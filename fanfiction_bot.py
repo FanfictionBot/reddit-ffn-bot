@@ -27,16 +27,16 @@ def main():
 
 
 def pause(minutes, seconds):
+    print("A countdown timer is beginning. You can skip it with Ctrl-C.")
     try:
-        while True:
-            totaltime = minutes * 60 + seconds
-            for remaining in range(totaltime, 0, -1):
-                sys.stdout.write("\r")
-                sys.stdout.write(
-                    "Paused: {:2d} seconds remaining.".format(remaining))
-                sys.stdout.flush()
-                time.sleep(1)
-            sys.stdout.write("\rComplete!            \n")
+        totaltime = minutes * 60 + seconds
+        for remaining in range(totaltime, 0, -1):
+            sys.stdout.write("\r")
+            sys.stdout.write(
+                "Paused: {:2d} seconds remaining.".format(remaining))
+            sys.stdout.flush()
+            time.sleep(1)
+        sys.stdout.write("\rComplete!            \n")
     except KeyboardInterrupt:
         sys.stdout.flush()
         time.sleep(1)
