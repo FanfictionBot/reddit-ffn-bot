@@ -8,6 +8,7 @@ from fanfiction_backend import Story
 from random import randint
 from pprint import pprint
 from google import search
+import argparse
 
 
 USER_AGENT = "Python:FanfictionComment:v0.001a (by /u/tusing)"
@@ -20,7 +21,7 @@ DONE = []
 def main():
     # DONE = pickle.load(replies)
     login()
-    while(True):
+    while True:
         parse_submissions()
         pause(30, 0)
 
@@ -35,12 +36,22 @@ def pause(minutes, seconds):
     sys.stdout.write("\rComplete!            \n")
 
 
+def parse_arguments():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-u', '--user', help='define Reddit login username')
+    parser.add_argument('-p', '--password', help='define Reddit login password')
+
+    args = parser.parse_args()
+
+    return args.user, args.password
+
+
 def login():
+    user_name, user_pw = parse_arguments()
     # Moved name and PW to local to prevent potential hack.
-    USER_NAME = ""
-    USER_PW = ""
+
     print("Logging in...")
-    r.login(USER_NAME, USER_PW)
+    r.login(user_name, user_pw)
     global SUBREDDIT
     print("Loading subreddit...")
     SUBREDDIT = r.get_subreddit('HPFanfiction')
@@ -119,11 +130,10 @@ def ffn_descriptionmaker(link):
     decodedData = current.data.decode('ascii', errors='replace')
     ws = '\n\n '
 
-    header = '[***' + decodedTitle + '***]' + '(' + link + ')' + ' '
-    header += '[*' + decodedAuthor + '*]' + '(' + current.authorlink + ')'
+    header = '[***{0}***]({1}) '.format(decodedTitle, link)
+    header += ' by [*{0}*]({1})'.format(decodedAuthor, current.authorlink)
     summary = '> ' + decodedSummary
     data = '> ' + decodedData
-    combined = header + ws + summary + ws + data + ws
-    return combined
+    return '{0} {1} {2} {1} {3} {1}'.format(header, ws, summary, data)
 
 main()
