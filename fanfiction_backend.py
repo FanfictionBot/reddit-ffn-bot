@@ -15,7 +15,7 @@ class Story:
         self.authorlink = ""
         self.summary = ""
         self.data = ""
-        
+
         self.parse_html(url)
         self.encode()
 

@@ -24,21 +24,26 @@ def main():
 
     while True:
         parse_submissions()
-        pause(30, 0)
+        pause(10, 0)
 
 
 def pause(minutes, seconds):
-    totaltime = minutes * 60 + seconds
-    for remaining in range(totaltime, 0, -1):
-        sys.stdout.write("\r")
-        sys.stdout.write("Paused: {:2d} seconds remaining.".format(remaining))
-        sys.stdout.flush()
-        time.sleep(1)
-    sys.stdout.write("\rComplete!            \n")
+    try:
+        while True:
+            totaltime = minutes * 60 + seconds
+            for remaining in range(totaltime, 0, -1):
+                sys.stdout.write("\r")
+                sys.stdout.write(
+                    "Paused: {:2d} seconds remaining. \n Press a key to skip.".format(remaining))
+                sys.stdout.flush()
+                time.sleep(1)
+            sys.stdout.write("\rComplete!            \n")
+    except KeyboardInterrupt:
+        print("Bypassing countdown.")
 
 
 def parse_arguments():
-    #initialize parser and add options for username and password
+    # initialize parser and add options for username and password
     parser = argparse.ArgumentParser()
     parser.add_argument('-u', '--user', help='define Reddit login username')
     parser.add_argument('-p', '--password', help='define Reddit login password')
@@ -62,7 +67,7 @@ def login_to_reddit():
     with open('done.txt', 'r') as file:
         DONE = [str(line.rstrip('\n')) for line in file]
 
- #Mark what as done? add more descriptive method name?
+
 def mark_as_done(id):
     DONE.append(str(id))
 
@@ -129,31 +134,15 @@ def ffn_comment_maker(links):
 
 def ffn_description_maker(link):
     current = Story(link)
-<<<<<<< HEAD
-    decodedTitle = current.title.decode('ascii', errors='replace')
-    decodedAuthor = current.author.decode('ascii', errors='replace')
-    decodedSummary = current.summary.decode('ascii', errors='replace')
-    decodedData = current.data.decode('ascii', errors='replace')
-    ws = '\n\n '
-
-    header = '[***{0}***]({1}) '.format(decodedTitle, link)
-    header += ' by [*{0}*]({1})'.format(decodedAuthor, current.authorlink)
-    summary = '> ' + decodedSummary
-    data = '> ' + decodedData
-    return '{0} {1} {2} {1} {3} {1}'.format(header, ws, summary, data)
-=======
-
     decoded_title = current.title.decode('ascii', errors='replace')
     decoded_author = current.author.decode('ascii', errors='replace')
     decoded_summary = current.summary.decode('ascii', errors='replace')
     decoded_data = current.data.decode('ascii', errors='replace')
 
-    #more pythonic string formatting
-    header =   '[***{0}***]({1}) by [*{2}*]({3})'.format(decoded_title, link, decoded_author, current.authorlink)
-     #'[***' +  decodedTitle + '***]' + '(' + link + ')' + ' '
-    #'[*' + decodedAuthor + '*]' + '(' + current.authorlink + ')'
+    # More pythonic string formatting.
+    header = '[***{0}***]({1}) by [*{2}*]({3})'.format(decoded_title,
+                                                       link, decoded_author, current.authorlink)
 
     return '{0}\n\n>{1}\n\n>{1}\n\n'.format(header, decoded_summary, decoded_data)
->>>>>>> 9558dabc33c3a4688e9f0d8a09b19a9f09bb325e
 
 main()
