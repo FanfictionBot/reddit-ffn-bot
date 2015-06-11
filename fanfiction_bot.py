@@ -14,12 +14,11 @@ import argparse
 USER_AGENT = "Python:FanfictionComment:v0.001a (by /u/tusing)"
 r = praw.Reddit(USER_AGENT)
 SUBREDDIT = None
-global DONE
-DONE = []
+CHECKED_COMMENTS = []
 
 
 def main():
-    # DONE = pickle.load(replies)
+    # CHECKED_COMMENTS = pickle.load(replies)
     login_to_reddit()
 
     while True:
@@ -34,7 +33,7 @@ def pause(minutes, seconds):
             for remaining in range(totaltime, 0, -1):
                 sys.stdout.write("\r")
                 sys.stdout.write(
-                    "Paused: {:2d} seconds remaining. \n Press a key to skip.".format(remaining))
+                    "Paused: {:2d} seconds remaining.".format(remaining))
                 sys.stdout.flush()
                 time.sleep(1)
             sys.stdout.write("\rComplete!            \n")
@@ -61,31 +60,33 @@ def login_to_reddit():
     r.login(user_name, user_pw)
 
     print("Loading subreddit...")
-    SUBREDDIT = r.get_subreddit('HPFanfiction')
-    print('Loading DONE...')
+    SUBREDDIT = r.get_subreddit('tusingtestfield')
+    print('Loading CHECKED_COMMENTS...')
 
-    with open('done.txt', 'r') as file:
-        DONE = [str(line.rstrip('\n')) for line in file]
+    global CHECKED_COMMENTS
+    with open('CHECKED_COMMENTS.txt', 'r') as file:
+        CHECKED_COMMENTS = [str(line.rstrip('\n')) for line in file]
 
 
 def mark_as_done(id):
-    DONE.append(str(id))
+    global CHECKED_COMMENTS
+    CHECKED_COMMENTS.append(str(id))
 
-    with open('done.txt', 'w') as file:
-        for id in DONE:
+    with open('CHECKED_COMMENTS.txt', 'w') as file:
+        for id in CHECKED_COMMENTS:
             file.write(str(id) + '\n')
 
 
 def parse_submissions():
-    print('DONE contains:')
-    for id in DONE:
+    print('CHECKED_COMMENTS contains:')
+    for id in CHECKED_COMMENTS:
         print(id)
     for submission in SUBREDDIT.get_hot(limit=10):
         print("Checking SUBMISSION: ", submission.id)
         flat_comments = praw.helpers.flatten_tree(submission.comments)
         for comment in flat_comments:
             print('Checking COMMENT: ' + comment.id + ' in submission ' + submission.id)
-            if str(comment.id) in DONE:
+            if str(comment.id) in CHECKED_COMMENTS:
                 print("Comment " + comment.id + " already parsed!")
             else:
                 print("Parsing comment ", comment.id)
@@ -114,13 +115,19 @@ def parse_comment(comment, id):
 def ffn_link_finder(fic_names):
     links_found = []
     for fic_name in fic_names:
+
+        # Obfuscation.
         time.sleep(randint(1, 3))
+        sleep_milliseconds = randint(500, 3000)
+        time.sleep(sleep_milliseconds / 1000)
 
         search_request = 'site:fanfiction.net/s/ ' + fic_name
         print("SEARCHING: ", search_request)
 
         search_results = search(search_request, num=1, stop=1)
-        links_found.append(next(search_results))
+        link_found = next(search_results)
+        links_found.append(link_found)
+        print("FOUND: " + link_found)
 
     return links_found
 
@@ -128,7 +135,7 @@ def ffn_link_finder(fic_names):
 def ffn_comment_maker(links):
     comment = ''
     for link in links:
-        comment = '{0}\n&nbsp;\n\n'.format(ffn_description_maker(link))
+        comment += '{0}\n&nbsp;\n\n'.format(ffn_description_maker(link))
     return comment
 
 
@@ -139,10 +146,15 @@ def ffn_description_maker(link):
     decoded_summary = current.summary.decode('ascii', errors='replace')
     decoded_data = current.data.decode('ascii', errors='replace')
 
+    print("Making a description for " + decoded_title)
+
     # More pythonic string formatting.
     header = '[***{0}***]({1}) by [*{2}*]({3})'.format(decoded_title,
                                                        link, decoded_author, current.authorlink)
 
-    return '{0}\n\n>{1}\n\n>{1}\n\n'.format(header, decoded_summary, decoded_data)
+    formatted_description = '{0}\n\n>{1}\n\n>{2}\n\n'.format(
+        header, decoded_summary, decoded_data)
+    print("Description for " + decoded_title + ": \n" + formatted_description)
+    return formatted_description
 
 main()
