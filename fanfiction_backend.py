@@ -11,14 +11,14 @@ class Story:
         self.raw_data = []
 
         self.title = ""
-        self.author = "by "
+        self.author = ""
         self.authorlink = ""
         self.summary = ""
         self.data = ""
-        self.parseHTML(url)
+        self.parse_html(url)
         self.encode()
 
-    def parseHTML(self, url):
+    def parse_html(self, url):
         page = requests.get(self.url)
         tree = html.fromstring(page.text)
         self.title = (tree.xpath('//*[@id="profile_top"]/b/text()'))[0]
