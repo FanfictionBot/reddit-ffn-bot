@@ -72,8 +72,8 @@ def parse_comment(comment, id):
     links = ffn_linkfinder(requested['ffn'])
     found_ffn = ffn_commentmaker(links)
     footer = "\n*Graciously brought to you by me - /u/tusing's bot.*"
-    print('Outgoing reply to ' + id + ':\n' + found_ffn + footer)
     if len(found_ffn) > 10:
+        print('Outgoing reply to ' + id + ':\n' + found_ffn + footer)
         comment.reply(found_ffn + footer)
 
 
