@@ -20,7 +20,7 @@ DONE = []
 
 def main():
     # DONE = pickle.load(replies)
-    login()
+    login_to_reddit()
 
     while True:
         parse_submissions()
@@ -48,7 +48,7 @@ def parse_arguments():
     return args.user, args.password
 
 
-def login():
+def login_to_reddit():
     global SUBREDDIT
 
     user_name, user_pw = parse_arguments()
@@ -63,7 +63,7 @@ def login():
         DONE = [str(line.rstrip('\n')) for line in file]
 
  #Mark what as done? add more descriptive method name?
-def markdone(id):
+def mark_as_done(id):
     DONE.append(str(id))
 
     with open('done.txt', 'w') as file:
@@ -85,7 +85,7 @@ def parse_submissions():
             else:
                 print("Parsing comment ", comment.id)
                 parse_comment(comment, comment.id)
-                markdone(comment.id)
+                mark_as_done(comment.id)
 
 
 def parse_comment(comment, id):
