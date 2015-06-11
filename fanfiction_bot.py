@@ -2,6 +2,7 @@ import praw
 import time
 import pickle
 import re
+import os
 import sys
 from fanfiction_backend import Story
 from random import randint
@@ -22,6 +23,16 @@ def main():
     parse_submissions()
 
 
+def pause(minutes, seconds):
+    totaltime = minutes * 60 + seconds
+    for remaining in range(totaltime, 0, -1):
+        sys.stdout.write("\r")
+        sys.stdout.write("Paused: {:2d} seconds remaining.".format(remaining))
+        sys.stdout.flush()
+        time.sleep(1)
+    sys.stdout.write("\rComplete!            \n")
+
+
 def login():
     # Moved name and PW to local to prevent potential hack.
     USER_NAME = ""
@@ -30,7 +41,7 @@ def login():
     r.login(USER_NAME, USER_PW)
     global SUBREDDIT
     print("Loading subreddit...")
-    SUBREDDIT = r.get_subreddit('tusingtestfield')
+    SUBREDDIT = r.get_subreddit('HPFanfiction')
     print('Loading DONE...')
     global DONE
     with open('done.txt', 'r') as file:
@@ -75,6 +86,7 @@ def parse_comment(comment, id):
     if len(found_ffn) > 10:
         print('Outgoing reply to ' + id + ':\n' + found_ffn + footer)
         comment.reply(found_ffn + footer)
+        pause(9, 5)  # pause for 9 minutes and 5 seconds before new comment
 
 
 def ffn_linkfinder(ficnames):
