@@ -1,3 +1,5 @@
+#Fanfiction Data Bot for Reddit
+
 #**APPROVAL**
 Guys, I can confirm this. To start developing this, though, I need manual upvotes, otherwise Reddit's API never lets bots through the CAPTCHA.
 
