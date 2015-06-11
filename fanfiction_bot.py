@@ -20,7 +20,9 @@ DONE = []
 def main():
     # DONE = pickle.load(replies)
     login()
-    parse_submissions()
+    while(true):
+        parse_submissions()
+        pause(30, 0)
 
 
 def pause(minutes, seconds):
