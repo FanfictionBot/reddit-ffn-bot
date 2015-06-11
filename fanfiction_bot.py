@@ -20,7 +20,7 @@ DONE = []
 def main():
     # DONE = pickle.load(replies)
     login()
-    while(true):
+    while(True):
         parse_submissions()
         pause(30, 0)
 
