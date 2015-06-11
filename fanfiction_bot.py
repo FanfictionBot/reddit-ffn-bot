@@ -90,10 +90,7 @@ def mark_as_done(id):
 
 def parse_submissions():
     print('CHECKED_COMMENTS contains:')
-    print_comments = ""
-    for id in CHECKED_COMMENTS:
-        print_comments += id
-    print(print_comments.replace('\n', ', '))
+    print(CHECKED_COMMENTS)
 
     for submission in SUBREDDIT.get_hot(limit=10):
         print("Checking SUBMISSION: ", submission.id)
@@ -104,11 +101,10 @@ def parse_submissions():
                 print("Comment " + comment.id + " already parsed!")
             else:
                 print("Parsing comment ", comment.id)
-                parse_comment(comment, comment.id)
-                mark_as_done(comment.id)
+                make_comment(comment, comment.id)
 
 
-def parse_comment(comment, id):
+def make_comment(comment, id):
     footer = "\n*Graciously brought to you by me - /u/tusing's bot. Many improvements by /u/MikroMan.*"
     REGEXPS = {'linkffn\((.*?)\)': 'ffn'}
     requested = {}
@@ -123,7 +119,8 @@ def parse_comment(comment, id):
     if len(found_ffn) > 10:
         print('Outgoing reply to ' + id + ':\n' + found_ffn + footer)
         comment.reply(found_ffn + footer)
-        pause(9, 5)  # pause for 9 minutes and 5 seconds before new comment
+        mark_as_done(comment.id)
+        pause(2, 5)  # pause for 9 minutes and 5 seconds before new comment
 
 
 def ffn_link_finder(fic_names):
