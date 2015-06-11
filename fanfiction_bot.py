@@ -32,11 +32,9 @@ def login():
     print("Loading subreddit...")
     SUBREDDIT = r.get_subreddit('tusingtestfield')
     print('Loading DONE...')
+    global DONE
     with open('done.txt', 'r') as file:
-        DONE = [line.rstrip('\n') for line in file]
-    print('DONE contains:')
-    for id in DONE:
-        print(id)
+        DONE = [str(line.rstrip('\n')) for line in file]
 
 
 def markdone(id):
@@ -47,6 +45,9 @@ def markdone(id):
 
 
 def parse_submissions():
+    print('DONE contains:')
+    for id in DONE:
+        print(id)
     for submission in SUBREDDIT.get_hot(limit=10):
         print("Checking SUBMISSION: ", submission.id)
         flat_comments = praw.helpers.flatten_tree(submission.comments)
