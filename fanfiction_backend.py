@@ -15,12 +15,14 @@ class Story:
         self.authorlink = ""
         self.summary = ""
         self.data = ""
+        
         self.parse_html(url)
         self.encode()
 
     def parse_html(self, url):
         page = requests.get(self.url)
         tree = html.fromstring(page.text)
+
         self.title = (tree.xpath('//*[@id="profile_top"]/b/text()'))[0]
         self.summary = (tree.xpath('//*[@id="profile_top"]/div/text()'))[0]
         self.author += (tree.xpath('//*[@id="profile_top"]/a[1]/text()'))[0]
