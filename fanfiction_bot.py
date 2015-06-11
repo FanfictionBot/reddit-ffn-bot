@@ -46,26 +46,34 @@ def parse_arguments():
     parser = argparse.ArgumentParser()
     parser.add_argument('-u', '--user', help='define Reddit login username')
     parser.add_argument('-p', '--password', help='define Reddit login password')
+    parser.add_argument('-s', '--subreddit', help='define target subreddit')
 
     args = parser.parse_args()
 
-    return args.user, args.password
+    return args.user, args.password, args.subreddit
 
 
 def login_to_reddit():
     global SUBREDDIT
+    user_name, user_pw, user_subreddit = parse_arguments()
 
-    user_name, user_pw = parse_arguments()
     print("Logging in...")
     r.login(user_name, user_pw)
+    print("Logged in.")
 
     print("Loading subreddit...")
-    SUBREDDIT = r.get_subreddit('tusingtestfield')
-    print('Loading CHECKED_COMMENTS...')
+    if user_subreddit is False:
+        user_subreddit = 'tusingtestfield'
+        SUBREDDIT = r.get_subreddit(user_subreddit)
+    else:
+        SUBREDDIT = r.get_subreddit(user_subreddit)
+    print("Loaded subreddit " + user_subreddit)
 
+    print('Loading CHECKED_COMMENTS...')
     global CHECKED_COMMENTS
     with open('CHECKED_COMMENTS.txt', 'r') as file:
         CHECKED_COMMENTS = [str(line.rstrip('\n')) for line in file]
+    print('Loaded CHECKED_COMMENTS.')
 
 
 def mark_as_done(id):
@@ -79,8 +87,11 @@ def mark_as_done(id):
 
 def parse_submissions():
     print('CHECKED_COMMENTS contains:')
+    print_comments = ""
     for id in CHECKED_COMMENTS:
-        print(id)
+        print_comments += id
+    print(print_comments.replace('\n', ', '))
+
     for submission in SUBREDDIT.get_hot(limit=10):
         print("Checking SUBMISSION: ", submission.id)
         flat_comments = praw.helpers.flatten_tree(submission.comments)
