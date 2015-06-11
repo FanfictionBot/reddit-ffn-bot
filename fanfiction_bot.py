@@ -41,6 +41,7 @@ def pause(minutes, seconds):
         sys.stdout.flush()
         time.sleep(1)
         sys.stdout.write("\rCountdown bypassed!            \n")
+        pass
 
 
 def parse_arguments():
