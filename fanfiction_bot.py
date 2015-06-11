@@ -38,7 +38,9 @@ def pause(minutes, seconds):
                 time.sleep(1)
             sys.stdout.write("\rComplete!            \n")
     except KeyboardInterrupt:
-        print("Bypassing countdown.")
+        sys.stdout.flush()
+        time.sleep(1)
+        sys.stdout.write("\rCountdown bypassed!            \n")
 
 
 def parse_arguments():
@@ -106,7 +108,7 @@ def parse_submissions():
 
 
 def parse_comment(comment, id):
-    footer = "\n*Graciously brought to you by me - /u/tusing's bot.*"
+    footer = "\n*Graciously brought to you by me - /u/tusing's bot. Many improvements by /u/MikroMan.*"
     REGEXPS = {'linkffn\((.*?)\)': 'ffn'}
     requested = {}
 
