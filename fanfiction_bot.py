@@ -105,7 +105,7 @@ def parse_submissions():
 
 
 def make_comment(comment, id):
-    footer = "\n*Read usage tips and tricks  [here](https://github.com/tusing/reddit-ffn-bot/blob/master/README.md). Graciously brought to you by me - /u/tusing's bot, with improvements by /u/MikroMan.*"
+    footer = "\n*Read usage tips and tricks  [here](https://github.com/tusing/reddit-ffn-bot/blob/master/README.md). Brought to you by me - /u/tusing's bot, with improvements by /u/MikroMan.*"
     REGEXPS = {'linkffn\((.*?)\)': 'ffn'}
     requested = {}
 

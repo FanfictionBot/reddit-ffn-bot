@@ -21,7 +21,7 @@ linkffn(Harry Potter and the Natural 20)
 >
 >
 >
-> *Graciously brought to you by me - /u/tusing's bot. Many improvements by /u/MikroMan.*
+> *Read usage tips and tricks  [here](https://github.com/tusing/reddit-ffn-bot/blob/master/README.md). Brought to you by me - /u/tusing's bot, with improvements by /u/MikroMan.*
 
 
 **You can use the author name** in the link request for more accuracy. This is *especially* helpful if your requested fic has a generic name, as follows:
@@ -36,7 +36,7 @@ linkffn(Emperor by Marquis Black)
 > >Fiction  M - English - Adventure -  Harry P. - Chapters: 42   - Words: 619,123 - Reviews: 1,693 - Favs: 2,494 - Follows: 2,270 - Updated: 12/25/20144/17/2010 - id: 5904185
 >
 >
-> *Graciously brought to you by me - /u/tusing's bot. Many improvements by /u/MikroMan.*
+> *Read usage tips and tricks  [here](https://github.com/tusing/reddit-ffn-bot/blob/master/README.md). Brought to you by me - /u/tusing's bot, with improvements by /u/MikroMan.*
 
 **You can use direct links** - they will also work, and rather accurately:
 
@@ -51,7 +51,7 @@ linkffn(https://www.fanfiction.net/s/8303194/1/Magics-of-the-Arcane)
 > >Fiction  M - English - Adventure -  Harry P., Albus D. - Chapters: 27   - Words: 193,359 - Reviews: 1,448 - Favs: 3,814 - Follows: 4,050 - Updated: 4/23/20147/9/2012 - id: 8303194
 >
 >
-> *Graciously brought to you by me - /u/tusing's bot. Many improvements by /u/MikroMan.*
+> *Read usage tips and tricks  [here](https://github.com/tusing/reddit-ffn-bot/blob/master/README.md). Brought to you by me - /u/tusing's bot, with improvements by /u/MikroMan.*
 
 You can namedrop multiple links in a comment.
 
@@ -70,12 +70,12 @@ Check out this completely awesome fic I found! linkffn(By the Divining Light by 
 >
 > >Book 2. As the Second War begins, Voldemort becomes obsessed with harnessing the realm of Old Magic to his own ends. Meanwhile, Harry has to contend with the Ministry, ancient foes and the machinations of a world he barely understands.
 >
-> >Fiction  T - English - Fantasy/Adventure -  Harry P., Luna L. - Chapters: 13   - Words: 57,777 - Reviews: 201 - Favs: 470 - Follows: 283 - Updated: 4/28/20115/14/2010 - Status: Complete - id: 5971274 
+> >Fiction  T - English - Fantasy/Adventure -  Harry P., Luna L. - Chapters: 13   - Words: 57,777 - Reviews: 201 - Favs: 470 - Follows: 283 - Updated: 4/28/20115/14/2010 - Status: Complete - id: 5971274
 >
 >
 >
 >
-> *Graciously brought to you by me - /u/tusing's bot. Many improvements by /u/MikroMan.*
+> *Read usage tips and tricks  [here](https://github.com/tusing/reddit-ffn-bot/blob/master/README.md). Brought to you by me - /u/tusing's bot, with improvements by /u/MikroMan.*
 
 
 ###**WHAT YOU CAN'T DO** _(yet)_
