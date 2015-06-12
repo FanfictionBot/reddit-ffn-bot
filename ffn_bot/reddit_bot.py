@@ -7,29 +7,32 @@ import praw
 
 from ffn_bot import fanfiction_parser
 
+__author__ = 'tusing, MikroMan, StuxSoftware'
+
 USER_AGENT = "Python:FanfictionComment:v0.001a (by /u/tusing)"
 r = praw.Reddit(USER_AGENT)
 DEFAULT_SUBREDDITS = ['HPFanfiction']
 SUBREDDIT_LIST = []
-CHECKED_COMMENTS = []
+CHECKED_COMMENTS = set()
 
-#New regex shoul match more possible letter combinations, see screenshot below
-#http://prntscr.com/7g0oeq
+# New regex shoul match more possible letter combinations, see screenshot below
+# http://prntscr.com/7g0oeq
 
 REGEXPS = {'[Ll][iI][nN][kK][fF]{2}[nN]\((.*?)\)': 'ffn'}
 FOOTER = "\n*Read usage tips and tricks  [here](https://github.com/tusing/reddit-ffn-bot/blob/master/README.md). Brought to you by me - /u/tusing's bot, with improvements by /u/MikroMan.*"
 
 
-def run_forever():
-    try:
-        main()
-    except:
-        pause(1, 0)
-        run_forever()
+def __main__():
+    while True:
+        try:
+            initialize()
+        except:
+            print("An exception has occured!")
+            pause(1, 0)
 
 
-def main():
-    #moved call for agruments to avoid double calling
+def initialize():
+    # moved call for agruments to avoid double calling
     bot_parameters = get_bot_parameters()
     login_to_reddit(bot_parameters)
     load_checked_comments()
@@ -49,10 +52,10 @@ def get_bot_parameters():
     parser.add_argument(
         '-s', '--subreddit', help='define target subreddit; can be used with -a')
 
-    #can also add possibility with -s option to aquire comma separated list of subreddits
-    #then do: subs = args.subreddit.split(',')
-    #and return this list, then append/extend to Subreddit_list or default_subs
-    #and possibl transform to set to avoid duplicates.
+    # can also add possibility with -s option to aquire comma separated list of subreddits
+    # then do: subs = args.subreddit.split(',')
+    # and return this list, then append/extend to Subreddit_list or default_subs
+    # and possibl transform to set to avoid duplicates.
 
     parser.add_argument(
         '-d', '--default', action='store_true', help='add default subreddits')
@@ -84,7 +87,7 @@ def load_subreddits(bot_parameters):
 
 def check_comment(id):
     global CHECKED_COMMENTS
-    CHECKED_COMMENTS.append(str(id))
+    CHECKED_COMMENTS.add(str(id))
     with open('CHECKED_COMMENTS.txt', 'w') as file:
         for id in CHECKED_COMMENTS:
             file.write(str(id) + '\n')
@@ -94,7 +97,7 @@ def load_checked_comments():
     global CHECKED_COMMENTS
     print('Loading CHECKED_COMMENTS...')
     with open('CHECKED_COMMENTS.txt', 'r') as file:
-        CHECKED_COMMENTS = [str(line.rstrip('\n')) for line in file]
+        CHECKED_COMMENTS = {str(line.rstrip('\n')) for line in file}
     print('Loaded CHECKED_COMMENTS. Contains:')
     print(CHECKED_COMMENTS)
 
@@ -166,4 +169,3 @@ def pause(minutes, seconds):
         time.sleep(1)
         sys.stdout.write("\rCountdown bypassed!            \n")
         pass
-
