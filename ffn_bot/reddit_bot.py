@@ -10,7 +10,7 @@ from ffn_bot import fanfiction_parser
 
 __author__ = 'tusing, MikroMan, StuxSoftware'
 
-USER_AGENT = "Python:FanfictionComment:v0.001a (by /u/tusing)"
+USER_AGENT = "Python:FanfictionComment:v0.1 (by /u/tusing)"
 r = praw.Reddit(USER_AGENT)
 DEFAULT_SUBREDDITS = ['HPFanfiction']
 SUBREDDIT_LIST = []
@@ -118,7 +118,8 @@ def parse_submissions(SUBREDDIT):
         logging.info("Checking SUBMISSION: ", submission.id)
         flat_comments = praw.helpers.flatten_tree(submission.comments)
         for comment in flat_comments:
-            logging.info('Checking COMMENT: ' + comment.id + ' in submission ' + submission.id)
+            logging.info(
+                'Checking COMMENT: ' + comment.id + ' in submission ' + submission.id)
             if str(comment.id) in CHECKED_COMMENTS:
                 logging.info("Comment " + comment.id + " already parsed!")
             else:
@@ -174,9 +175,11 @@ if platform.system() == "Windows":
         return False
 else:
     def wait(timeout=1):
-        import sys, select
+        import sys
+        import select
         rlist, wlist, xlist = select([sys.stdin], [], [], timeout)
         return bool(rlist)
+
 
 def pause(minutes, seconds):
     print("A countdown timer is beginning. You can skip it with Ctrl-C.")
