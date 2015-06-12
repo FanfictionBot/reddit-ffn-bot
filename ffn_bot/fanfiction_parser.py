@@ -7,8 +7,7 @@ from lxml import html
 
 
 def ffn_make_from_requests(fic_requests):
-    links = ffn_link_finder(fic_requests)
-    found_ffn = ffn_comment_maker(links)
+    found_ffn = ffn_comment_maker(ffn_link_finder(fic_requests))
     return found_ffn
 
 def safe_int(request):
@@ -18,12 +17,11 @@ def safe_int(request):
        return None
 
 def ffn_link_finder(fic_names):
-    links_found = []
     for fic_name in fic_names:
         # Allow just to post the ID of the fanfiction.
         sid = safe_int(fic_name)
         if sid is not None:
-            links_found.append("https://www.fanfiction.net/s/%d/1/"%sid)
+            yield "https://www.fanfiction.net/s/%d/1/"%sid
             continue
 
         # Obfuscation.
@@ -36,20 +34,18 @@ def ffn_link_finder(fic_names):
 
         search_results = search(search_request, num=1, stop=1)
         link_found = next(search_results)
-        links_found.append(link_found)
         print("FOUND: " + link_found)
-
-    return links_found
+        yield link_found
 
 
 def ffn_comment_maker(links):
-    comment = ''
+    comment = []
     for link in links:
         # preparation for caching of known stories, should cache last X stories
         # and be able to search cached by name or link or id
         current = Story(link)
-        comment += '{0}\n&nbsp;\n\n'.format(ffn_description_maker(current))
-    return comment
+        comment.append('{0}\n&nbsp;\n\n'.format(ffn_description_maker(current)))
+    return "".join(comment)
 
 
 def ffn_description_maker(current):
