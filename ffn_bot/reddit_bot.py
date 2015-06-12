@@ -23,7 +23,6 @@ FOOTER = "\n*Read usage tips and tricks  [here](https://github.com/tusing/reddit
 
 
 def __main__():
-    initialize()
     while True:
         try:
             initialize()
