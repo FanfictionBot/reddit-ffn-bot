@@ -19,7 +19,7 @@ CHECKED_COMMENTS = set()
 # http://prntscr.com/7g0oeq
 
 REGEXPS = {'[Ll][iI][nN][kK][fF]{2}[nN]\((.*?)\)': 'ffn'}
-FOOTER = "\n*Read usage tips and tricks  [here](https://github.com/tusing/reddit-ffn-bot/blob/master/README.md). Brought to you by me - /u/tusing's bot, with improvements by /u/MikroMan.*"
+FOOTER = "\n*Read usage tips and tricks  [here](https://github.com/tusing/reddit-ffn-bot/blob/master/README.md).*"
 
 
 def __main__():
@@ -122,7 +122,7 @@ def parse_submissions(SUBREDDIT):
             if str(comment.id) in CHECKED_COMMENTS:
                 logging.info("Comment " + comment.id + " already parsed!")
             else:
-                print("Parsing comment ", comment.id)
+                print("Parsing comment ", comment.id, ' in submission ', submission.id)
                 make_reply(comment, comment.id)
     print("Parsing on SUBREDDIT ", SUBREDDIT, " complete.")
     print("==================================================")

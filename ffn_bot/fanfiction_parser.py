@@ -46,12 +46,11 @@ def ffn_description_maker(current):
     decoded_author = current.author.decode('ascii', errors='replace')
     decoded_summary = current.summary.decode('ascii', errors='replace')
     decoded_data = current.data.decode('ascii', errors='replace')
-
     print("Making a description for " + decoded_title)
 
     # More pythonic string formatting.
     header = '[***{0}***]({1}) by [*{2}*]({3})'.format(decoded_title,
-                                                       link, decoded_author, current.authorlink)
+                                                       current.url, decoded_author, current.authorlink)
 
     formatted_description = '{0}\n\n>{1}\n\n>{2}\n\n'.format(
         header, decoded_summary, decoded_data)
