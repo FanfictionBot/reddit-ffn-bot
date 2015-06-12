@@ -175,7 +175,7 @@ if platform.system() == "Windows":
 else:
     def wait(timeout=1):
         import sys, select
-        rlist, wlist, xlist = select([sys.stdin], [], [], timeout)
+        rlist, wlist, xlist = select.select([sys.stdin], [], [], timeout)
         return bool(rlist)
 
 def pause(minutes, seconds):
