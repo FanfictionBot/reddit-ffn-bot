@@ -4,6 +4,7 @@ import sys
 import argparse
 import logging
 import praw
+import platform
 
 from ffn_bot import fanfiction_parser
 
@@ -163,6 +164,19 @@ def parse_comment_requests(requests):
     ao3_comment = ""
     return ffn_comment + dlp_comment + ao3_comment
 
+if platform.system() == "Windows":
+    def wait(timeout=1):
+        import msvcrt
+        time.sleep(timeout)
+        if msvcrt.kbhit():
+            msvcrt.getch()
+            return True
+        return False
+else:
+    def wait(timeout=1):
+        import sys, select
+        rlist, wlist, xlist = select([sys.stdin], [], [], timeout)
+        return bool(rlist)
 
 def pause(minutes, seconds):
     print("A countdown timer is beginning. You can skip it with Ctrl-C.")
@@ -173,7 +187,9 @@ def pause(minutes, seconds):
             sys.stdout.write(
                 "Paused: {:2d} seconds remaining.".format(remaining))
             sys.stdout.flush()
-            time.sleep(1)
+            if wait(1):
+                sys.stdout.write("\rSkipped!             \n")
+                break
         sys.stdout.write("\rComplete!            \n")
     except KeyboardInterrupt:
         sys.stdout.flush()
