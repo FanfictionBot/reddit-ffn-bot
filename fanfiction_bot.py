@@ -23,6 +23,14 @@ REGEXPS = {'linkffn\((.*?)\)': 'ffn'}
 FOOTER = "\n*Read usage tips and tricks  [here](https://github.com/tusing/reddit-ffn-bot/blob/master/README.md). Brought to you by me - /u/tusing's bot, with improvements by /u/MikroMan.*"
 
 
+def persistent_main():
+    try:
+        main()
+    except:
+        pause(1, 0)
+        persistent_main()
+
+
 def main():
     login_to_reddit()
     load_checked_comments()
@@ -41,7 +49,8 @@ def parse_arguments():
     parser.add_argument('-p', '--password', help='define Reddit login password')
     parser.add_argument(
         '-s', '--subreddit', help='define target subreddit; can be used with -a')
-    parser.add_argument('-d', '--default', action='store_true', help='add default subreddits')
+    parser.add_argument(
+        '-d', '--default', action='store_true', help='add default subreddits')
     args = parser.parse_args()
     return args.user, args.password, args.subreddit, args.default
 
@@ -152,4 +161,4 @@ def pause(minutes, seconds):
         pass
 
 
-main()
+persistent_main()
