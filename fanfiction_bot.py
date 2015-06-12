@@ -16,7 +16,7 @@ USER_AGENT = "Python:FanfictionComment:v0.001a (by /u/tusing)"
 r = praw.Reddit(USER_AGENT)
 DEFAULT_SUBREDDITS = ['HPFanfiction']
 SUBREDDIT_LIST = []
-CHECKED_COMMENTS = []
+CHECKED_COMMENTS = set()
 
 
 REGEXPS = {'linkffn\((.*?)\)': 'ffn'}
@@ -78,7 +78,7 @@ def load_subreddits():
 
 def check_comment(id):
     global CHECKED_COMMENTS
-    CHECKED_COMMENTS.append(str(id))
+    CHECKED_COMMENTS.add(str(id))
     with open('CHECKED_COMMENTS.txt', 'w') as file:
         for id in CHECKED_COMMENTS:
             file.write(str(id) + '\n')
@@ -88,7 +88,7 @@ def load_checked_comments():
     global CHECKED_COMMENTS
     print('Loading CHECKED_COMMENTS...')
     with open('CHECKED_COMMENTS.txt', 'r') as file:
-        CHECKED_COMMENTS = [str(line.rstrip('\n')) for line in file]
+        CHECKED_COMMENTS = {str(line.rstrip('\n')) for line in file}
     print('Loaded CHECKED_COMMENTS. Contains:')
     print(CHECKED_COMMENTS)
 
