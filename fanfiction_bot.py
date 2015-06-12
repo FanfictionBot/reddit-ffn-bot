@@ -41,13 +41,13 @@ def parse_arguments():
     parser.add_argument('-p', '--password', help='define Reddit login password')
     parser.add_argument(
         '-s', '--subreddit', help='define target subreddit; can be used with -a')
-    parser.add_argument('-a', '--all', help='run on all default subreddits')
+    parser.add_argument('-d', '--default', action='store_true', help='add default subreddits')
     args = parser.parse_args()
-    return args.user, args.password, args.subreddit, args.all
+    return args.user, args.password, args.subreddit, args.default
 
 
 def login_to_reddit():
-    user_name, user_pw, user_subreddit, all_subreddits = parse_arguments()
+    user_name, user_pw, user_subreddit, use_default = parse_arguments()
     print("Logging in...")
     r.login(user_name, user_pw)
     print("Logged in.")
@@ -55,10 +55,11 @@ def login_to_reddit():
 
 def load_subreddits():
     global SUBREDDIT_LIST
-    user_name, user_pw, user_subreddit, all_subreddits = parse_arguments()
+    user_name, user_pw, user_subreddit, use_default = parse_arguments()
     print("Loading subreddits...")
-    if all_subreddits is True:
-        SUBREDDIT_LIST.append(DEFAULT_SUBREDDITS)
+    if use_default is True:
+        for subreddit in DEFAULT_SUBREDDITS:
+            SUBREDDIT_LIST.append(subreddit)
     if user_subreddit is True:
         SUBREDDIT_LIST.append(user_subreddit)
     if len(SUBREDDIT_LIST) == 0:
@@ -108,7 +109,7 @@ def make_reply(comment, id):
         print('Outgoing reply to ' + id + ':\n' + reply + FOOTER)
         comment.reply(reply + FOOTER)
         check_comment(comment.id)
-        pause(2, 5)
+        pause(1, 20)
     else:
         print("No reply conditions met.")
         check_comment(comment.id)
