@@ -11,10 +11,21 @@ def ffn_make_from_requests(fic_requests):
     found_ffn = ffn_comment_maker(links)
     return found_ffn
 
+def safe_int(request):
+    try:
+       return int(request)
+    except ValueError:
+       return None
 
 def ffn_link_finder(fic_names):
     links_found = []
     for fic_name in fic_names:
+        # Allow just to post the ID of the fanfiction.
+        sid = safe_int(fic_name)
+        if sid is not None:
+            links_found.append("https://www.fanfiction.net/s/%d/1/"%sid)
+            continue
+
         # Obfuscation.
         time.sleep(randint(1, 3))
         sleep_milliseconds = randint(500, 3000)
