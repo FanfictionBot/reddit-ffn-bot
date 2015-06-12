@@ -177,7 +177,7 @@ else:
     def wait(timeout=1):
         import sys
         import select
-        rlist, wlist, xlist = select([sys.stdin], [], [], timeout)
+        rlist, wlist, xlist = select.select([sys.stdin], [], [], timeout)
         return bool(rlist)
 
 
