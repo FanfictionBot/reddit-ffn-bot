@@ -23,6 +23,7 @@ FOOTER = "\n*Read usage tips and tricks  [here](https://github.com/tusing/reddit
 
 
 def __main__():
+    initialize()
     while True:
         try:
             initialize()
@@ -50,23 +51,22 @@ def get_bot_parameters():
     parser.add_argument('-u', '--user', help='define Reddit login username')
     parser.add_argument('-p', '--password', help='define Reddit login password')
     parser.add_argument(
-        '-s', '--subreddit', help='define target subreddit; can be used with -a')
+        '-s', '--subreddits', help='define target subreddits; seperate with commas')
 
-    # can also add possibility with -s option to aquire comma separated list of subreddits
+    # Can also add possibility with -s option to aquire comma separated list of subreddits
     # then do: subs = args.subreddit.split(',')
     # and return this list, then append/extend to Subreddit_list or default_subs
     # and possibl transform to set to avoid duplicates.
 
     parser.add_argument(
-        '-d', '--default', action='store_true', help='add default subreddits')
+        '-d', '--default', action='store_true', help='add default subreddits, can be in addition to -s')
 
     args = parser.parse_args()
 
-    return {'user': args.user, 'password': args.password, 'user_subreddit': args.subreddit, 'default': args.default}
+    return {'user': args.user, 'password': args.password, 'user_subreddits': args.subreddits, 'default': args.default}
 
 
 def login_to_reddit(bot_parameters):
-
     print("Logging in...")
     r.login(bot_parameters['user'], bot_parameters['password'])
     print("Logged in.")
@@ -75,13 +75,22 @@ def login_to_reddit(bot_parameters):
 def load_subreddits(bot_parameters):
     global SUBREDDIT_LIST
     print("Loading subreddits...")
-    if use_default is True:
+
+    if bot_parameters['default'] is True:
+        print("Adding default subreddits: ", DEFAULT_SUBREDDITS)
         for subreddit in DEFAULT_SUBREDDITS:
             SUBREDDIT_LIST.append(subreddit)
-    if bot_parameters['user_subreddit'] is True:
-        SUBREDDIT_LIST.append(bot_parameters['user_subreddit'])
+
+    if bot_parameters['user_subreddits'] is not None:
+        user_subreddits = bot_parameters['user_subreddits'].split(',')
+        print("Adding user subreddits: ", user_subreddits)
+        for subreddit in user_subreddits:
+            SUBREDDIT_LIST.append(subreddit)
+
     if len(SUBREDDIT_LIST) == 0:
+        print("No subreddit specified. Adding test subreddit.")
         SUBREDDIT_LIST.append('tusingtestfield')
+    SUBREDDIT_LIST = set(SUBREDDIT_LIST)
     print("LOADED SUBREDDITS: ", SUBREDDIT_LIST)
 
 
