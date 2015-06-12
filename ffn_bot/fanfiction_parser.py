@@ -1,21 +1,15 @@
-import praw
 import time
-import pickle
-import re
-import os
-import sys
-import argparse
+
 import requests
-import urllib.request
+
 from random import randint
-from pprint import pprint
+
 from google import search
 from lxml import html
-from lxml import etree
 
 
-def ffn_make_from_requests(requests):
-    links = ffn_link_finder(requests)
+def ffn_make_from_requests(fic_requests):
+    links = ffn_link_finder(fic_requests)
     found_ffn = ffn_comment_maker(links)
     return found_ffn
 
@@ -23,13 +17,12 @@ def ffn_make_from_requests(requests):
 def ffn_link_finder(fic_names):
     links_found = []
     for fic_name in fic_names:
-
         # Obfuscation.
         time.sleep(randint(1, 3))
         sleep_milliseconds = randint(500, 3000)
         time.sleep(sleep_milliseconds / 1000)
 
-        search_request = 'site:fanfiction.net/s/ ' + fic_name
+        search_request = 'site:fanfiction.net/s/ {0}'.format(fic_name)
         print("SEARCHING: ", search_request)
 
         search_results = search(search_request, num=1, stop=1)
@@ -43,12 +36,13 @@ def ffn_link_finder(fic_names):
 def ffn_comment_maker(links):
     comment = ''
     for link in links:
-        comment += '{0}\n&nbsp;\n\n'.format(ffn_description_maker(link))
+        # preparation for caching of known stories, should cache last X stories and be able to search cached by name or link or id
+        current = Story(link)
+        comment += '{0}\n&nbsp;\n\n'.format(ffn_description_maker(current))
     return comment
 
 
-def ffn_description_maker(link):
-    current = Story(link)
+def ffn_description_maker(current):
     decoded_title = current.title.decode('ascii', errors='replace')
     decoded_author = current.author.decode('ascii', errors='replace')
     decoded_summary = current.summary.decode('ascii', errors='replace')
@@ -68,7 +62,6 @@ def ffn_description_maker(link):
 
 
 class Story:
-
     def __init__(self, url):
         self.url = url
         self.raw_data = []
@@ -79,10 +72,10 @@ class Story:
         self.summary = ""
         self.data = ""
 
-        self.parse_html(url)
+        self.parse_html()
         self.encode()
 
-    def parse_html(self, url):
+    def parse_html(self):
         page = requests.get(self.url)
         tree = html.fromstring(page.text)
 
@@ -90,7 +83,7 @@ class Story:
         self.summary = (tree.xpath('//*[@id="profile_top"]/div/text()'))[0]
         self.author += (tree.xpath('//*[@id="profile_top"]/a[1]/text()'))[0]
         self.authorlink = 'https://www.fanfiction.net' + \
-            tree.xpath('//*[@id="profile_top"]/a[1]/@href')[0]
+                          tree.xpath('//*[@id="profile_top"]/a[1]/@href')[0]
 
         # Getting the metadata was a bit more tedious.
         self.raw_data += (tree.xpath('//*[@id="profile_top"]/span[4]/a[1]/text()'))
