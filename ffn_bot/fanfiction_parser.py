@@ -10,18 +10,20 @@ def ffn_make_from_requests(fic_requests):
     found_ffn = ffn_comment_maker(ffn_link_finder(fic_requests))
     return found_ffn
 
+
 def safe_int(request):
     try:
-       return int(request)
+        return int(request)
     except ValueError:
-       return None
+        return None
+
 
 def ffn_link_finder(fic_names):
     for fic_name in fic_names:
         # Allow just to post the ID of the fanfiction.
         sid = safe_int(fic_name)
         if sid is not None:
-            yield "https://www.fanfiction.net/s/%d/1/"%sid
+            yield "https://www.fanfiction.net/s/%d/1/" % sid
             continue
 
         # Obfuscation.
@@ -116,7 +118,7 @@ except ImportError:
     Story = _Story
 else:
     # We will use a simple lru_cache for now.
-    @lru_cache(max_size=10000)
+    @lru_cache(maxsize=10000)
     def Story(url):
         return _Story(url)
 
