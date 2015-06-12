@@ -64,7 +64,7 @@ def ffn_description_maker(current):
     return formatted_description
 
 
-class Story:
+class _Story:
 
     def __init__(self, url):
         self.url = url
@@ -106,6 +106,19 @@ class Story:
         self.data = self.data.encode('ascii', errors='replace')
         for string in self.raw_data:
             self.data += string.encode('ascii', errors='replace')
+
+# Implement a cached version if the lru_cache is
+# implemented in this version of python.
+try:
+    from functools import lru_cache
+except ImportError:
+    print("Python version too old for caching.")
+    Story = _Story
+else:
+    # We will use a simple lru_cache for now.
+    @lru_cache(max_size=10000)
+    def Story(url):
+        return _Story(url)
 
 # # DEBUG
 # x = Story('https://www.fanfiction.net/s/8303194/1/Magics-of-the-Arcane')
