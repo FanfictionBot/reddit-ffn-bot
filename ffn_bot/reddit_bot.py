@@ -13,7 +13,7 @@ DEFAULT_SUBREDDITS = ['HPFanfiction']
 SUBREDDIT_LIST = []
 CHECKED_COMMENTS = []
 
-#New regex shoul match more possible letter combinations, see creenshot below
+#New regex shoul match more possible letter combinations, see screenshot below
 #http://prntscr.com/7g0oeq
 
 REGEXPS = {'[Ll][iI][nN][kK][fF]{2}[nN]\((.*?)\)': 'ffn'}
@@ -29,9 +29,11 @@ def run_forever():
 
 
 def main():
-    login_to_reddit()
+    #moved call for agruments to avoid double calling
+    bot_parameters = get_bot_parameters()
+    login_to_reddit(bot_parameters)
     load_checked_comments()
-    load_subreddits()
+    load_subreddits(bot_parameters)
 
     while True:
         for SUBREDDIT in SUBREDDIT_LIST:
@@ -57,25 +59,24 @@ def get_bot_parameters():
 
     args = parser.parse_args()
 
-    return {'user': args.user, 'password': args.password, 'subreddit': args.subreddit, 'default': args.default}
+    return {'user': args.user, 'password': args.password, 'user_subreddit': args.subreddit, 'default': args.default}
 
 
-def login_to_reddit():
-    bot_parameters = get_bot_parameters()
+def login_to_reddit(bot_parameters):
+
     print("Logging in...")
     r.login(bot_parameters['user'], bot_parameters['password'])
     print("Logged in.")
 
 
-def load_subreddits():
+def load_subreddits(bot_parameters):
     global SUBREDDIT_LIST
-    user_name, user_pw, user_subreddit, use_default = get_bot_parameters()
     print("Loading subreddits...")
     if use_default is True:
         for subreddit in DEFAULT_SUBREDDITS:
             SUBREDDIT_LIST.append(subreddit)
-    if user_subreddit is True:
-        SUBREDDIT_LIST.append(user_subreddit)
+    if bot_parameters['user_subreddit'] is True:
+        SUBREDDIT_LIST.append(bot_parameters['user_subreddit'])
     if len(SUBREDDIT_LIST) == 0:
         SUBREDDIT_LIST.append('tusingtestfield')
     print("LOADED SUBREDDITS: ", SUBREDDIT_LIST)
