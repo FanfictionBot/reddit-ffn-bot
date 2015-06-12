@@ -168,7 +168,10 @@ if platform.system() == "Windows":
     def wait(timeout=1):
         import msvcrt
         time.sleep(timeout)
-        return bool(msvcrt.kbhit())
+        if msvcrt.kbhit():
+            msvcrt.getch()
+            return True
+        return False
 else:
     def wait(timeout=1):
         import sys, select
