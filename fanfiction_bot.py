@@ -105,7 +105,7 @@ def parse_submissions():
 
 
 def make_comment(comment, id):
-    footer = "\n*Graciously brought to you by me - /u/tusing's bot. Many improvements by /u/MikroMan.*"
+    footer = "\n*Read usage tips and tricks  [here](https://github.com/tusing/reddit-ffn-bot/blob/master/README.md). Graciously brought to you by me - /u/tusing's bot, with improvements by /u/MikroMan.*"
     REGEXPS = {'linkffn\((.*?)\)': 'ffn'}
     requested = {}
 
@@ -165,7 +165,7 @@ def ffn_description_maker(link):
 
     formatted_description = '{0}\n\n>{1}\n\n>{2}\n\n'.format(
         header, decoded_summary, decoded_data)
-    print("Description for " + decoded_title + ": \n" + formatted_description)
+    # print("Description for " + decoded_title + ": \n" + formatted_description)
     return formatted_description
 
 main()
