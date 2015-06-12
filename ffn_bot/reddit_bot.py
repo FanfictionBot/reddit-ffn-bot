@@ -2,7 +2,7 @@ import time
 import re
 import sys
 import argparse
-
+import logging
 import praw
 
 from ffn_bot import fanfiction_parser
@@ -104,25 +104,28 @@ def check_comment(id):
 
 def load_checked_comments():
     global CHECKED_COMMENTS
-    print('Loading CHECKED_COMMENTS...')
+    logging.info('Loading CHECKED_COMMENTS...')
     with open('CHECKED_COMMENTS.txt', 'r') as file:
         CHECKED_COMMENTS = {str(line.rstrip('\n')) for line in file}
-    print('Loaded CHECKED_COMMENTS. Contains:')
-    print(CHECKED_COMMENTS)
+    print('Loaded CHECKED_COMMENTS.')
+    logging.info(CHECKED_COMMENTS)
 
 
 def parse_submissions(SUBREDDIT):
-    print("PARSING SUBMISSIONS ON SUBREDDIT ", SUBREDDIT)
+    print("==================================================")
+    print("Parsing submissions on SUBREDDIT ", SUBREDDIT)
     for submission in SUBREDDIT.get_hot(limit=10):
-        print("Checking SUBMISSION: ", submission.id)
+        logging.info("Checking SUBMISSION: ", submission.id)
         flat_comments = praw.helpers.flatten_tree(submission.comments)
         for comment in flat_comments:
-            print('Checking COMMENT: ' + comment.id + ' in submission ' + submission.id)
+            logging.info('Checking COMMENT: ' + comment.id + ' in submission ' + submission.id)
             if str(comment.id) in CHECKED_COMMENTS:
-                print("Comment " + comment.id + " already parsed!")
+                logging.info("Comment " + comment.id + " already parsed!")
             else:
                 print("Parsing comment ", comment.id)
                 make_reply(comment, comment.id)
+    print("Parsing on SUBREDDIT ", SUBREDDIT, " complete.")
+    print("==================================================")
 
 
 def make_reply(comment, id):

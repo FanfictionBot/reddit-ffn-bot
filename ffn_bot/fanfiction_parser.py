@@ -1,9 +1,7 @@
 import time
-
+import logging
 import requests
-
 from random import randint
-
 from google import search
 from lxml import html
 
@@ -36,7 +34,8 @@ def ffn_link_finder(fic_names):
 def ffn_comment_maker(links):
     comment = ''
     for link in links:
-        # preparation for caching of known stories, should cache last X stories and be able to search cached by name or link or id
+        # preparation for caching of known stories, should cache last X stories
+        # and be able to search cached by name or link or id
         current = Story(link)
         comment += '{0}\n&nbsp;\n\n'.format(ffn_description_maker(current))
     return comment
@@ -56,12 +55,11 @@ def ffn_description_maker(current):
 
     formatted_description = '{0}\n\n>{1}\n\n>{2}\n\n'.format(
         header, decoded_summary, decoded_data)
-    # print("Description for " + decoded_title + ": \n" + formatted_description)
-    print(formatted_description)
     return formatted_description
 
 
 class Story:
+
     def __init__(self, url):
         self.url = url
         self.raw_data = []
