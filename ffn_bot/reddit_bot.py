@@ -1,16 +1,11 @@
-import praw
 import time
-import pickle
 import re
-import os
 import sys
 import argparse
-import fanfiction_backend
-from fanfiction_backend import Story
-from random import randint
-from pprint import pprint
-from google import search
 
+import praw
+
+from ffn_bot import fanfiction_parser
 
 USER_AGENT = "Python:FanfictionComment:v0.001a (by /u/tusing)"
 r = praw.Reddit(USER_AGENT)
@@ -18,23 +13,27 @@ DEFAULT_SUBREDDITS = ['HPFanfiction']
 SUBREDDIT_LIST = []
 CHECKED_COMMENTS = []
 
+#New regex shoul match more possible letter combinations, see screenshot below
+#http://prntscr.com/7g0oeq
 
-REGEXPS = {'linkffn\((.*?)\)': 'ffn'}
+REGEXPS = {'[Ll][iI][nN][kK][fF]{2}[nN]\((.*?)\)': 'ffn'}
 FOOTER = "\n*Read usage tips and tricks  [here](https://github.com/tusing/reddit-ffn-bot/blob/master/README.md). Brought to you by me - /u/tusing's bot, with improvements by /u/MikroMan.*"
 
 
-def persistent_main():
+def run_forever():
     try:
         main()
     except:
         pause(1, 0)
-        persistent_main()
+        run_forever()
 
 
 def main():
-    login_to_reddit()
+    #moved call for agruments to avoid double calling
+    bot_parameters = get_bot_parameters()
+    login_to_reddit(bot_parameters)
     load_checked_comments()
-    load_subreddits()
+    load_subreddits(bot_parameters)
 
     while True:
         for SUBREDDIT in SUBREDDIT_LIST:
@@ -42,35 +41,42 @@ def main():
             pause(1, 0)
 
 
-def parse_arguments():
+def get_bot_parameters():
     # initialize parser and add options for username and password
     parser = argparse.ArgumentParser()
     parser.add_argument('-u', '--user', help='define Reddit login username')
     parser.add_argument('-p', '--password', help='define Reddit login password')
     parser.add_argument(
         '-s', '--subreddit', help='define target subreddit; can be used with -a')
+
+    #can also add possibility with -s option to aquire comma separated list of subreddits
+    #then do: subs = args.subreddit.split(',')
+    #and return this list, then append/extend to Subreddit_list or default_subs
+    #and possibl transform to set to avoid duplicates.
+
     parser.add_argument(
         '-d', '--default', action='store_true', help='add default subreddits')
+
     args = parser.parse_args()
-    return args.user, args.password, args.subreddit, args.default
+
+    return {'user': args.user, 'password': args.password, 'user_subreddit': args.subreddit, 'default': args.default}
 
 
-def login_to_reddit():
-    user_name, user_pw, user_subreddit, use_default = parse_arguments()
+def login_to_reddit(bot_parameters):
+
     print("Logging in...")
-    r.login(user_name, user_pw)
+    r.login(bot_parameters['user'], bot_parameters['password'])
     print("Logged in.")
 
 
-def load_subreddits():
+def load_subreddits(bot_parameters):
     global SUBREDDIT_LIST
-    user_name, user_pw, user_subreddit, use_default = parse_arguments()
     print("Loading subreddits...")
     if use_default is True:
         for subreddit in DEFAULT_SUBREDDITS:
             SUBREDDIT_LIST.append(subreddit)
-    if user_subreddit is True:
-        SUBREDDIT_LIST.append(user_subreddit)
+    if bot_parameters['user_subreddit'] is True:
+        SUBREDDIT_LIST.append(bot_parameters['user_subreddit'])
     if len(SUBREDDIT_LIST) == 0:
         SUBREDDIT_LIST.append('tusingtestfield')
     print("LOADED SUBREDDITS: ", SUBREDDIT_LIST)
@@ -125,6 +131,7 @@ def make_reply(comment, id):
 
 
 def formulate_reply(comment_body):
+
     requests = {}
     for expr in REGEXPS.keys():
         tofind = re.findall(expr, comment_body)
@@ -137,7 +144,7 @@ def parse_comment_requests(requests):
     comments_from_sources = []
     ffn_requests = requests['ffn']
     print("FFN requests: ", ffn_requests)
-    ffn_comment = fanfiction_backend.ffn_make_from_requests(ffn_requests)
+    ffn_comment = fanfiction_parser.ffn_make_from_requests(ffn_requests)
     dlp_comment = ""
     ao3_comment = ""
     return ffn_comment + dlp_comment + ao3_comment
@@ -160,5 +167,3 @@ def pause(minutes, seconds):
         sys.stdout.write("\rCountdown bypassed!            \n")
         pass
 
-
-persistent_main()
