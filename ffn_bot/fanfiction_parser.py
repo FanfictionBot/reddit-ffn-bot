@@ -1,6 +1,9 @@
+import sys
 import time
 import logging
 import requests
+
+from ffn_bot import bot_tools
 from random import randint
 from google import search
 from lxml import html
@@ -45,8 +48,13 @@ def ffn_comment_maker(links):
     for link in links:
         # preparation for caching of known stories, should cache last X stories
         # and be able to search cached by name or link or id
-        current = Story(link)
-        comment.append('{0}\n&nbsp;\n\n'.format(ffn_description_maker(current)))
+        try:
+            current = Story(link)
+            comment.append('{0}\n&nbsp;\n\n'.format(ffn_description_maker(current)))
+        except:
+            logging.error("EXCEPTION HAS OCCURED DURING STORY CREATION PROCESS!")
+            bot_tools.print_exception()
+            pass
     return "".join(comment)
 
 
@@ -78,8 +86,13 @@ class _Story:
         self.summary = ""
         self.data = ""
 
-        self.parse_html()
-        self.encode()
+        try:
+            self.parse_html()
+            self.encode()
+        except:
+            logging.error("HTML PARSING ERROR HAS OCCURED FOR ", url)
+            bot_tools.print_exception()
+            pass
 
     def parse_html(self):
         page = requests.get(self.url)
@@ -89,7 +102,7 @@ class _Story:
         self.summary = (tree.xpath('//*[@id="profile_top"]/div/text()'))[0]
         self.author += (tree.xpath('//*[@id="profile_top"]/a[1]/text()'))[0]
         self.authorlink = 'https://www.fanfiction.net' + \
-                          tree.xpath('//*[@id="profile_top"]/a[1]/@href')[0]
+            tree.xpath('//*[@id="profile_top"]/a[1]/@href')[0]
 
         # Getting the metadata was a bit more tedious.
         self.raw_data += (tree.xpath('//*[@id="profile_top"]/span[4]/a[1]/text()'))

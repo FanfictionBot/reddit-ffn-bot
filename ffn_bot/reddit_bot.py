@@ -1,12 +1,12 @@
-import time
 import re
 import sys
 import argparse
 import logging
 import praw
-import platform
 
 from ffn_bot import fanfiction_parser
+from ffn_bot import bot_tools
+
 
 __author__ = 'tusing, MikroMan, StuxSoftware'
 
@@ -28,8 +28,9 @@ def __main__():
         try:
             initialize()
         except:
-            print("An exception has occured!")
-            pause(1, 0)
+            logging.error("MAIN: AN EXCEPTION HAS OCCURED!")
+            bot_tools.print_exception()
+            bot_tools.pause(1, 0)
 
 
 def initialize():
@@ -42,7 +43,7 @@ def initialize():
     while True:
         for SUBREDDIT in SUBREDDIT_LIST:
             parse_submissions(r.get_subreddit(SUBREDDIT))
-            pause(1, 0)
+            bot_tools.pause(1, 0)
 
 
 def get_bot_parameters():
@@ -140,7 +141,7 @@ def make_reply(comment, id):
         print('Outgoing reply to ' + id + ':\n' + reply + FOOTER)
         comment.reply(reply + FOOTER)
         check_comment(comment.id)
-        pause(1, 20)
+        bot_tools.pause(1, 20)
     else:
         print("No reply conditions met.")
         check_comment(comment.id)
@@ -164,40 +165,3 @@ def parse_comment_requests(requests):
     dlp_comment = ""
     ao3_comment = ""
     return ffn_comment + dlp_comment + ao3_comment
-
-
-if platform.system() == "Windows":
-    def wait(timeout=1):
-        import msvcrt
-        time.sleep(timeout)
-        if msvcrt.kbhit():
-            msvcrt.getch()
-            return True
-        return False
-else:
-    def wait(timeout=1):
-        import sys
-        import select
-        rlist, wlist, xlist = select.select([sys.stdin], [], [], timeout)
-        return bool(rlist)
-
-
-def pause(minutes, seconds):
-    print("A countdown timer is beginning. You can skip it by pressing a key.")
-    try:
-        totaltime = minutes * 60 + seconds
-        for remaining in range(totaltime, 0, -1):
-            sys.stdout.write("\r")
-            sys.stdout.write(
-                "Paused: {:2d} seconds remaining.".format(remaining))
-            sys.stdout.flush()
-            if wait(1):
-                output_message = "\rSkipped at " + str(remaining) + " seconds!        \n"
-                sys.stdout.write(output_message)
-                break
-        sys.stdout.write("\rComplete!                                                 \n")
-    except KeyboardInterrupt:
-        sys.stdout.flush()
-        time.sleep(1)
-        sys.stdout.write("\rCountdown bypassed!            \n")
-        pass
