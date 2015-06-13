@@ -75,7 +75,7 @@ def ffn_description_maker(current):
     decoded_title = current.title.decode('ascii', errors='replace')
     decoded_author = current.author.decode('ascii', errors='replace')
     decoded_summary = current.summary.decode('ascii', errors='replace')
-    decoded_data = current.data.decode('ascii', errors='replace')
+    decoded_description = current.description.decode('ascii', errors='replace')
     print("Making a description for " + decoded_title)
 
     # More pythonic string formatting.
@@ -83,7 +83,7 @@ def ffn_description_maker(current):
                                                        current.url, decoded_author, current.authorlink)
 
     formatted_description = '{0}\n\n>{1}\n\n>{2}\n\n'.format(
-        header, decoded_summary, decoded_data)
+        header, decoded_summary, decoded_description)
     return formatted_description
 
 
@@ -91,13 +91,13 @@ class _Story:
 
     def __init__(self, url):
         self.url = url
-        self.raw_data = []
+        self.raw_description = []
+        self.description = ""
 
         self.title = ""
         self.author = ""
         self.authorlink = ""
         self.summary = ""
-        self.data = ""
 
         self.parse_html()
         self.encode()
@@ -111,20 +111,14 @@ class _Story:
         self.author += (tree.xpath('//*[@id="profile_top"]/a[1]/text()'))[0]
         self.authorlink = 'https://www.fanfiction.net' + \
             tree.xpath('//*[@id="profile_top"]/a[1]/@href')[0]
+        self.image = tree.xpath('//*[@id="profile_top"]/span[1]/img')
 
-        # For testing the "no image = no data/stats in comment" bug.
-        # self.image = tree.xpath('//*[@id="profile_top"]/span[1]/img')
-        # print(self.image)
+        # XPath changes depending on the presence of an image
 
-        # Getting the metadata was a bit more tedious.
-        self.raw_data += (tree.xpath('//*[@id="profile_top"]/span[4]/a[1]/text()'))
-        self.raw_data += (tree.xpath('//*[@id="profile_top"]/span[4]/text()[2]'))
-        self.raw_data += (tree.xpath('//*[@id="profile_top"]/span[4]/a[2]/text()'))
-        self.raw_data += (tree.xpath('//*[@id="profile_top"]/span[4]/text()[3]'))
-        self.raw_data += (tree.xpath('//*[@id="profile_top"]/span[4]/span[1]/text()'))
-        self.raw_data += (tree.xpath('//*[@id="profile_top"]/span[4]/text()[4]/text()'))
-        self.raw_data += (tree.xpath('//*[@id="profile_top"]/span[4]/span[2]/text()'))
-        self.raw_data += (tree.xpath('//*[@id="profile_top"]/span[4]/text()[5]'))
+        if len(self.image) is not 0:
+            self.raw_description = tree.xpath('//*[@id="profile_top"]/span[4]//text()')
+        else:
+            self.raw_description = tree.xpath('//*[@id="profile_top"]/span[3]//text()')
 
     def encode(self):
         self.title = self.title.encode('ascii', errors='replace')
