@@ -113,8 +113,9 @@ def load_checked_comments():
 
 def parse_submissions(SUBREDDIT):
     print("==================================================")
-    print("Parsing submissions on SUBREDDIT ", SUBREDDIT)
-    for submission in SUBREDDIT.get_hot(limit=10):
+    submission_list = SUBREDDIT.get_hot(limit=30)
+    print("Parsing submissions on SUBREDDIT", SUBREDDIT)
+    for submission in submission_list:
         logging.info("Checking SUBMISSION: ", submission.id)
         flat_comments = praw.helpers.flatten_tree(submission.comments)
         for comment in flat_comments:

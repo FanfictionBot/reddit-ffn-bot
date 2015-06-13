@@ -76,7 +76,10 @@ def ffn_description_maker(current):
     decoded_author = current.author.decode('ascii', errors='replace')
     decoded_summary = current.summary.decode('ascii', errors='replace')
     decoded_stats = current.stats.decode('ascii', errors='replace')
-    decoded_stats.replace(' ', ' ^')
+    formatted_stats = decoded_stats.replace('   ', ' ').replace('  ', ' ').replace(
+        ' ', ' ^').replace('Rated:', '^Rated:')
+    formatted_stats = formatted_stats[:-1]
+
     print("Making a description for " + decoded_title)
 
     # More pythonic string formatting.
@@ -84,7 +87,7 @@ def ffn_description_maker(current):
                                                        current.url, decoded_author, current.authorlink)
 
     formatted_description = '{0}\n\n>{1}\n\n>{2}\n\n'.format(
-        header, decoded_summary, decoded_stats)
+        header, decoded_summary, formatted_stats)
     return formatted_description
 
 
