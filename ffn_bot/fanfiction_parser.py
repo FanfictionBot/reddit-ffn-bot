@@ -23,6 +23,8 @@ def safe_int(request):
 
 def ffn_link_finder(fic_names):
     for fic_name in fic_names:
+        fic_name = fic_name.encode('ascii', errors='replace')
+        fic_name = fic_name.decode('ascii', errors='replace')
         # Allow just to post the ID of the fanfiction.
         sid = safe_int(fic_name)
         if sid is not None:
@@ -36,7 +38,6 @@ def ffn_link_finder(fic_names):
 
         search_request = 'site:fanfiction.net/s/ {0}'.format(fic_name)
         print("SEARCHING: ", search_request)
-
         search_results = search(search_request, num=1, stop=1)
         link_found = next(search_results)
         print("FOUND: " + link_found)
