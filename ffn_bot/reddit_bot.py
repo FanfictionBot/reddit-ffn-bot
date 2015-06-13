@@ -27,7 +27,7 @@ FOOTER = "\n*Read usage tips and tricks  [here](https://github.com/tusing/reddit
 
 def get_regexps():
     global SITES
-    return {site.regex: site.name for site in SITES}
+    return {site.name: re.compile(site.regex, re.IGNORECASE) for site in SITES}
 
 def get_sites():
     global SITES
@@ -160,9 +160,9 @@ def make_reply(comment, id):
 def formulate_reply(comment_body):
     REGEXPS = get_regexps()
     requests = {}
-    for expr in REGEXPS.keys():
-        tofind = re.findall(expr, comment_body)
-        requests[REGEXPS[expr]] = tofind
+    for name, regexp in REGEXPS.items():
+        tofind = regexp.findall(comment_body)
+        requests[name] = tofind
     print("FINDING: ", requests)
     return parse_comment_requests(requests)
 
