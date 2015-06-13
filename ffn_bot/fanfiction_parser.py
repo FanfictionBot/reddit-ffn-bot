@@ -9,7 +9,7 @@ from random import randint
 from google import search
 from lxml import html
 
-FFN_LINK = re.compile("http(s?)://(www|m)?\\.fanfiction\\.net/s/(\\d+)/.*",re.IGNORECASE)
+FFN_LINK = re.compile("http(s?)://((www|m)\\.)?fanfiction\\.net/s/(\\d+)/.*",re.IGNORECASE)
 
 def ffn_make_from_requests(fic_requests):
     found_ffn = ffn_comment_maker(ffn_link_finder(fic_requests))
