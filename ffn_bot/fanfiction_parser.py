@@ -19,7 +19,7 @@ FFN_LINK = re.compile(
 class FanfictionNetSite(site.Site):
     # All regexps are automatically case insensitive for sites.
 
-    def __init__(self, regex=r"linkffn\((.*?)\)", name="ffn"):
+    def __init__(self, regex=r"linkffn\((.*?)\)", name=None):
         super(FanfictionNetSite, self).__init__(regex, name)
 
     @staticmethod

@@ -21,7 +21,7 @@ AO3_SUMMARY_FINDER = '//*[@id="workskin"]//*[@role="complementary"]//blockquote/
 
 
 class ArchiveOfOurOwn(Site):
-    def __init__(self, regex=AO3_FUNCTION + r"\((.*?)\)", name="ao3"):
+    def __init__(self, regex=AO3_FUNCTION + r"\((.*?)\)", name=None):
         super(ArchiveOfOurOwn, self).__init__(regex, name)
 
     @staticmethod
