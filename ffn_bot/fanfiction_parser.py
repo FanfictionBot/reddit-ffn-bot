@@ -18,13 +18,15 @@ FFN_LINK = re.compile(
 
 class FanfictionNetSite(site.Site):
     # All regexps are automatically case insensitive for sites.
+
     def __init__(self, regex=r"linkffn\((.*?)\)", name="ffn"):
-        super(FanfictionNetSite, self).__init__(regex, ffn)
+        super(FanfictionNetSite, self).__init__(regex, name)
 
     def from_request(self, requests):
         # I'd love to use 'yield from'
         for comment in ffn_comment_maker(ffn_link_finder(fic_requests)):
             yield comment
+
 
 def ffn_make_from_requests(fic_requests):
     return "".join(ffn_comment_maker(ffn_link_finder(fic_requests)))
