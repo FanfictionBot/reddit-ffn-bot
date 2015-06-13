@@ -5,6 +5,7 @@ import logging
 import praw
 
 from ffn_bot import fanfiction_parser
+from ffn_bot import ao3
 from ffn_bot import bot_tools
 
 
@@ -20,7 +21,10 @@ CHECKED_COMMENTS = set()
 # http://prntscr.com/7g0oeq
 
 # REGEXPS = {'[Ll][iI][nN][kK][fF]{2}[nN]\((.*?)\)': 'ffn'}
-SITES = [fanfiction_parser.FanfictionNetSite()]
+SITES = [
+    fanfiction_parser.FanfictionNetSite(),
+    ao3.ArchiveOfOurOwn()
+]
 
 FOOTER = "\n*Read usage tips and tricks  [here](https://github.com/tusing/reddit-ffn-bot/blob/master/README.md).*"
 
@@ -179,7 +183,7 @@ def _parse_comment_requests(requests):
 
     for site, queries in requests.items():
         print("Requests for '%s': %r" % (site, queries))
-        for comment in sites[site].from_request(queries):
+        for comment in sites[site].from_requests(queries):
             yield comment
 
     # ffn_requests = requests['ffn']

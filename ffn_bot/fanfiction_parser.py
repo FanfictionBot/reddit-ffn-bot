@@ -22,7 +22,7 @@ class FanfictionNetSite(site.Site):
     def __init__(self, regex=r"linkffn\((.*?)\)", name="ffn"):
         super(FanfictionNetSite, self).__init__(regex, name)
 
-    def from_request(self, requests):
+    def from_requests(self, requests):
         # I'd love to use 'yield from'
         for comment in ffn_comment_maker(ffn_link_finder(requests)):
             yield comment
