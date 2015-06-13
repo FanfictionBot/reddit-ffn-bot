@@ -94,13 +94,8 @@ class _Story:
         self.summary = ""
         self.data = ""
 
-        try:
-            self.parse_html()
-            self.encode()
-        except:
-            logging.error("HTML PARSING ERROR HAS OCCURED FOR ", url)
-            bot_tools.print_exception()
-            pass
+        self.parse_html()
+        self.encode()
 
     def parse_html(self):
         page = requests.get(self.url)
