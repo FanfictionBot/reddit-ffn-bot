@@ -75,7 +75,8 @@ def ffn_description_maker(current):
     decoded_title = current.title.decode('ascii', errors='replace')
     decoded_author = current.author.decode('ascii', errors='replace')
     decoded_summary = current.summary.decode('ascii', errors='replace')
-    decoded_description = current.description.decode('ascii', errors='replace')
+    decoded_stats = current.stats.decode('ascii', errors='replace')
+    decoded_stats.replace(' ', ' ^')
     print("Making a description for " + decoded_title)
 
     # More pythonic string formatting.
@@ -83,7 +84,7 @@ def ffn_description_maker(current):
                                                        current.url, decoded_author, current.authorlink)
 
     formatted_description = '{0}\n\n>{1}\n\n>{2}\n\n'.format(
-        header, decoded_summary, decoded_description)
+        header, decoded_summary, decoded_stats)
     return formatted_description
 
 
@@ -91,8 +92,8 @@ class _Story:
 
     def __init__(self, url):
         self.url = url
-        self.raw_description = []
-        self.description = ""
+        self.raw_stats = []
+        self.stats = ""
 
         self.title = ""
         self.author = ""
@@ -116,17 +117,17 @@ class _Story:
         # XPath changes depending on the presence of an image
 
         if len(self.image) is not 0:
-            self.raw_description = tree.xpath('//*[@id="profile_top"]/span[4]//text()')
+            self.raw_stats = tree.xpath('//*[@id="profile_top"]/span[4]//text()')
         else:
-            self.raw_description = tree.xpath('//*[@id="profile_top"]/span[3]//text()')
+            self.raw_stats = tree.xpath('//*[@id="profile_top"]/span[3]//text()')
 
     def encode(self):
         self.title = self.title.encode('ascii', errors='replace')
         self.author = self.author.encode('ascii', errors='replace')
         self.summary = self.summary.encode('ascii', errors='replace')
-        self.data = self.data.encode('ascii', errors='replace')
-        for string in self.raw_data:
-            self.data += string.encode('ascii', errors='replace')
+        self.stats = self.stats.encode('ascii', errors='replace')
+        for string in self.raw_stats:
+            self.stats += string.encode('ascii', errors='replace')
 
 # Implement a cached version if the lru_cache is
 # implemented in this version of python.
@@ -147,4 +148,4 @@ else:
 # print(x.title)
 # print(x.author)
 # print(x.summary)
-# print(x.data)
+# print(x.stats)
