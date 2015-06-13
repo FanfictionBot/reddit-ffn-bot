@@ -27,9 +27,6 @@ def safe_int(request):
 
 def ffn_link_finder(fic_names):
     for fic_name in fic_names:
-        # Prevent users from crashing program with bad link names.
-        fic_name = fic_name.encode('ascii', errors='replace')
-        fic_name = fic_name.decode('ascii', errors='replace')
 
         # Allow just to post the ID of the fanfiction.
         sid = safe_int(fic_name)
@@ -40,6 +37,9 @@ def ffn_link_finder(fic_names):
         # Yield links directly without googling.
         match = FFN_LINK.match(fic_name)
         if match is not None:
+            # Prevent users from crashing program with bad link names.
+            fic_name = fic_name.encode('ascii', errors='replace')
+            fic_name = fic_name.decode('ascii', errors='replace')
             yield fic_name
             continue
 
