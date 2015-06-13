@@ -1,3 +1,4 @@
+import re
 import sys
 import time
 import logging
@@ -8,6 +9,7 @@ from random import randint
 from google import search
 from lxml import html
 
+FFN_LINK = re.compile("http(s?)://((www|m)\\.)?fanfiction\\.net/s/(\\d+)/.*",re.IGNORECASE)
 
 def ffn_make_from_requests(fic_requests):
     found_ffn = ffn_comment_maker(ffn_link_finder(fic_requests))
@@ -29,6 +31,12 @@ def ffn_link_finder(fic_names):
         sid = safe_int(fic_name)
         if sid is not None:
             yield "https://www.fanfiction.net/s/%d/1/" % sid
+            continue
+
+        # Yield links directly without googling.
+        match = FFN_LINK.match(fic_name)
+        if match is not None:
+            yield fic_name
             continue
 
         # Obfuscation.
