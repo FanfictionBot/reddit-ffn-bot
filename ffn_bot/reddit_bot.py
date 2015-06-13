@@ -29,9 +29,11 @@ def get_regexps():
     global SITES
     return {site.name: re.compile(site.regex, re.IGNORECASE) for site in SITES}
 
+
 def get_sites():
     global SITES
     return {site.name: site for site in SITES}
+
 
 def __main__():
     while True:
@@ -179,7 +181,7 @@ def _parse_comment_requests(requests):
         print("Requests for '%s': %r" % (site, queries))
         for comment in sites[site].from_request(queries):
             yield comment
-        
+
     # ffn_requests = requests['ffn']
     # print("FFN requests: ", ffn_requests)
     # ffn_comment = fanfiction_parser.ffn_make_from_requests(ffn_requests)
