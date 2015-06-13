@@ -113,9 +113,8 @@ def load_checked_comments():
 
 def parse_submissions(SUBREDDIT):
     print("==================================================")
-    submission_list = SUBREDDIT.get_hot(limit=30)
     print("Parsing submissions on SUBREDDIT", SUBREDDIT)
-    for submission in submission_list:
+    for submission in SUBREDDIT.get_hot(limit=25):
         logging.info("Checking SUBMISSION: ", submission.id)
         flat_comments = praw.helpers.flatten_tree(submission.comments)
         for comment in flat_comments:
@@ -125,6 +124,7 @@ def parse_submissions(SUBREDDIT):
                 logging.info("Comment " + comment.id + " already parsed!")
             else:
                 print("Parsing comment ", comment.id, ' in submission ', submission.id)
+                print(comment.body)
                 make_reply(comment, comment.id)
     print("Parsing on SUBREDDIT ", SUBREDDIT, " complete.")
     print("==================================================")
@@ -142,6 +142,7 @@ def make_reply(comment, id):
         comment.reply(reply + FOOTER)
         check_comment(comment.id)
         bot_tools.pause(1, 20)
+        print('Continuing to parse submissions...')
     else:
         print("No reply conditions met.")
         check_comment(comment.id)
