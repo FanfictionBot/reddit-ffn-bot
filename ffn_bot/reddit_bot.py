@@ -12,7 +12,7 @@ __author__ = 'tusing, MikroMan, StuxSoftware'
 
 USER_AGENT = "Python:FanfictionComment:v0.1 (by /u/tusing)"
 r = praw.Reddit(USER_AGENT)
-DEFAULT_SUBREDDITS = ['HPFanfiction']
+DEFAULT_SUBREDDITS = ['HPFanfiction', 'fanfiction', 'HPMOR']
 SUBREDDIT_LIST = []
 CHECKED_COMMENTS = set()
 
@@ -165,6 +165,7 @@ def parse_comment_requests(requests):
     ao3_comment = ""
     return ffn_comment + dlp_comment + ao3_comment
 
+
 if platform.system() == "Windows":
     def wait(timeout=1):
         import msvcrt
@@ -182,7 +183,7 @@ else:
 
 
 def pause(minutes, seconds):
-    print("A countdown timer is beginning. You can skip it with Ctrl-C.")
+    print("A countdown timer is beginning. You can skip it by pressing a key.")
     try:
         totaltime = minutes * 60 + seconds
         for remaining in range(totaltime, 0, -1):
