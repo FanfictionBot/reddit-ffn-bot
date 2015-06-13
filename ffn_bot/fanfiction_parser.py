@@ -112,6 +112,10 @@ class _Story:
         self.authorlink = 'https://www.fanfiction.net' + \
             tree.xpath('//*[@id="profile_top"]/a[1]/@href')[0]
 
+        # For testing the "no image = no data/stats in comment" bug.
+        # self.image = tree.xpath('//*[@id="profile_top"]/span[1]/img')
+        # print(self.image)
+
         # Getting the metadata was a bit more tedious.
         self.raw_data += (tree.xpath('//*[@id="profile_top"]/span[4]/a[1]/text()'))
         self.raw_data += (tree.xpath('//*[@id="profile_top"]/span[4]/text()[2]'))
@@ -144,7 +148,7 @@ else:
         return _Story(url)
 
 # # DEBUG
-# x = Story('https://www.fanfiction.net/s/8303194/1/Magics-of-the-Arcane')
+# x = Story('https://www.fanfiction.net/s/11096853/1/She-Chose-Me')  # No self.image
 # print(x.authorlink)
 # print(x.title)
 # print(x.author)
