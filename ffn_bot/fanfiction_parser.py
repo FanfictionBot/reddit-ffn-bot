@@ -24,7 +24,7 @@ class FanfictionNetSite(site.Site):
 
     def from_request(self, requests):
         # I'd love to use 'yield from'
-        for comment in ffn_comment_maker(ffn_link_finder(fic_requests)):
+        for comment in ffn_comment_maker(ffn_link_finder(requests)):
             yield comment
 
 
