@@ -74,26 +74,6 @@ class FanfictionNetSite(site.Site):
         return link_found
 
 
-def ffn_description_maker(current):
-    decoded_title = current.title.decode('ascii', errors='replace')
-    decoded_author = current.author.decode('ascii', errors='replace')
-    decoded_summary = current.summary.decode('ascii', errors='replace')
-    decoded_stats = current.stats.decode('ascii', errors='replace')
-    formatted_stats = decoded_stats.replace('   ', ' ').replace('  ', ' ').replace(
-        ' ', ' ^').replace('Rated:', '^Rated:')
-    formatted_stats = formatted_stats[:-1]
-
-    print("Making a description for " + decoded_title)
-
-    # More pythonic string formatting.
-    header = '[***{0}***]({1}) by [*{2}*]({3})'.format(decoded_title,
-                                                       current.url, decoded_author, current.authorlink)
-
-    formatted_description = '{0}\n\n>{1}\n\n>{2}\n\n'.format(
-        header, decoded_summary, formatted_stats)
-    return formatted_description
-
-
 class _Story:
 
     def __init__(self, url):
@@ -135,10 +115,29 @@ class _Story:
         for string in self.raw_stats:
             self.stats += string.encode('ascii', errors='replace')
 
-    __str__ = ffn_description_maker
+    def __str__(self):
+        decoded_title = self.title.decode('ascii', errors='replace')
+        decoded_author = self.author.decode('ascii', errors='replace')
+        decoded_summary = self.summary.decode('ascii', errors='replace')
+        decoded_stats = self.stats.decode('ascii', errors='replace')
+        formatted_stats = decoded_stats.replace(' ', ' ').replace(' ', ' ').replace( ' ', ' ^').replace('Rated:', '^Rated:') 
+        formatted_stats = formatted_stats[:-1]
+        # print("Making a description for " + decoded_title) # More pythonic string formatting.
+        header = '[***{0}***]({1}) by [*{2}*]({3})'.format(
+            decoded_title,
+            self.url,
+            decoded_author,
+            self.authorlink
+        )
 
-# Implement a cached version if the lru_cache is
-# implemented in this version of python.
+        formatted_description = '{0}\n\n>{1}\n\n>{2}\n\n'.format(
+            header,
+            decoded_summary,
+            formatted_stats
+        )
+        return formatted_description
+
+
 try:
     from functools import lru_cache
 except ImportError:
