@@ -31,11 +31,13 @@ def ffn_link_finder(fic_names):
 
         search_request = 'site:fanfiction.net/s/ {0}'.format(fic_name)
         print("SEARCHING: ", search_request)
-
-        search_results = search(search_request, num=1, stop=1)
-        link_found = next(search_results)
-        print("FOUND: " + link_found)
-        yield link_found
+        try:
+            search_results = search(search_request, num=1, stop=1)
+            link_found = next(search_results)
+            print("FOUND: " + link_found)
+            yield link_found
+        except BaseException as e:
+            print(str(e))
 
 
 def ffn_comment_maker(links):
@@ -43,7 +45,11 @@ def ffn_comment_maker(links):
     for link in links:
         # preparation for caching of known stories, should cache last X stories
         # and be able to search cached by name or link or id
-        current = Story(link)
+        try:
+            current = Story(link)
+        except Exception as e:
+            print(str(e))
+            continue
         comment.append('{0}\n&nbsp;\n\n'.format(ffn_description_maker(current)))
     return "".join(comment)
 
