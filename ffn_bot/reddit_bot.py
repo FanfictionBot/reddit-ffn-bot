@@ -13,7 +13,7 @@ __author__ = 'tusing, MikroMan, StuxSoftware'
 USER_AGENT = "Python:FanfictionComment:v0.1 (by /u/tusing)"
 r = praw.Reddit(USER_AGENT)
 DEFAULT_SUBREDDITS = ['HPFanfiction', 'fanfiction', 'HPMOR']
-SUBREDDIT_LIST = []
+SUBREDDIT_LIST = set()
 CHECKED_COMMENTS = set()
 
 # New regex shoul match more possible letter combinations, see screenshot below
@@ -80,18 +80,17 @@ def load_subreddits(bot_parameters):
     if bot_parameters['default'] is True:
         print("Adding default subreddits: ", DEFAULT_SUBREDDITS)
         for subreddit in DEFAULT_SUBREDDITS:
-            SUBREDDIT_LIST.append(subreddit)
+            SUBREDDIT_LIST.add(subreddit)
 
     if bot_parameters['user_subreddits'] is not None:
         user_subreddits = bot_parameters['user_subreddits'].split(',')
         print("Adding user subreddits: ", user_subreddits)
         for subreddit in user_subreddits:
-            SUBREDDIT_LIST.append(subreddit)
+            SUBREDDIT_LIST.add(subreddit)
 
     if len(SUBREDDIT_LIST) == 0:
         print("No subreddit specified. Adding test subreddit.")
-        SUBREDDIT_LIST.append('tusingtestfield')
-    SUBREDDIT_LIST = set(SUBREDDIT_LIST)
+        SUBREDDIT_LIST.add('tusingtestfield')
     print("LOADED SUBREDDITS: ", SUBREDDIT_LIST)
 
 
