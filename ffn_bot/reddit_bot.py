@@ -13,15 +13,25 @@ __author__ = 'tusing, MikroMan, StuxSoftware'
 USER_AGENT = "Python:FanfictionComment:v0.1 (by /u/tusing)"
 r = praw.Reddit(USER_AGENT)
 DEFAULT_SUBREDDITS = ['HPFanfiction', 'fanfiction', 'HPMOR']
-SUBREDDIT_LIST = []
+SUBREDDIT_LIST = set()
 CHECKED_COMMENTS = set()
 
 # New regex shoul match more possible letter combinations, see screenshot below
 # http://prntscr.com/7g0oeq
 
-REGEXPS = {'[Ll][iI][nN][kK][fF]{2}[nN]\((.*?)\)': 'ffn'}
+# REGEXPS = {'[Ll][iI][nN][kK][fF]{2}[nN]\((.*?)\)': 'ffn'}
+SITES = [fanfiction_parser.FanfictionNetSite()]
+
 FOOTER = "\n*Read usage tips and tricks  [here](https://github.com/tusing/reddit-ffn-bot/blob/master/README.md).*"
 
+
+def get_regexps():
+    global SITES
+    return {site.name: re.compile(site.regex, re.IGNORECASE) for site in SITES}
+
+def get_sites():
+    global SITES
+    return {site.name: site for site in SITES}
 
 def __main__():
     while True:
@@ -80,18 +90,17 @@ def load_subreddits(bot_parameters):
     if bot_parameters['default'] is True:
         print("Adding default subreddits: ", DEFAULT_SUBREDDITS)
         for subreddit in DEFAULT_SUBREDDITS:
-            SUBREDDIT_LIST.append(subreddit)
+            SUBREDDIT_LIST.add(subreddit)
 
     if bot_parameters['user_subreddits'] is not None:
         user_subreddits = bot_parameters['user_subreddits'].split(',')
         print("Adding user subreddits: ", user_subreddits)
         for subreddit in user_subreddits:
-            SUBREDDIT_LIST.append(subreddit)
+            SUBREDDIT_LIST.add(subreddit)
 
     if len(SUBREDDIT_LIST) == 0:
         print("No subreddit specified. Adding test subreddit.")
-        SUBREDDIT_LIST.append('tusingtestfield')
-    SUBREDDIT_LIST = set(SUBREDDIT_LIST)
+        SUBREDDIT_LIST.add('tusingtestfield')
     print("LOADED SUBREDDITS: ", SUBREDDIT_LIST)
 
 
@@ -114,8 +123,8 @@ def load_checked_comments():
 
 def parse_submissions(SUBREDDIT):
     print("==================================================")
-    print("Parsing submissions on SUBREDDIT ", SUBREDDIT)
-    for submission in SUBREDDIT.get_hot(limit=10):
+    print("Parsing submissions on SUBREDDIT", SUBREDDIT)
+    for submission in SUBREDDIT.get_hot(limit=25):
         logging.info("Checking SUBMISSION: ", submission.id)
         flat_comments = praw.helpers.flatten_tree(submission.comments)
         for comment in flat_comments:
@@ -125,6 +134,7 @@ def parse_submissions(SUBREDDIT):
                 logging.info("Comment " + comment.id + " already parsed!")
             else:
                 print("Parsing comment ", comment.id, ' in submission ', submission.id)
+                print(comment.body)
                 make_reply(comment, comment.id)
     print("Parsing on SUBREDDIT ", SUBREDDIT, " complete.")
     print("==================================================")
@@ -142,26 +152,37 @@ def make_reply(comment, id):
         comment.reply(reply + FOOTER)
         check_comment(comment.id)
         bot_tools.pause(1, 20)
+        print('Continuing to parse submissions...')
     else:
         print("No reply conditions met.")
         check_comment(comment.id)
 
 
 def formulate_reply(comment_body):
-
+    REGEXPS = get_regexps()
     requests = {}
-    for expr in REGEXPS.keys():
-        tofind = re.findall(expr, comment_body)
-        requests[REGEXPS[expr]] = tofind
+    for name, regexp in REGEXPS.items():
+        tofind = regexp.findall(comment_body)
+        requests[name] = tofind
     print("FINDING: ", requests)
     return parse_comment_requests(requests)
 
 
 def parse_comment_requests(requests):
-    comments_from_sources = []
-    ffn_requests = requests['ffn']
-    print("FFN requests: ", ffn_requests)
-    ffn_comment = fanfiction_parser.ffn_make_from_requests(ffn_requests)
-    dlp_comment = ""
-    ao3_comment = ""
-    return ffn_comment + dlp_comment + ao3_comment
+    return "".join(_parse_comment_requests(requests))
+
+
+def _parse_comment_requests(requests):
+    sites = get_sites()
+
+    for site, queries in requests.items():
+        print("Requests for '%s': %r" % (site, queries))
+        for comment in sites[site].from_request(queries):
+            yield comment
+        
+    # ffn_requests = requests['ffn']
+    # print("FFN requests: ", ffn_requests)
+    # ffn_comment = fanfiction_parser.ffn_make_from_requests(ffn_requests)
+    # dlp_comment = ""
+    # ao3_comment = ""
+    # return ffn_comment + dlp_comment + ao3_comment

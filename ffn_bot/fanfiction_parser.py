@@ -5,17 +5,29 @@ import logging
 import requests
 
 from ffn_bot import bot_tools
+from ffn_bot import site
 from random import randint
 from google import search
 from lxml import html
+
+__all__ = ["FanfictionNetSite"]
 
 FFN_LINK = re.compile(
     "http(s?)://((www|m)\\.)?fanfiction\\.net/s/(\\d+)/.*", re.IGNORECASE)
 
 
+class FanfictionNetSite(site.Site):
+    # All regexps are automatically case insensitive for sites.
+    def __init__(self, regex=r"linkffn\((.*?)\)", name="ffn"):
+        super(FanfictionNetSite, self).__init__(regex, ffn)
+
+    def from_request(self, requests):
+        # I'd love to use 'yield from'
+        for comment in ffn_comment_maker(ffn_link_finder(fic_requests)):
+            yield comment
+
 def ffn_make_from_requests(fic_requests):
-    found_ffn = ffn_comment_maker(ffn_link_finder(fic_requests))
-    return found_ffn
+    return "".join(ffn_comment_maker(ffn_link_finder(fic_requests)))
 
 
 def safe_int(request):
@@ -57,25 +69,27 @@ def ffn_link_finder(fic_names):
 
 
 def ffn_comment_maker(links):
-    comment = []
     for link in links:
         # preparation for caching of known stories, should cache last X stories
         # and be able to search cached by name or link or id
         try:
             current = Story(link)
-            comment.append('{0}\n&nbsp;\n\n'.format(ffn_description_maker(current)))
+            yield '{0}\n&nbsp;\n\n'.format(ffn_description_maker(current))
         except:
             logging.error("EXCEPTION HAS OCCURED DURING STORY CREATION PROCESS!")
             bot_tools.print_exception()
             pass
-    return "".join(comment)
 
 
 def ffn_description_maker(current):
     decoded_title = current.title.decode('ascii', errors='replace')
     decoded_author = current.author.decode('ascii', errors='replace')
     decoded_summary = current.summary.decode('ascii', errors='replace')
-    decoded_data = current.data.decode('ascii', errors='replace')
+    decoded_stats = current.stats.decode('ascii', errors='replace')
+    formatted_stats = decoded_stats.replace('   ', ' ').replace('  ', ' ').replace(
+        ' ', ' ^').replace('Rated:', '^Rated:')
+    formatted_stats = formatted_stats[:-1]
+
     print("Making a description for " + decoded_title)
 
     # More pythonic string formatting.
@@ -83,7 +97,7 @@ def ffn_description_maker(current):
                                                        current.url, decoded_author, current.authorlink)
 
     formatted_description = '{0}\n\n>{1}\n\n>{2}\n\n'.format(
-        header, decoded_summary, decoded_data)
+        header, decoded_summary, formatted_stats)
     return formatted_description
 
 
@@ -91,13 +105,13 @@ class _Story:
 
     def __init__(self, url):
         self.url = url
-        self.raw_data = []
+        self.raw_stats = []
+        self.stats = ""
 
         self.title = ""
         self.author = ""
         self.authorlink = ""
         self.summary = ""
-        self.data = ""
 
         self.parse_html()
         self.encode()
@@ -111,24 +125,22 @@ class _Story:
         self.author += (tree.xpath('//*[@id="profile_top"]/a[1]/text()'))[0]
         self.authorlink = 'https://www.fanfiction.net' + \
             tree.xpath('//*[@id="profile_top"]/a[1]/@href')[0]
+        self.image = tree.xpath('//*[@id="profile_top"]/span[1]/img')
 
-        # Getting the metadata was a bit more tedious.
-        self.raw_data += (tree.xpath('//*[@id="profile_top"]/span[4]/a[1]/text()'))
-        self.raw_data += (tree.xpath('//*[@id="profile_top"]/span[4]/text()[2]'))
-        self.raw_data += (tree.xpath('//*[@id="profile_top"]/span[4]/a[2]/text()'))
-        self.raw_data += (tree.xpath('//*[@id="profile_top"]/span[4]/text()[3]'))
-        self.raw_data += (tree.xpath('//*[@id="profile_top"]/span[4]/span[1]/text()'))
-        self.raw_data += (tree.xpath('//*[@id="profile_top"]/span[4]/text()[4]/text()'))
-        self.raw_data += (tree.xpath('//*[@id="profile_top"]/span[4]/span[2]/text()'))
-        self.raw_data += (tree.xpath('//*[@id="profile_top"]/span[4]/text()[5]'))
+        # XPath changes depending on the presence of an image
+
+        if len(self.image) is not 0:
+            self.raw_stats = tree.xpath('//*[@id="profile_top"]/span[4]//text()')
+        else:
+            self.raw_stats = tree.xpath('//*[@id="profile_top"]/span[3]//text()')
 
     def encode(self):
         self.title = self.title.encode('ascii', errors='replace')
         self.author = self.author.encode('ascii', errors='replace')
         self.summary = self.summary.encode('ascii', errors='replace')
-        self.data = self.data.encode('ascii', errors='replace')
-        for string in self.raw_data:
-            self.data += string.encode('ascii', errors='replace')
+        self.stats = self.stats.encode('ascii', errors='replace')
+        for string in self.raw_stats:
+            self.stats += string.encode('ascii', errors='replace')
 
 # Implement a cached version if the lru_cache is
 # implemented in this version of python.
@@ -144,9 +156,9 @@ else:
         return _Story(url)
 
 # # DEBUG
-# x = Story('https://www.fanfiction.net/s/8303194/1/Magics-of-the-Arcane')
+# x = Story('https://www.fanfiction.net/s/11096853/1/She-Chose-Me')  # No self.image
 # print(x.authorlink)
 # print(x.title)
 # print(x.author)
 # print(x.summary)
-# print(x.data)
+# print(x.stats)
