@@ -5,17 +5,29 @@ import logging
 import requests
 
 from ffn_bot import bot_tools
+from ffn_bot import site
 from random import randint
 from google import search
 from lxml import html
+
+__all__ = ["FanfictionNetSite"]
 
 FFN_LINK = re.compile(
     "http(s?)://((www|m)\\.)?fanfiction\\.net/s/(\\d+)/.*", re.IGNORECASE)
 
 
+class FanfictionNetSite(site.Site):
+    # All regexps are automatically case insensitive for sites.
+    def __init__(self, regex=r"linkffn\((.*?)\)", name="ffn"):
+        super(FanfictionNetSite, self).__init__(regex, ffn)
+
+    def from_request(self, requests):
+        # I'd love to use 'yield from'
+        for comment in ffn_comment_maker(ffn_link_finder(fic_requests)):
+            yield comment
+
 def ffn_make_from_requests(fic_requests):
-    found_ffn = ffn_comment_maker(ffn_link_finder(fic_requests))
-    return found_ffn
+    return "".join(ffn_comment_maker(ffn_link_finder(fic_requests)))
 
 
 def safe_int(request):
@@ -57,18 +69,16 @@ def ffn_link_finder(fic_names):
 
 
 def ffn_comment_maker(links):
-    comment = []
     for link in links:
         # preparation for caching of known stories, should cache last X stories
         # and be able to search cached by name or link or id
         try:
             current = Story(link)
-            comment.append('{0}\n&nbsp;\n\n'.format(ffn_description_maker(current)))
+            yield '{0}\n&nbsp;\n\n'.format(ffn_description_maker(current))
         except:
             logging.error("EXCEPTION HAS OCCURED DURING STORY CREATION PROCESS!")
             bot_tools.print_exception()
             pass
-    return "".join(comment)
 
 
 def ffn_description_maker(current):
