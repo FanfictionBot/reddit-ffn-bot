@@ -19,9 +19,19 @@ CHECKED_COMMENTS = set()
 # New regex shoul match more possible letter combinations, see screenshot below
 # http://prntscr.com/7g0oeq
 
-REGEXPS = {'[Ll][iI][nN][kK][fF]{2}[nN]\((.*?)\)': 'ffn'}
+# REGEXPS = {'[Ll][iI][nN][kK][fF]{2}[nN]\((.*?)\)': 'ffn'}
+SITES = [fanfiction_parser.FanfictionNetSite()]
+
 FOOTER = "\n*Read usage tips and tricks  [here](https://github.com/tusing/reddit-ffn-bot/blob/master/README.md).*"
 
+
+def get_regexps():
+    global SITES
+    return {site.regex: site.name for site in SITES}
+
+def get_sites():
+    global SITES
+    return {site.name: site for site in SITES}
 
 def __main__():
     while True:
@@ -148,7 +158,7 @@ def make_reply(comment, id):
 
 
 def formulate_reply(comment_body):
-
+    REGEXPS = get_regexps()
     requests = {}
     for expr in REGEXPS.keys():
         tofind = re.findall(expr, comment_body)
@@ -158,10 +168,20 @@ def formulate_reply(comment_body):
 
 
 def parse_comment_requests(requests):
-    comments_from_sources = []
-    ffn_requests = requests['ffn']
-    print("FFN requests: ", ffn_requests)
-    ffn_comment = fanfiction_parser.ffn_make_from_requests(ffn_requests)
-    dlp_comment = ""
-    ao3_comment = ""
-    return ffn_comment + dlp_comment + ao3_comment
+    return "".join(_parse_comment_requests(requests))
+
+
+def _parse_comment_requests(requests):
+    sites = get_sites()
+
+    for site, queries in requests.items():
+        print("Requests for '%s': %r" % (site, queries))
+        for comment in sites[site].from_request(queries):
+            yield comment
+        
+    # ffn_requests = requests['ffn']
+    # print("FFN requests: ", ffn_requests)
+    # ffn_comment = fanfiction_parser.ffn_make_from_requests(ffn_requests)
+    # dlp_comment = ""
+    # ao3_comment = ""
+    # return ffn_comment + dlp_comment + ao3_comment
