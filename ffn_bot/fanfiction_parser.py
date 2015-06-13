@@ -17,7 +17,8 @@ FFN_LINK = re.compile(
 
 
 class FanfictionNetSite(site.Site):
-    def __init__(self, regex=r"[Ll][iI][nN][kK][fF]{2}[nN]\((.*?)\)", name="ffn"):
+    # All regexps are automatically case insensitive for sites.
+    def __init__(self, regex=r"linkffn\((.*?)\)", name="ffn"):
         super(FanfictionNetSite, self).__init__(regex, ffn)
 
     def from_request(self, requests):
