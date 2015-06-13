@@ -9,7 +9,9 @@ from random import randint
 from google import search
 from lxml import html
 
-FFN_LINK = re.compile("http(s?)://((www|m)\\.)?fanfiction\\.net/s/(\\d+)/.*",re.IGNORECASE)
+FFN_LINK = re.compile(
+    "http(s?)://((www|m)\\.)?fanfiction\\.net/s/(\\d+)/.*", re.IGNORECASE)
+
 
 def ffn_make_from_requests(fic_requests):
     found_ffn = ffn_comment_maker(ffn_link_finder(fic_requests))
@@ -25,8 +27,10 @@ def safe_int(request):
 
 def ffn_link_finder(fic_names):
     for fic_name in fic_names:
+        # Prevent users from crashing program with bad link names.
         fic_name = fic_name.encode('ascii', errors='replace')
         fic_name = fic_name.decode('ascii', errors='replace')
+
         # Allow just to post the ID of the fanfiction.
         sid = safe_int(fic_name)
         if sid is not None:
