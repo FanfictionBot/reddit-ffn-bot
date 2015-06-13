@@ -150,8 +150,8 @@ else:
         return _Story(url)
 
 # # DEBUG
-x = Story('https://www.fanfiction.net/s/11096853/1/She-Chose-Me')  # No self.image
-print(str(x))
+# x = Story('https://www.fanfiction.net/s/11096853/1/She-Chose-Me')  # No self.image
+# print(str(x))
 # print(x.authorlink)
 # print(x.title)
 # print(x.author)
