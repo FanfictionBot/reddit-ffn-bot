@@ -5,6 +5,7 @@ from google import search
 from requests import get
 from lxml import html
 
+from ffn_bot.cache import default_cache
 from ffn_bot.bot_tools import safe_int
 from ffn_bot.site import Site
 from ffn_bot import site
@@ -64,12 +65,7 @@ class ArchiveOfOurOwn(Site):
         if match is not None:
             return request
 
-        search_request = search(AO3_SEARCH_QUERY % request, num=1, stop=1)
-        try:
-            return next(search_request)
-        except StopIteration:
-            # We didn't find anything so return None.
-            return
+        return default_cache.search(AO3_SEARCH_QUERY % request)
 
     def generate_response(self, link):
         assert link is not None
@@ -79,22 +75,7 @@ class ArchiveOfOurOwn(Site):
         return Story(self.find_link(query))
 
 
-try:
-    from functools import lru_cache
-except ImportError:
-    def lru_cache(*args, **kwargs):
-        def _decorator(fnc):
-            return fnc
-        print("Warning: Python is too old for this cache variant.")
-        return _decorator
-
-
-@lru_cache(maxsize=10000)
-def Story(link):
-    return AO3Story(link)
-
-
-class AO3Story(site.Story):
+class Story(site.Story):
 
     def __init__(self, url):
         self.url = url
@@ -115,8 +96,8 @@ class AO3Story(site.Story):
         return sep.join(self.tree.xpath(xpath)).strip()
 
     def parse_html(self):
-        result = get(self.get_real_url())
-        self.tree = html.fromstring(result.text)
+        page = default_cache.get_page(self.get_real_url())
+        self.tree = html.fromstring(page)
 
         self.summary = self.get_value_from_tree(AO3_SUMMARY_FINDER)
         self.title = self.get_value_from_tree(AO3_TITLE)

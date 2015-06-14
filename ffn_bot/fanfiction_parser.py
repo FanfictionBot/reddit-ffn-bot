@@ -6,6 +6,8 @@ import requests
 
 from ffn_bot import bot_tools
 from ffn_bot import site
+from ffn_bot.cache import default_cache
+
 from random import randint
 from google import search
 from lxml import html
@@ -37,6 +39,10 @@ class FanfictionBaseSite(site.Site):
         except (StopIteration, Exception) as e:
             bot_tools.print_exception()
             return None
+
+        if link is None:
+            return None
+
         try:
             return Story(link, self.site)
         except Exception as e:
@@ -64,11 +70,7 @@ class FanfictionBaseSite(site.Site):
         time.sleep(sleep_milliseconds / 1000)
 
         search_request = 'site:www.{1}/s/ {0}'.format(fic_name, self.site)
-        print("SEARCHING: ", search_request)
-        search_results = search(search_request, num=1, stop=1)
-        link_found = next(search_results)
-        print("FOUND: " + link_found)
-        return link_found
+        return default_cache.search(search_request)
 
 
 class _Story(site.Story):
@@ -89,8 +91,8 @@ class _Story(site.Story):
         self.decode()
 
     def parse_html(self):
-        page = requests.get(self.url)
-        tree = html.fromstring(page.text)
+        page = default_cache.get_page(self.url)
+        tree = html.fromstring(page)
 
         self.title = (tree.xpath('//*[@id="profile_top"]/b/text()'))[0]
         self.summary = (tree.xpath('//*[@id="profile_top"]/div/text()'))[0]
