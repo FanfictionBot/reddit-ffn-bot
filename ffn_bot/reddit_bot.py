@@ -9,9 +9,7 @@ from ffn_bot import ao3
 from ffn_bot import bot_tools
 
 # For pretty text
-from colorama import init
-from colorama import Fore, Back, Style
-init()
+from ffn_bot.bot_tools import Fore, Back, Style 
 
 __author__ = 'tusing, MikroMan, StuxSoftware'
 
@@ -46,18 +44,18 @@ def get_sites():
     return {site.name: site for site in SITES}
 
 
-def __main__():
+def run_forever():
     """Run-Forever"""
     while True:
         try:
-            initialize()
+            main()
         except:
             logging.error("MAIN: AN EXCEPTION HAS OCCURED!")
             bot_tools.print_exception()
             bot_tools.pause(1, 0)
 
 
-def initialize():
+def main():
     """Basic main function."""
     # moved call for agruments to avoid double calling
     bot_parameters = get_bot_parameters()
