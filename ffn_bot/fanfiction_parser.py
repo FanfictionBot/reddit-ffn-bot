@@ -70,7 +70,6 @@ class FanfictionBaseSite(site.Site):
         time.sleep(sleep_milliseconds / 1000)
 
         search_request = 'site:www.{1}/s/ {0}'.format(fic_name, self.site)
-        print("SEARCHING: ", search_request)
         return default_cache.search(search_request)
 
 

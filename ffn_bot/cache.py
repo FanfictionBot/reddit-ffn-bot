@@ -53,6 +53,7 @@ class RequestCache(object):
         self.cache[cache_id] = (data, time.time())
         
     def get_page(self, page):
+        print("LOADING: " + str(page))
         try:
             return self.hit_cache("get", page)
         except KeyError:
@@ -63,6 +64,7 @@ class RequestCache(object):
         return result
         
     def search(self, query):
+        print("SEARCHING: " + str(query))
         try:
             return self.hit_cache("search", query)
         except KeyError:
