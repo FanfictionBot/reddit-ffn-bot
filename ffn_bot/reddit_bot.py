@@ -95,31 +95,31 @@ def get_bot_parameters():
 
 def login_to_reddit(bot_parameters):
     """Performs the login for reddit."""
-    print("Logging in...")
+    logging.info("Logging in...")
     r.login(bot_parameters['user'], bot_parameters['password'])
-    print(Fore.GREEN, "Logged in.", Style.RESET_ALL)
+    logging.info("Login successful")
 
 
 def load_subreddits(bot_parameters):
     """Loads the subreddits this bot operates on."""
     global SUBREDDIT_LIST
-    print("Loading subreddits...")
+    logging.info("Loading subreddits...")
 
     if bot_parameters['default'] is True:
-        print("Adding default subreddits: ", DEFAULT_SUBREDDITS)
+        print("Adding default subreddits: %r" % DEFAULT_SUBREDDITS)
         for subreddit in DEFAULT_SUBREDDITS:
             SUBREDDIT_LIST.add(subreddit)
 
     if bot_parameters['user_subreddits'] is not None:
         user_subreddits = bot_parameters['user_subreddits'].split(',')
-        print("Adding user subreddits: ", user_subreddits)
+        logging.info("Adding user subreddits: "+ str(user_subreddits))
         for subreddit in user_subreddits:
             SUBREDDIT_LIST.add(subreddit)
 
     if len(SUBREDDIT_LIST) == 0:
-        print("No subreddit specified. Adding test subreddit.")
+        logging.info("No subreddit specified. Adding test subreddit.")
         SUBREDDIT_LIST.add('tusingtestfield')
-    print("LOADED SUBREDDITS: ", SUBREDDIT_LIST)
+    logging.info("LOADED SUBREDDITS: "+ str(SUBREDDIT_LIST))
 
 
 def check_comment(id):
@@ -137,8 +137,8 @@ def load_checked_comments():
     logging.info('Loading CHECKED_COMMENTS...')
     with open('CHECKED_COMMENTS.txt', 'r') as file:
         CHECKED_COMMENTS = {str(line.rstrip('\n')) for line in file}
-    print('Loaded CHECKED_COMMENTS.')
-    logging.info(CHECKED_COMMENTS)
+    logging.info('Loaded CHECKED_COMMENTS.')
+    # logging.info(CHECKED_COMMENTS)
 
 
 def check_submission(submission):
@@ -155,26 +155,27 @@ def is_submission_checked(submission):
 def parse_submissions(SUBREDDIT):
     """Parses all user-submissions."""
     # FIXME: Also parse submission-text itself.
-    print("==================================================")
-    print("Parsing submissions on SUBREDDIT", SUBREDDIT)
+    logging.info("==================================================")
+    logging.info("Parsing submissions on SUBREDDIT", SUBREDDIT)
     for submission in SUBREDDIT.get_hot(limit=25):
         # Also parse the submission text.
         if not is_submission_checked(submission):
             make_reply(submission.selftext, None, submission.id, submission.add_comment)
             check_submission(submission)
 
-        logging.info("Checking SUBMISSION: ", submission.id)
+        logging.info("Checking SUBMISSION: %r" % submission.id)
         flat_comments = praw.helpers.flatten_tree(submission.comments)
         for comment in flat_comments:
             logging.info(
-                'Checking COMMENT: ' + comment.id + ' in submission ' + submission.id)
+                'Checking COMMENT: %r in submission %r' % (comment.id, submission.id)
+            )
             if str(comment.id) in CHECKED_COMMENTS:
                 logging.info("Comment " + comment.id + " already parsed!")
             else:
-                print("Parsing comment ", comment.id, ' in submission ', submission.id)
+                logging.info("Parsing comment %r in submission %r" % (comment.id, submission.id))
                 make_reply(comment.body, comment.id, comment.id, comment.reply)
-    print("Parsing on SUBREDDIT ", SUBREDDIT, " complete.")
-    print("==================================================")
+    logging.info("Parsing on SUBREDDIT ", SUBREDDIT, " complete.")
+    logging.info("==================================================")
 
 
 def make_reply(body, cid, id, reply_func):
@@ -182,16 +183,14 @@ def make_reply(body, cid, id, reply_func):
     reply = formulate_reply(body)
 
     if reply is None:
-        print("Empty reply!")
+        logging.info("Empty reply!")
     elif len(reply) > 10:
-        print(Fore.GREEN)
-        print('--------------------------------------------------')
-        print('Outgoing reply to ' + id + ':\n' + reply + FOOTER)
-        print('--------------------------------------------------')
-        print(Style.RESET_ALL)
+        # ('--------------------------------------------------')
+        logging.info('Outgoing reply to ' + id + ':\n' + reply + FOOTER)
+        # print('--------------------------------------------------')
         reply_func(reply + FOOTER)
-        bot_tools.pause(1, 20)
-        print('Continuing to parse submissions...')
+        # bot_tools.pause(1, 20)
+        # print('Continuing to parse submissions...')
     else:
         logging.info("No reply conditions met.")
 
@@ -221,8 +220,8 @@ def _parse_comment_requests(requests):
     sites = get_sites()
 
     for site, queries in requests.items():
-        if len(queries) > 0:
-            print("Requests for '%s': %r" % (site, queries))
+        if queries:
+            logging.info("Requests for '%s': %r" % (site, queries))
         for comment in sites[site].from_requests(queries):
             if comment is None:
                 continue
