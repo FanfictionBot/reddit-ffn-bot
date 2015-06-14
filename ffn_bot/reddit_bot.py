@@ -23,6 +23,7 @@ CHECKED_COMMENTS = set()
 # REGEXPS = {'[Ll][iI][nN][kK][fF]{2}[nN]\((.*?)\)': 'ffn'}
 SITES = [
     fanfiction_parser.FanfictionNetSite(),
+    fanfiction_parser.FictionPressSite(),
     ao3.ArchiveOfOurOwn()
 ]
 
