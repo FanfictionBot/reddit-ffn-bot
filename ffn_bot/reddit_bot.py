@@ -44,7 +44,7 @@ def get_sites():
     return {site.name: site for site in SITES}
 
 
-def main():
+def run_forever():
     """Run-Forever"""
     while True:
         try:
