@@ -81,5 +81,7 @@ class Story(object):
             result.append("> " + line)
         result.append("")
         # print(self.get_stats())
-        result.append(">" + WHITESPACE.sub(r"\g<0>^", self.get_stats()))
+        for line in self.get_stats().split("\n"):
+            result.append("> " + WHITESPACE.sub(r"\g<0>^", line.strip()))
+            
         return "\n".join(result)

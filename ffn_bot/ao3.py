@@ -4,6 +4,7 @@ import logging
 from google import search
 from requests import get
 from lxml import html
+from lxml.cssselect import CSSSelector
 
 from ffn_bot.cache import default_cache
 from ffn_bot.bot_tools import safe_int
@@ -22,6 +23,7 @@ AO3_META_PARTS = '//dl[@class="stats"]//text()'
 AO3_TITLE = '//h2/text()'
 AO3_SUMMARY_FINDER = '//*[@id="workskin"]//*[@role="complementary"]//blockquote//text()'
 
+AO3_FANDOM_TAGS = CSSSelector("dd.fandom ul li").path + "//text()"
 
 class ArchiveOfOurOwn(Site):
 
@@ -104,4 +106,8 @@ class Story(site.Story):
         self.title = self.get_value_from_tree(AO3_TITLE)
         self.author = self.get_value_from_tree(AO3_AUTHOR_NAME)
         self.authorlink = self.get_value_from_tree(AO3_AUTHOR_URL)
-        self.stats = self.get_value_from_tree(AO3_META_PARTS, " ")
+        self.stats = "\n".join((
+            self.get_value_from_tree(AO3_FANDOM_TAGS, ", "),
+            self.get_value_from_tree(AO3_META_PARTS, " ")
+        ))
+        
