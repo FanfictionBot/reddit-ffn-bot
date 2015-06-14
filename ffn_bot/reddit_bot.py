@@ -156,7 +156,7 @@ def make_reply(comment, id):
         print("Empty reply!")
     elif len(reply) > 10:
         print('Outgoing reply to ' + id + ':\n' + reply + FOOTER)
-        comment.reply(reply + FOOTER)
+        comment.reply(reply + "\n\n" + FOOTER)
         check_comment(comment.id)
         bot_tools.pause(1, 20)
         print('Continuing to parse submissions...')
