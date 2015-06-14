@@ -46,8 +46,8 @@ if platform.system() == "Windows":
 
         # Use a loop so we can exit the function
         # before the timeout has been reached.
-        for i in range(timeout / precision):
-            time.sleep(presision)
+        for i in range(int(timeout / precision)):
+            time.sleep(precision)
 
             # Handle all keypresses that have occured
             # in this time.
@@ -65,7 +65,7 @@ if platform.system() == "Windows":
         # return False.
         return False
 else:
-    def wait(timeout=1, presision=None):
+    def wait(timeout=1, precision=None):
         """
         Wait for a keypress.
 
