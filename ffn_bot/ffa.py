@@ -1,0 +1,108 @@
+# Harry Potter Fanfic Archive site
+
+import re
+import logging
+
+from google import search
+from requests import get
+from lxml import html
+
+from ffn_bot.cache import default_cache
+from ffn_bot.bot_tools import safe_int
+from ffn_bot.site import Site
+from ffn_bot import site
+
+__all__ = ["HPFanfictionArchive"]
+
+FFA_LINK_REGEX = re.compile(
+    r"http(s)?://www.hpfanficarchive.com/stories/viewstory.php?sid=(?P<sid>\d+)", re.IGNORECASE)
+FFA_FUNCTION = "linkffa"
+FFA_SEARCH_QUERY = "http://www.hpfanficarchive.com/stories/viewstory.php?sid= %s"
+
+FFA_AUTHOR_NAME = '//*[@id="pagetitle"]/a[2]/text()'
+FFA_AUTHOR_URL = '//*[@id="pagetitle"]/a[2]/@href'
+FFA_SUMMARY_META = '//*[@id="mainpage"]/div[4]//text()'
+FFA_TITLE = '//*[@id="pagetitle"]/a[1]/text()'
+
+
+class HPFanfictionArchive(Site):
+
+    def __init__(self, regex=FFA_FUNCTION + r"\((.*?)\)", name=None):
+        super(HPFanfictionArchive, self).__init__(regex, name)
+
+    def from_requests(self, requests):
+        _pitem = []
+        item = _pitem
+        for request in requests:
+            try:
+                item = self.process(request)
+            except Exception as e:
+                continue
+
+            if item is not None:
+                yield item
+        # Make sure we yield something.
+        yield ""
+
+    def process(self, request):
+        try:
+            link = self.find_link(request)
+        except IOError as e:
+            logging.info("FF not found: %s" % request)
+            return
+
+        if link is None:
+            return
+
+        return self.generate_response(link)
+
+    def find_link(self, request):
+        # Find link by ID.
+        id = safe_int(request)
+        if id is not None:
+            return "http://www.hpfanficarchive.com/stories/viewstory.php?sid=%d" % id
+
+        # Filter out direct links.
+        match = FFA_LINK_REGEX.match(request)
+        if match is not None:
+            return request
+
+        return default_cache.search(FFA_SEARCH_QUERY % request)
+
+    def generate_response(self, link):
+        assert link is not None
+        return Story(link)
+
+    def get_story(self, query):
+        return Story(self.find_link(query))
+
+
+class Story(site.Story):
+
+    def __init__(self, url):
+        self.url = url
+        self.raw_stats = []
+
+        self.stats = ""
+        self.title = ""
+        self.author = ""
+        self.authorlink = ""
+        self.summary = ""
+
+        self.parse_html()
+
+    def get_real_url(self):
+        return "http://www.hpfanficarchive.com/stories/viewstory.php?sid=%d" % FFA_LINK_REGEX.match(self.url).groupdict()["sid"]
+    get_url = get_real_url
+
+    def get_value_from_tree(self, xpath, sep=""):
+        return sep.join(self.tree.xpath(xpath)).strip()
+
+    def parse_html(self):
+        page = default_cache.get_page(self.get_real_url())
+        self.tree = html.fromstring(page)
+
+        self.summary = self.get_value_from_tree(FFA_SUMMARY_META)
+        self.title = self.get_value_from_tree(FFA_TITLE)
+        self.author = self.get_value_from_tree(FFA_AUTHOR_NAME)
+        self.authorlink = self.get_value_from_tree(FFA_AUTHOR_URL)
