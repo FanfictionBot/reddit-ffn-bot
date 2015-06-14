@@ -97,7 +97,6 @@ def pause(minutes, seconds):
     """
     print("A countdown timer is beginning. You can skip it by pressing a key.")
     try:
-        print(Style.DIM)
         totaltime = minutes * 60 + seconds
         for remaining in range(totaltime, 0, -1):
             sys.stdout.write("\r")
@@ -108,12 +107,10 @@ def pause(minutes, seconds):
                 sys.stdout.write(str.ljust(output_message, 55) + '\n')
                 break
         sys.stdout.write(str.ljust("\rComplete!", 55) + '\n')
-        print(Style.RESET_ALL)
     except KeyboardInterrupt:
         sys.stdout.flush()
         time.sleep(1)
-        sys.stdout.write("\rCountdown bypassed!            \n")
-        print(Style.RESET_ALL)
+        sys.stdout.write(str.ljust("\rCountdown bypassed!", 55) + "\n")
 
 
 def print_exception(etype=None, evalue=None, etb=None):
