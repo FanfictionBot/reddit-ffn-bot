@@ -6,10 +6,12 @@ from requests import get
 from lxml import html
 
 from ffn_bot.site import Site
+from ffn_bot import site
 
 __all__ = ["ArchiveOfOurOwn"]
 
-AO3_LINK_REGEX = re.compile(r"http(s)?://([^.]\.)?archiveofourown.org/works/(?P<sid>\d+).*", re.IGNORECASE)
+AO3_LINK_REGEX = re.compile(
+    r"http(s)?://([^.]\.)?archiveofourown.org/works/(?P<sid>\d+).*", re.IGNORECASE)
 AO3_FUNCTION = "linkao3"
 AO3_SEARCH_QUERY = "site:archiveofourown.org/works/ %s"
 
@@ -21,6 +23,7 @@ AO3_SUMMARY_FINDER = '//*[@id="workskin"]//*[@role="complementary"]//blockquote/
 
 
 class ArchiveOfOurOwn(Site):
+
     def __init__(self, regex=AO3_FUNCTION + r"\((.*?)\)", name=None):
         super(ArchiveOfOurOwn, self).__init__(regex, name)
 
@@ -49,7 +52,7 @@ class ArchiveOfOurOwn(Site):
         try:
             link = self.find_link(request)
         except IOError as e:
-            logging.info("FF not found: %s"%request)
+            logging.info("FF not found: %s" % request)
             return
 
         if link is None:
@@ -92,12 +95,14 @@ except ImportError:
         print("Warning: Python is too old for this cache variant.")
         return _decorator
 
+
 @lru_cache(maxsize=10000)
 def Story(link):
     return AO3Story(link)
 
 
-class AO3Story(object):
+class AO3Story(site.Story):
+
     def __init__(self, url):
         self.url = url
         self.raw_stats = []
@@ -126,16 +131,16 @@ class AO3Story(object):
         self.authorlink = self.get_value_from_tree(AO3_AUTHOR_URL)
         self.stats = self.get_value_from_tree(AO3_META_PARTS, " ")
 
-    def __str__(self):
-        header = '[***{0}***]({1}) by [*{2}*]({3})'.format(
-            self.title,
-            self.get_real_url(),
-            self.author,
-            self.authorlink
-        )
-        formatted_description = '{0}\n\n>{1}\n\n>{2}\n\n'.format(
-            header,
-            "\n>".join(line.strip() for line in self.summary.split("\n")),
-            self.stats
-        )
-        return formatted_description
+#    def __str__(self):
+#        header = '[***{0}***]({1}) by [*{2}*]({3})'.format(
+#            self.title,
+#            self.get_real_url(),
+#            self.author,
+#            self.authorlink
+#        )
+#        formatted_description = '{0}\n\n>{1}\n\n>{2}\n\n'.format(
+#            header,
+#            "\n>".join(line.strip() for line in self.summary.split("\n")),
+#            self.stats
+#        )
+#        return formatted_description
