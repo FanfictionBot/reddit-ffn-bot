@@ -135,7 +135,7 @@ class AO3Story(object):
         )
         formatted_description = '{0}\n\n>{1}\n\n>{2}\n\n'.format(
             header,
-            self.summary,
+            "\n>".join(line.strip() for line in self.summary.split("\n")),
             self.stats
         )
         return formatted_description
