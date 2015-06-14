@@ -31,7 +31,7 @@ class RequestCache(object):
     EMPTY_RESULT = []
     
     def __init__(self, max_size=10000, expire_time=30*60*1000):
-        self.cache = LimitedSizeDict(max_size)
+        self.cache = LimitedSizeDict(size_limit=max_size)
         self.expire_time = expire_time
         
     def hit_cache(self, type, query):
@@ -47,7 +47,10 @@ class RequestCache(object):
         
     def push_cache(self, type, query, data):
         """Push a value into the cache."""
-        self.cache["%s:%s"%(type, query)] = (data, time.time())
+        cache_id = "%s:%s"%(type, query)
+        if cache_id in self.cache:
+            del self.cache[cache_id]
+        self.cache[cache_id] = (data, time.time())
         
     def get_page(self, page):
         try:
@@ -69,3 +72,4 @@ class RequestCache(object):
         self.push_cache("search", query, result)
         return result
         
+default_cache = RequestCache()
