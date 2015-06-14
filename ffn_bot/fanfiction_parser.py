@@ -77,7 +77,7 @@ class FanfictionBaseSite(site.Site):
         return link_found
 
 
-class _Story:
+class _Story(site.Story):
 
     def __init__(self, url, site):
         self.url = url
@@ -92,6 +92,7 @@ class _Story:
 
         self.parse_html()
         self.encode()
+        self.decode()
 
     def parse_html(self):
         page = requests.get(self.url)
@@ -119,27 +120,35 @@ class _Story:
         for string in self.raw_stats:
             self.stats += string.encode('ascii', errors='replace')
 
-    def __str__(self):
-        decoded_title = self.title.decode('ascii', errors='replace')
-        decoded_author = self.author.decode('ascii', errors='replace')
-        decoded_summary = self.summary.decode('ascii', errors='replace')
-        decoded_stats = self.stats.decode('ascii', errors='replace')
-        formatted_stats = decoded_stats.replace(' ', ' ').replace(' ', ' ').replace( ' ', ' ^').replace('Rated:', '^Rated:') 
-        formatted_stats = formatted_stats[:-1]
-        # print("Making a description for " + decoded_title) # More pythonic string formatting.
-        header = '[***{0}***]({1}) by [*{2}*]({3})'.format(
-            decoded_title,
-            self.url,
-            decoded_author,
-            self.authorlink
-        )
+    def decode(self):
+        _decode = lambda s: s.decode('ascii', errors='replace')
+        self.title = _decode(self.title)
+        self.author = _decode(self.author)
+        self.summary = _decode(self.summary)
+        self.stats = _decode(self.stats)
 
-        formatted_description = '{0}\n\n>{1}\n\n>{2}\n\n'.format(
-            header,
-            decoded_summary,
-            formatted_stats
-        )
-        return formatted_description
+    # def __str__(self):
+    #    decoded_title = self.title.decode('ascii', errors='replace')
+    #    decoded_author = self.author.decode('ascii', errors='replace')
+    
+    #    decoded_summary = self.summary.decode('ascii', errors='replace')
+    #    decoded_stats = self.stats.decode('ascii', errors='replace')
+    #    formatted_stats = decoded_stats.replace(' ', ' ').replace(' ', ' ').replace( ' ', ' ^').replace('Rated:', '^Rated:') 
+    #    formatted_stats = formatted_stats[:-1]
+    #    # print("Making a description for " + decoded_title) # More pythonic string formatting.
+    #    header = '[***{0}***]({1}) by [*{2}*]({3})'.format(
+    #        decoded_title,
+    #        self.url,
+    #        decoded_author,
+    #        self.authorlink
+    #    )
+    #
+    #    formatted_description = '{0}\n\n>{1}\n\n>{2}\n\n'.format(
+    #        header,
+    #        decoded_summary,
+    #        formatted_stats
+    #    )
+    #    return formatted_description
 
 
 class FanfictionNetSite(FanfictionBaseSite):
