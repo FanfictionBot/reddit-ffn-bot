@@ -36,7 +36,7 @@ def safe_int(value, default=None, converter=int):
     """
 
     try:
-        return int(value)
+        return converter(value)
     except ValueError:
         return default
 
