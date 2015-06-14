@@ -23,6 +23,7 @@ def safe_int(value, default=None, converter=int):
 # Waiting for a keypress is platform dependent.
 # We will define the function determined by the platform.
 if platform.system() == "Windows":
+    import msvcrt
 
     def wait(timeout=1, precision=1):
         """
