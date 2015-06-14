@@ -3,3 +3,4 @@ google
 praw
 requests
 colorama
+cssselect
