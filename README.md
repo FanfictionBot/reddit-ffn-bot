@@ -9,6 +9,9 @@ _(Temporary Note: Results can take time - up to an hour, until this bot has enou
 
 ###**USAGE, TIPS, AND TRICKS**
 
+####**(UPDATE: AO3 AND FICTIONPRESS SUPPORT ADDED!)**
+*Just use `linkao3(ficname)` and `linkfp(ficname)`, respectively. Below tips still apply.*
+
 **To link Harry Potter and the Natural 20:**
 ```
 linkffn(Harry Potter and the Natural 20)
@@ -80,12 +83,11 @@ Check out this completely awesome fic I found! linkffn(By the Divining Light by 
 
 ###**WHAT YOU CAN'T DO** _(yet)_
 - You can't link from OP.
-- You can't use linkdlp or linkao3, since they aren't implemented.
-- You can't change or format the code phrase (eg. Linkffn(...) or _linkffn_(...) won't work)
 
 ###**UPCOMING FEATURES**
 - Support for DLP forums
-- Support for AO3
+- Support for AO3 (Done!)
+- Support for Fictionpress (Done!)
 - More at request
 
 ###**BUGS**
