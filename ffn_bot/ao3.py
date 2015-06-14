@@ -79,7 +79,7 @@ class ArchiveOfOurOwn(Site):
 
     def generate_response(self, link):
         assert link is not None
-        return str(Story(link))
+        return Story(link)
 
     def get_story(self, query):
         return Story(self.find_link(query))
@@ -129,17 +129,3 @@ class AO3Story(site.Story):
         self.author = self.get_value_from_tree(AO3_AUTHOR_NAME)
         self.authorlink = self.get_value_from_tree(AO3_AUTHOR_URL)
         self.stats = self.get_value_from_tree(AO3_META_PARTS, " ")
-
-#    def __str__(self):
-#        header = '[***{0}***]({1}) by [*{2}*]({3})'.format(
-#            self.title,
-#            self.get_real_url(),
-#            self.author,
-#            self.authorlink
-#        )
-#        formatted_description = '{0}\n\n>{1}\n\n>{2}\n\n'.format(
-#            header,
-#            "\n>".join(line.strip() for line in self.summary.split("\n")),
-#            self.stats
-#        )
-#        return formatted_description

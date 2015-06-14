@@ -43,12 +43,12 @@ class FanfictionBaseSite(site.Site):
             link = self.find_link(request)
         except (StopIteration, Exception) as e:
             bot_tools.print_exception()
-            return ""
+            return None
         try:
-            return str(Story(link, self.site))
+            return Story(link, self.site)
         except Exception as e:
             bot_tools.print_exception()
-            return ""
+            return None
 
     def find_link(self, fic_name):
         # Prevent users from crashing program with bad link names.
@@ -127,29 +127,6 @@ class _Story(site.Story):
         self.author = _decode(self.author)
         self.summary = _decode(self.summary)
         self.stats = _decode(self.stats)
-
-    # def __str__(self):
-    #    decoded_title = self.title.decode('ascii', errors='replace')
-    #    decoded_author = self.author.decode('ascii', errors='replace')
-    #
-    #    decoded_summary = self.summary.decode('ascii', errors='replace')
-    #    decoded_stats = self.stats.decode('ascii', errors='replace')
-    #    formatted_stats = decoded_stats.replace(' ', ' ').replace(' ', ' ').replace( ' ', ' ^').replace('Rated:', '^Rated:')
-    #    formatted_stats = formatted_stats[:-1]
-    #    # print("Making a description for " + decoded_title) # More pythonic string formatting.
-    #    header = '[***{0}***]({1}) by [*{2}*]({3})'.format(
-    #        decoded_title,
-    #        self.url,
-    #        decoded_author,
-    #        self.authorlink
-    #    )
-    #
-    #    formatted_description = '{0}\n\n>{1}\n\n>{2}\n\n'.format(
-    #        header,
-    #        decoded_summary,
-    #        formatted_stats
-    #    )
-    #    return formatted_description
 
 
 class FanfictionNetSite(FanfictionBaseSite):
