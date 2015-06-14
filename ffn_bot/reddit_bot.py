@@ -185,11 +185,6 @@ def _parse_comment_requests(requests):
     for site, queries in requests.items():
         print("Requests for '%s': %r" % (site, queries))
         for comment in sites[site].from_requests(queries):
-            yield comment
-
-    # ffn_requests = requests['ffn']
-    # print("FFN requests: ", ffn_requests)
-    # ffn_comment = fanfiction_parser.ffn_make_from_requests(ffn_requests)
-    # dlp_comment = ""
-    # ao3_comment = ""
-    # return ffn_comment + dlp_comment + ao3_comment
+            if comment is None:
+                continue
+            yield str(comment)
