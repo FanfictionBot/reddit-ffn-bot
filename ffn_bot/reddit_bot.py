@@ -128,10 +128,24 @@ def load_checked_comments():
     logging.info(CHECKED_COMMENTS)
 
 
+def check_submission(submission):
+    """Mark the submission as checked."""
+    check_comment("SUBMISSION_" + str(submission.id))
+    
+def is_submission_checked(submission):
+    """Check if the submission was checked."""
+    global CHECKED_COMMENTS
+    return "SUBMISSION_" + str(submission.id) in CHECKED_COMMENTS
+
 def parse_submissions(SUBREDDIT):
     print("==================================================")
     print("Parsing submissions on SUBREDDIT", SUBREDDIT)
     for submission in SUBREDDIT.get_hot(limit=25):
+        # Also parse the submission text.
+        if not is_submission_checked(submission):
+            make_reply(submission.selftext, None, submission.id, submission.add_comment)
+            check_submission(submission)
+                
         logging.info("Checking SUBMISSION: ", submission.id)
         flat_comments = praw.helpers.flatten_tree(submission.comments)
         for comment in flat_comments:
@@ -142,27 +156,26 @@ def parse_submissions(SUBREDDIT):
             else:
                 print("Parsing comment ", comment.id, ' in submission ', submission.id)
                 print(comment.body)
-                make_reply(comment, comment.id)
+                make_reply(comment.body, comment.id, comment.id, comment.reply)
     print("Parsing on SUBREDDIT ", SUBREDDIT, " complete.")
     print("==================================================")
 
 
-def make_reply(comment, id):
-
-    reply = formulate_reply(comment.body)
+def make_reply(body, cid, id, reply_func):
+    reply = formulate_reply(body)
 
     if reply is None:
-        check_comment(comment.id)
         print("Empty reply!")
     elif len(reply) > 10:
         print('Outgoing reply to ' + id + ':\n' + reply + FOOTER)
-        comment.reply(reply + FOOTER)
-        check_comment(comment.id)
+        reply_func(reply + FOOTER)
         bot_tools.pause(1, 20)
         print('Continuing to parse submissions...')
     else:
         print("No reply conditions met.")
-        check_comment(comment.id)
+    
+    if cid is not None:
+        check_comment(cid)
 
 
 def formulate_reply(comment_body):
