@@ -10,17 +10,20 @@ from random import randint
 from google import search
 from lxml import html
 
-__all__ = ["FanfictionNetSite"]
+__all__ = ["FanfictionNetSite", "FictionPressSite"]
 
-FFN_LINK = re.compile(
-    "http(s?)://((www|m)\\.)?fanfiction\\.net/s/(\\d+)/.*", re.IGNORECASE)
+LINK_REGEX = "http(s?)://((www|m)\\.)?%s/s/(\\d+)/.*"
+ID_LINK = "https://www.{0}/s/%s"
 
 
-class FanfictionNetSite(site.Site):
+class FanfictionBaseSite(site.Site):
     # All regexps are automatically case insensitive for sites.
 
-    def __init__(self, regex=r"linkffn\((.*?)\)", name=None):
-        super(FanfictionNetSite, self).__init__(regex, name)
+    def __init__(self, site, command, name=None):
+        super(FanfictionBaseSite, self).__init__(command + r"\((.*?)\)", name)
+        self.site = site
+        self.link_regex = re.compile(LINK_REGEX % self.site.replace(".", "\\."), re.IGNORECASE)
+        self.id_link = ID_LINK.format(self.site)
 
     @staticmethod
     def safe_int(value):
@@ -41,7 +44,7 @@ class FanfictionNetSite(site.Site):
             bot_tools.print_exception()
             return ""
         try:
-            return str(Story(link))
+            return str(Story(link, self.site))
         except Exception as e:
             bot_tools.print_exception()
             return ""
@@ -54,10 +57,10 @@ class FanfictionNetSite(site.Site):
         # Allow just to post the ID of the fanfiction.
         sid = FanfictionNetSite.safe_int(fic_name)
         if sid is not None:
-            return "https://www.fanfiction.net/s/%d/1/" % sid
+            return self.id_link % sid
 
         # Yield links directly without googling.
-        match = FFN_LINK.match(fic_name)
+        match = self.link_regex.match(fic_name)
         if match is not None:
             return fic_name
 
@@ -66,7 +69,7 @@ class FanfictionNetSite(site.Site):
         sleep_milliseconds = randint(500, 3000)
         time.sleep(sleep_milliseconds / 1000)
 
-        search_request = 'site:fanfiction.net/s/ {0}'.format(fic_name)
+        search_request = 'site:www.{1}/s/ {0}'.format(fic_name,self.site)
         print("SEARCHING: ", search_request)
         search_results = search(search_request, num=1, stop=1)
         link_found = next(search_results)
@@ -76,8 +79,9 @@ class FanfictionNetSite(site.Site):
 
 class _Story:
 
-    def __init__(self, url):
+    def __init__(self, url, site):
         self.url = url
+        self.site = site
         self.raw_stats = []
         self.stats = ""
 
@@ -96,7 +100,7 @@ class _Story:
         self.title = (tree.xpath('//*[@id="profile_top"]/b/text()'))[0]
         self.summary = (tree.xpath('//*[@id="profile_top"]/div/text()'))[0]
         self.author += (tree.xpath('//*[@id="profile_top"]/a[1]/text()'))[0]
-        self.authorlink = 'https://www.fanfiction.net' + \
+        self.authorlink = 'https://www.' + self.site + \
             tree.xpath('//*[@id="profile_top"]/a[1]/@href')[0]
         self.image = tree.xpath('//*[@id="profile_top"]/span[1]/img')
 
@@ -138,6 +142,16 @@ class _Story:
         return formatted_description
 
 
+class FanfictionNetSite(FanfictionBaseSite):
+    def __init__(self, command="linkffn", name=None):
+        super(FanfictionNetSite, self).__init__("fanfiction.net", "linkffn", name)
+
+
+class FictionPressSite(FanfictionBaseSite):
+    def __init__(self, command="linkfp", name=None):
+        super(FictionPressSite, self).__init__("fictionpress.com", "linkfp", name)
+
+
 try:
     from functools import lru_cache
 except ImportError:
@@ -146,8 +160,8 @@ except ImportError:
 else:
     # We will use a simple lru_cache for now.
     @lru_cache(maxsize=10000)
-    def Story(url):
-        return _Story(url)
+    def Story(url, site):
+        return _Story(url, site)
 
 # # DEBUG
 # x = Story('https://www.fanfiction.net/s/11096853/1/She-Chose-Me')  # No self.image

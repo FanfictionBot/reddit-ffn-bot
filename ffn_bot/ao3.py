@@ -123,7 +123,7 @@ class AO3Story(object):
         self.summary = self.get_value_from_tree(AO3_SUMMARY_FINDER)
         self.title = self.get_value_from_tree(AO3_TITLE)
         self.author = self.get_value_from_tree(AO3_AUTHOR_NAME)
-        self.authorurl = self.get_value_from_tree(AO3_AUTHOR_URL)
+        self.authorlink = self.get_value_from_tree(AO3_AUTHOR_URL)
         self.stats = self.get_value_from_tree(AO3_META_PARTS, " ")
 
     def __str__(self):
@@ -135,7 +135,7 @@ class AO3Story(object):
         )
         formatted_description = '{0}\n\n>{1}\n\n>{2}\n\n'.format(
             header,
-            self.summary,
+            "\n>".join(line.strip() for line in self.summary.split("\n")),
             self.stats
         )
         return formatted_description
