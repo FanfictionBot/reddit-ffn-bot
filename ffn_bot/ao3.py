@@ -9,7 +9,8 @@ from ffn_bot.site import Site
 
 __all__ = ["ArchiveOfOurOwn"]
 
-AO3_LINK_REGEX = re.compile(r"http(s)?://([^.]\.)?archiveofourown.org/works/(?P<sid>\d+).*", re.IGNORECASE)
+AO3_LINK_REGEX = re.compile(
+    r"http(s)?://([^.]\.)?archiveofourown.org/works/(?P<sid>\d+).*", re.IGNORECASE)
 AO3_FUNCTION = "linkao3"
 AO3_SEARCH_QUERY = "site:archiveofourown.org/works/ %s"
 
@@ -21,6 +22,7 @@ AO3_SUMMARY_FINDER = '//*[@id="workskin"]//*[@role="complementary"]//blockquote/
 
 
 class ArchiveOfOurOwn(Site):
+
     def __init__(self, regex=AO3_FUNCTION + r"\((.*?)\)", name="ao3"):
         super(ArchiveOfOurOwn, self).__init__(regex, name)
 
@@ -49,7 +51,7 @@ class ArchiveOfOurOwn(Site):
         try:
             link = self.find_link(request)
         except IOError as e:
-            logging.info("FF not found: %s"%request)
+            logging.info("FF not found: %s" % request)
             return
 
         if link is None:
@@ -92,12 +94,14 @@ except ImportError:
         print("Warning: Python is too old for this cache variant.")
         return _decorator
 
+
 @lru_cache(maxsize=10000)
 def Story(link):
     return AO3Story(link)
 
 
 class AO3Story(object):
+
     def __init__(self, url):
         self.url = url
         self.raw_stats = []
