@@ -26,13 +26,6 @@ class FanfictionBaseSite(site.Site):
             LINK_REGEX % self.site.replace(".", "\\."), re.IGNORECASE)
         self.id_link = ID_LINK.format(self.site)
 
-    @staticmethod
-    def safe_int(value):
-        try:
-            return int(value)
-        except ValueError:
-            return None
-
     def from_requests(self, requests):
         # I'd love to use 'yield from'
         for request in requests:
@@ -43,12 +36,12 @@ class FanfictionBaseSite(site.Site):
             link = self.find_link(request)
         except (StopIteration, Exception) as e:
             bot_tools.print_exception()
-            return ""
+            return None
         try:
-            return str(Story(link, self.site))
+            return Story(link, self.site)
         except Exception as e:
             bot_tools.print_exception()
-            return ""
+            return None
 
     def find_link(self, fic_name):
         # Prevent users from crashing program with bad link names.
@@ -56,7 +49,7 @@ class FanfictionBaseSite(site.Site):
         fic_name = fic_name.decode('ascii', errors='replace')
 
         # Allow just to post the ID of the fanfiction.
-        sid = FanfictionNetSite.safe_int(fic_name)
+        sid = bot_tools.safe_int(fic_name)
         if sid is not None:
             return self.id_link % sid
 
@@ -127,29 +120,6 @@ class _Story(site.Story):
         self.author = _decode(self.author)
         self.summary = _decode(self.summary)
         self.stats = _decode(self.stats)
-
-    # def __str__(self):
-    #    decoded_title = self.title.decode('ascii', errors='replace')
-    #    decoded_author = self.author.decode('ascii', errors='replace')
-    #
-    #    decoded_summary = self.summary.decode('ascii', errors='replace')
-    #    decoded_stats = self.stats.decode('ascii', errors='replace')
-    #    formatted_stats = decoded_stats.replace(' ', ' ').replace(' ', ' ').replace( ' ', ' ^').replace('Rated:', '^Rated:')
-    #    formatted_stats = formatted_stats[:-1]
-    #    # print("Making a description for " + decoded_title) # More pythonic string formatting.
-    #    header = '[***{0}***]({1}) by [*{2}*]({3})'.format(
-    #        decoded_title,
-    #        self.url,
-    #        decoded_author,
-    #        self.authorlink
-    #    )
-    #
-    #    formatted_description = '{0}\n\n>{1}\n\n>{2}\n\n'.format(
-    #        header,
-    #        decoded_summary,
-    #        formatted_stats
-    #    )
-    #    return formatted_description
 
 
 class FanfictionNetSite(FanfictionBaseSite):

@@ -5,6 +5,7 @@ from google import search
 from requests import get
 from lxml import html
 
+from ffn_bot.bot_tools import safe_int
 from ffn_bot.site import Site
 from ffn_bot import site
 
@@ -25,13 +26,6 @@ class ArchiveOfOurOwn(Site):
 
     def __init__(self, regex=AO3_FUNCTION + r"\((.*?)\)", name=None):
         super(ArchiveOfOurOwn, self).__init__(regex, name)
-
-    @staticmethod
-    def safe_int(value):
-        try:
-            return int(value)
-        except ValueError:
-            return None
 
     def from_requests(self, requests):
         _pitem = []
@@ -61,7 +55,7 @@ class ArchiveOfOurOwn(Site):
 
     def find_link(self, request):
         # Find link by ID.
-        id = ArchiveOfOurOwn.safe_int(request)
+        id = safe_int(request)
         if id is not None:
             return "http://archiveofourown.org/works/%d/" % id
 
@@ -79,7 +73,7 @@ class ArchiveOfOurOwn(Site):
 
     def generate_response(self, link):
         assert link is not None
-        return str(Story(link))
+        return Story(link)
 
     def get_story(self, query):
         return Story(self.find_link(query))
@@ -129,17 +123,3 @@ class AO3Story(site.Story):
         self.author = self.get_value_from_tree(AO3_AUTHOR_NAME)
         self.authorlink = self.get_value_from_tree(AO3_AUTHOR_URL)
         self.stats = self.get_value_from_tree(AO3_META_PARTS, " ")
-
-#    def __str__(self):
-#        header = '[***{0}***]({1}) by [*{2}*]({3})'.format(
-#            self.title,
-#            self.get_real_url(),
-#            self.author,
-#            self.authorlink
-#        )
-#        formatted_description = '{0}\n\n>{1}\n\n>{2}\n\n'.format(
-#            header,
-#            "\n>".join(line.strip() for line in self.summary.split("\n")),
-#            self.stats
-#        )
-#        return formatted_description
