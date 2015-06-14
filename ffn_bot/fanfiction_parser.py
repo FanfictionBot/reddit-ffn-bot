@@ -3,6 +3,7 @@ import sys
 import time
 import logging
 import requests
+import itertools
 
 from ffn_bot import bot_tools
 from ffn_bot import site
@@ -101,20 +102,23 @@ class _Story(site.Story):
             tree.xpath('//*[@id="profile_top"]/a[1]/@href')[0]
         self.image = tree.xpath('//*[@id="profile_top"]/span[1]/img')
 
-        # XPath changes depending on the presence of an image
+        self.raw_stats = []
+        self.raw_stats.extend(tree.xpath('//*[@id="pre_story_links"]/span/a[last()]/text()'))
+        self.raw_stats.append(" - ")
 
+        # XPath changes depending on the presence of an image
         if len(self.image) is not 0:
-            self.raw_stats = tree.xpath('//*[@id="profile_top"]/span[4]//text()')
+            self.raw_stats.extend(tree.xpath('//*[@id="profile_top"]/span[4]//text()'))
         else:
-            self.raw_stats = tree.xpath('//*[@id="profile_top"]/span[3]//text()')
+            self.raw_stats.extend(tree.xpath('//*[@id="profile_top"]/span[3]//text()'))
 
     def encode(self):
         self.title = self.title.encode('ascii', errors='replace')
         self.author = self.author.encode('ascii', errors='replace')
         self.summary = self.summary.encode('ascii', errors='replace')
-        self.stats = self.stats.encode('ascii', errors='replace')
-        for string in self.raw_stats:
-            self.stats += string.encode('ascii', errors='replace')
+        self.stats = "".join(itertools.chain(
+            (self.stats,), self.raw_stats
+        )).encode('ascii', errors='replace')
 
     def decode(self):
         _decode = lambda s: s.decode('ascii', errors='replace')
