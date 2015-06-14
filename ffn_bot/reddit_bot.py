@@ -154,7 +154,6 @@ def parse_submissions(SUBREDDIT):
                 logging.info("Comment " + comment.id + " already parsed!")
             else:
                 print("Parsing comment ", comment.id, ' in submission ', submission.id)
-                print(comment.body)
                 make_reply(comment, comment.id)
     print("Parsing on SUBREDDIT ", SUBREDDIT, " complete.")
     print("==================================================")

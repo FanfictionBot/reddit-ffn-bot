@@ -28,10 +28,10 @@ if platform.system() == "Windows":
     def wait(timeout=1, precision=1):
         """
         Wait for a keypress.
-        
+
         If `timeout` is 0, the function will wait
         indefinitely.
-        
+
         :param timeout:   The timeout before the function returns
                           0 means indefinitely.
         :param precision: The time we should be waiting between the
@@ -43,19 +43,19 @@ if platform.system() == "Windows":
         if timeout == 0:
             msvcrt.getch()
             return True
-            
+
         # Use a loop so we can exit the function
         # before the timeout has been reached.
-        for i in range(timeout/presision):
+        for i in range(timeout / precision):
             time.sleep(presision)
-            
+
             # Handle all keypresses that have occured
             # in this time.
             kbhit = False
             while msvcrt.kbhit():
                 msvcrt.getch()
                 kbhit = True
-                
+
             # If there was at least one keypress,
             # Exit function.
             if kbhit:
@@ -68,10 +68,10 @@ else:
     def wait(timeout=1, presision=None):
         """
         Wait for a keypress.
-        
+
         If `timeout` is 0, the function will wait
         indefinitely.
-        
+
         :param timeout:   The timeout before the function returns
                           0 means indefinitely.
         :param precision: The time we should be waiting between the
@@ -80,7 +80,7 @@ else:
         """
         import sys
         import select
-        
+
         rlist, wlist, xlist = select.select([sys.stdin], [], [], timeout)
         return bool(rlist)
 
@@ -88,7 +88,7 @@ else:
 def pause(minutes, seconds):
     """
     Pauses the script for the given amount of time. Skippable by keypress.
-    
+
     :param minutes:  The amount of minutes that should be waited.
     :param seconds:  The amount of seconds we sould wait.
     """
@@ -116,7 +116,7 @@ def print_exception(etype=None, evalue=None, etb=None):
     Prints the exception. Defaults to the last exception that occured.
     If only `etype` is given, the function will try to extract the
     values from that argument.
-    
+
     :param etype:  The type of the exception. (optional)
     :param evalue: The exception instance. (optional)
     :param etb:    The traceback. (optional)
@@ -134,7 +134,7 @@ def print_exception(etype=None, evalue=None, etb=None):
             exc_type, exc_value, exc_tb = etype, evalue, etb
     else:
         exc_type, exc_value, exc_traceback = sys.exc_info()
-    
+
     # Format the exception
     lines = traceback.format_exception(exc_type, exc_value, exc_traceback)
     logging.error(''.join('!! ' + line for line in lines))

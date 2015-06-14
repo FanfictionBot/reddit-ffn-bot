@@ -5,6 +5,7 @@ WHITESPACE = re.compile("(^|[ ]+(?!\Z))")
 
 
 class Site(object):
+
     """
     Base-Class for a supported fanfiction archive.
     """
@@ -34,6 +35,7 @@ class Site(object):
 
 
 class Story(object):
+
     """
     Represents a single story.
     """
