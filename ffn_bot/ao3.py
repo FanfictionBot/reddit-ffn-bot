@@ -5,6 +5,7 @@ from google import search
 from requests import get
 from lxml import html
 
+from ffn_bot.bot_tools import safe_int
 from ffn_bot.site import Site
 from ffn_bot import site
 
@@ -25,13 +26,6 @@ class ArchiveOfOurOwn(Site):
 
     def __init__(self, regex=AO3_FUNCTION + r"\((.*?)\)", name=None):
         super(ArchiveOfOurOwn, self).__init__(regex, name)
-
-    @staticmethod
-    def safe_int(value):
-        try:
-            return int(value)
-        except ValueError:
-            return None
 
     def from_requests(self, requests):
         _pitem = []
@@ -61,7 +55,7 @@ class ArchiveOfOurOwn(Site):
 
     def find_link(self, request):
         # Find link by ID.
-        id = ArchiveOfOurOwn.safe_int(request)
+        id = safe_int(request)
         if id is not None:
             return "http://archiveofourown.org/works/%d/" % id
 

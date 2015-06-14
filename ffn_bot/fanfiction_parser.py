@@ -26,13 +26,6 @@ class FanfictionBaseSite(site.Site):
             LINK_REGEX % self.site.replace(".", "\\."), re.IGNORECASE)
         self.id_link = ID_LINK.format(self.site)
 
-    @staticmethod
-    def safe_int(value):
-        try:
-            return int(value)
-        except ValueError:
-            return None
-
     def from_requests(self, requests):
         # I'd love to use 'yield from'
         for request in requests:
@@ -56,7 +49,7 @@ class FanfictionBaseSite(site.Site):
         fic_name = fic_name.decode('ascii', errors='replace')
 
         # Allow just to post the ID of the fanfiction.
-        sid = FanfictionNetSite.safe_int(fic_name)
+        sid = bot_tools.safe_int(fic_name)
         if sid is not None:
             return self.id_link % sid
 
