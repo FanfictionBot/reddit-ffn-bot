@@ -31,16 +31,19 @@ FOOTER = "\n\n*NOW WITH AO3 (linkao3) and FICTIONPRESS (linkfp) support! Read us
 
 
 def get_regexps():
+    """Returns the regular expressions for the sites."""
     global SITES
     return {site.name: re.compile(site.regex, re.IGNORECASE) for site in SITES}
 
 
 def get_sites():
+    """Returns a dictionary of all sites."""
     global SITES
     return {site.name: site for site in SITES}
 
 
 def __main__():
+    """Run-Forever"""
     while True:
         try:
             initialize()
@@ -51,6 +54,7 @@ def __main__():
 
 
 def initialize():
+    """Basic main function."""
     # moved call for agruments to avoid double calling
     bot_parameters = get_bot_parameters()
     login_to_reddit(bot_parameters)
@@ -64,6 +68,7 @@ def initialize():
 
 
 def get_bot_parameters():
+    """Parse the command-line arguments."""
     # initialize parser and add options for username and password
     parser = argparse.ArgumentParser()
     parser.add_argument('-u', '--user', help='define Reddit login username')
@@ -76,6 +81,8 @@ def get_bot_parameters():
     # and return this list, then append/extend to Subreddit_list or default_subs
     # and possibl transform to set to avoid duplicates.
 
+    # Alternatively we can just use docopt. (See http://docopt.org/)
+
     parser.add_argument(
         '-d', '--default', action='store_true', help='add default subreddits, can be in addition to -s')
 
@@ -85,12 +92,14 @@ def get_bot_parameters():
 
 
 def login_to_reddit(bot_parameters):
+    """Performs the login for reddit."""
     print("Logging in...")
     r.login(bot_parameters['user'], bot_parameters['password'])
     print("Logged in.")
 
 
 def load_subreddits(bot_parameters):
+    """Loads the subreddits this bot operates on."""
     global SUBREDDIT_LIST
     print("Loading subreddits...")
 
@@ -112,6 +121,7 @@ def load_subreddits(bot_parameters):
 
 
 def check_comment(id):
+    """Marks a comment as checked."""
     global CHECKED_COMMENTS
     CHECKED_COMMENTS.add(str(id))
     with open('CHECKED_COMMENTS.txt', 'w') as file:
@@ -120,6 +130,7 @@ def check_comment(id):
 
 
 def load_checked_comments():
+    """Loads all comments that have been checked."""
     global CHECKED_COMMENTS
     logging.info('Loading CHECKED_COMMENTS...')
     with open('CHECKED_COMMENTS.txt', 'r') as file:
@@ -129,6 +140,8 @@ def load_checked_comments():
 
 
 def parse_submissions(SUBREDDIT):
+    """Parses all user-submissions."""
+    # FIXME: Also parse submission-text itself.
     print("==================================================")
     print("Parsing submissions on SUBREDDIT", SUBREDDIT)
     for submission in SUBREDDIT.get_hot(limit=25):
@@ -148,6 +161,7 @@ def parse_submissions(SUBREDDIT):
 
 
 def make_reply(comment, id):
+    """Makes a reply for the given comment."""
 
     reply = formulate_reply(comment.body)
 
@@ -166,6 +180,7 @@ def make_reply(comment, id):
 
 
 def formulate_reply(comment_body):
+    """Creates the reply for the given comment."""
     REGEXPS = get_regexps()
     requests = {}
     for name, regexp in REGEXPS.items():
@@ -176,6 +191,10 @@ def formulate_reply(comment_body):
 
 
 def parse_comment_requests(requests):
+    """
+    Executes the queries and return the
+    generated story strings as a single string
+    """
     return "".join(_parse_comment_requests(requests))
 
 
