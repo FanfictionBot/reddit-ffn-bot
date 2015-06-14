@@ -130,7 +130,7 @@ class _Story(site.Story):
     # def __str__(self):
     #    decoded_title = self.title.decode('ascii', errors='replace')
     #    decoded_author = self.author.decode('ascii', errors='replace')
-    
+    #
     #    decoded_summary = self.summary.decode('ascii', errors='replace')
     #    decoded_stats = self.stats.decode('ascii', errors='replace')
     #    formatted_stats = decoded_stats.replace(' ', ' ').replace(' ', ' ').replace( ' ', ' ^').replace('Rated:', '^Rated:') 
