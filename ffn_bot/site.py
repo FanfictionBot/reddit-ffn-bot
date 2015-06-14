@@ -42,7 +42,7 @@ class Story(object):
 
     def __str__(self):
         result = []
-        result.append("[***%s***](%s) by [*%s*](%s)" % (
+        result.append("\n\n[***%s***](%s) by [*%s*](%s)" % (
             self.get_title(), self.get_url(),
             self.get_author(), self.get_author_link()
         ))

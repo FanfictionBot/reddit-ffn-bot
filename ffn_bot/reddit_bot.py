@@ -27,7 +27,7 @@ SITES = [
     ao3.ArchiveOfOurOwn()
 ]
 
-FOOTER = "\n*NOW WITH AO3 (linkao3) and FICTIONPRESS (linkfp) support! Read usage tips and tricks  [here](https://github.com/tusing/reddit-ffn-bot/blob/master/README.md).*"
+FOOTER = "\n\n*NOW WITH AO3 (linkao3) and FICTIONPRESS (linkfp) support! Read usage tips and tricks  [here](https://github.com/tusing/reddit-ffn-bot/blob/master/README.md).*"
 
 
 def get_regexps():

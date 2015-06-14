@@ -22,7 +22,8 @@ class FanfictionBaseSite(site.Site):
     def __init__(self, site, command, name=None):
         super(FanfictionBaseSite, self).__init__(command + r"\((.*?)\)", name)
         self.site = site
-        self.link_regex = re.compile(LINK_REGEX % self.site.replace(".", "\\."), re.IGNORECASE)
+        self.link_regex = re.compile(
+            LINK_REGEX % self.site.replace(".", "\\."), re.IGNORECASE)
         self.id_link = ID_LINK.format(self.site)
 
     @staticmethod
@@ -69,7 +70,7 @@ class FanfictionBaseSite(site.Site):
         sleep_milliseconds = randint(500, 3000)
         time.sleep(sleep_milliseconds / 1000)
 
-        search_request = 'site:www.{1}/s/ {0}'.format(fic_name,self.site)
+        search_request = 'site:www.{1}/s/ {0}'.format(fic_name, self.site)
         print("SEARCHING: ", search_request)
         search_results = search(search_request, num=1, stop=1)
         link_found = next(search_results)
@@ -133,7 +134,7 @@ class _Story(site.Story):
     #
     #    decoded_summary = self.summary.decode('ascii', errors='replace')
     #    decoded_stats = self.stats.decode('ascii', errors='replace')
-    #    formatted_stats = decoded_stats.replace(' ', ' ').replace(' ', ' ').replace( ' ', ' ^').replace('Rated:', '^Rated:') 
+    #    formatted_stats = decoded_stats.replace(' ', ' ').replace(' ', ' ').replace( ' ', ' ^').replace('Rated:', '^Rated:')
     #    formatted_stats = formatted_stats[:-1]
     #    # print("Making a description for " + decoded_title) # More pythonic string formatting.
     #    header = '[***{0}***]({1}) by [*{2}*]({3})'.format(
@@ -152,11 +153,13 @@ class _Story(site.Story):
 
 
 class FanfictionNetSite(FanfictionBaseSite):
+
     def __init__(self, command="linkffn", name=None):
         super(FanfictionNetSite, self).__init__("fanfiction.net", "linkffn", name)
 
 
 class FictionPressSite(FanfictionBaseSite):
+
     def __init__(self, command="linkfp", name=None):
         super(FictionPressSite, self).__init__("fictionpress.com", "linkfp", name)
 
