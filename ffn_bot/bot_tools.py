@@ -4,26 +4,8 @@ import platform
 import traceback
 import time
 
-
-# colorama is not installed on
-# the system, we will use a fake ANSI-Class that will
-# return an empty string on all unknown variables.
-try:
-    from colorama import init
-    from colorama import Fore, Back, Style
-except ImportError:
-    class FakeANSI(object):
-        def __getattr__(self, name):
-            try:
-                return super(FakeANSI, self).__getattr__(name)
-            except AttributeError:
-                return ""
-    Fore = FakeANSI()
-    Back = FakeANSI()
-    Style = FakeANSI()
-else:
-    init()
-
+from ffn_bot import logger
+from ffn_bot.colors import Fore, Back, Style
 
 def safe_int(value, default=None, converter=int):
     """
@@ -122,8 +104,10 @@ def pause(minutes, seconds):
             if wait(1):
                 output_message = "\rSkipped at " + str(remaining) + " seconds!"
                 sys.stdout.write(str.ljust(output_message, 55) + '\n')
+                sys.stdout.flush()
                 break
         sys.stdout.write(str.ljust("\rComplete!", 55) + '\n')
+        sys.stdout.flush()
     except KeyboardInterrupt:
         sys.stdout.flush()
         time.sleep(1)
@@ -140,8 +124,6 @@ def print_exception(etype=None, evalue=None, etb=None):
     :param evalue: The exception instance. (optional)
     :param etb:    The traceback. (optional)
     """
-    # Try to parse the parameters.
-    print(Fore.RED)
     if etype is not None:
         if evalue is None:
             exc_type = type(etype)
@@ -157,5 +139,6 @@ def print_exception(etype=None, evalue=None, etb=None):
 
     # Format the exception
     lines = traceback.format_exception(exc_type, exc_value, exc_traceback)
-    logging.error(''.join('!! ' + line for line in lines))
-    print(Style.RESET_ALL)
+    for line in lines:
+       for subline in line.split("\n"):
+           logging.error("!! " + subline)
