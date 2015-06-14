@@ -10,8 +10,7 @@ from ffn_bot import site
 
 __all__ = ["ArchiveOfOurOwn"]
 
-AO3_LINK_REGEX = re.compile(
-    r"http(s)?://([^.]\.)?archiveofourown.org/works/(?P<sid>\d+).*", re.IGNORECASE)
+AO3_LINK_REGEX = re.compile(r"http(s)?://([^.]+\.)?archiveofourown.org/works/(?P<sid>\d+).*", re.IGNORECASE)
 AO3_FUNCTION = "linkao3"
 AO3_SEARCH_QUERY = "site:archiveofourown.org/works/ %s"
 
@@ -69,7 +68,7 @@ class ArchiveOfOurOwn(Site):
         # Filter out direct links.
         match = AO3_LINK_REGEX.match(request)
         if match is not None:
-            return match
+            return request
 
         search_request = search(AO3_SEARCH_QUERY % request, num=1, stop=1)
         try:
