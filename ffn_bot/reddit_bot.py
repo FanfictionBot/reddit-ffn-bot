@@ -156,7 +156,7 @@ def parse_submissions(SUBREDDIT):
     """Parses all user-submissions."""
     # FIXME: Also parse submission-text itself.
     logging.info("==================================================")
-    logging.info("Parsing submissions on SUBREDDIT", SUBREDDIT)
+    logging.info("Parsing submissions on SUBREDDIT: %s" + str(SUBREDDIT))
     for submission in SUBREDDIT.get_hot(limit=25):
         # Also parse the submission text.
         if not is_submission_checked(submission):
@@ -174,7 +174,7 @@ def parse_submissions(SUBREDDIT):
             else:
                 logging.info("Parsing comment %r in submission %r" % (comment.id, submission.id))
                 make_reply(comment.body, comment.id, comment.id, comment.reply)
-    logging.info("Parsing on SUBREDDIT ", SUBREDDIT, " complete.")
+    logging.info("".join(("Parsing on SUBREDDIT ", SUBREDDIT, " complete.")))
     logging.info("==================================================")
 
 
