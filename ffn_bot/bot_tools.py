@@ -3,6 +3,9 @@ import logging
 import platform
 import traceback
 import time
+from colorama import init
+from colorama import Fore, Back, Style
+init()
 
 
 def safe_int(value, default=None, converter=int):
@@ -94,21 +97,23 @@ def pause(minutes, seconds):
     """
     print("A countdown timer is beginning. You can skip it by pressing a key.")
     try:
+        print(Style.DIM)
         totaltime = minutes * 60 + seconds
         for remaining in range(totaltime, 0, -1):
             sys.stdout.write("\r")
-            sys.stdout.write(
-                "Paused: {:2d} seconds remaining.".format(remaining))
+            sys.stdout.write("Paused: {:2d} seconds remaining.".format(remaining))
             sys.stdout.flush()
             if wait(1):
                 output_message = "\rSkipped at " + str(remaining) + " seconds!"
                 sys.stdout.write(str.ljust(output_message, 55) + '\n')
                 break
         sys.stdout.write(str.ljust("\rComplete!", 55) + '\n')
+        print(Style.RESET_ALL)
     except KeyboardInterrupt:
         sys.stdout.flush()
         time.sleep(1)
         sys.stdout.write("\rCountdown bypassed!            \n")
+        print(Style.RESET_ALL)
 
 
 def print_exception(etype=None, evalue=None, etb=None):
@@ -122,6 +127,7 @@ def print_exception(etype=None, evalue=None, etb=None):
     :param etb:    The traceback. (optional)
     """
     # Try to parse the parameters.
+    print(Fore.RED)
     if etype is not None:
         if evalue is None:
             exc_type = type(etype)
@@ -138,3 +144,4 @@ def print_exception(etype=None, evalue=None, etb=None):
     # Format the exception
     lines = traceback.format_exception(exc_type, exc_value, exc_traceback)
     logging.error(''.join('!! ' + line for line in lines))
+    print(Style.RESET_ALL)

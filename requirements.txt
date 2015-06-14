@@ -2,3 +2,4 @@ lxml
 google
 praw
 requests
+colorama

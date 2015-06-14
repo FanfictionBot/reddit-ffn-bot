@@ -8,10 +8,14 @@ from ffn_bot import fanfiction_parser
 from ffn_bot import ao3
 from ffn_bot import bot_tools
 
+# For pretty text
+from colorama import init
+from colorama import Fore, Back, Style
+init()
 
 __author__ = 'tusing, MikroMan, StuxSoftware'
 
-USER_AGENT = "Python:FanfictionComment:v0.1 (by /u/tusing)"
+USER_AGENT = "Python:FanfictionComment:v0.5 (by tusing, StuxSoftware, and MikroMan)"
 r = praw.Reddit(USER_AGENT)
 DEFAULT_SUBREDDITS = ['HPFanfiction', 'fanfiction', 'HPMOR']
 SUBREDDIT_LIST = set()
@@ -95,7 +99,7 @@ def login_to_reddit(bot_parameters):
     """Performs the login for reddit."""
     print("Logging in...")
     r.login(bot_parameters['user'], bot_parameters['password'])
-    print("Logged in.")
+    print(Fore.GREEN, "Logged in.", Style.RESET_ALL)
 
 
 def load_subreddits(bot_parameters):
@@ -170,7 +174,6 @@ def parse_submissions(SUBREDDIT):
                 logging.info("Comment " + comment.id + " already parsed!")
             else:
                 print("Parsing comment ", comment.id, ' in submission ', submission.id)
-                print(comment.body)
                 make_reply(comment.body, comment.id, comment.id, comment.reply)
     print("Parsing on SUBREDDIT ", SUBREDDIT, " complete.")
     print("==================================================")
@@ -183,15 +186,16 @@ def make_reply(body, cid, id, reply_func):
     if reply is None:
         print("Empty reply!")
     elif len(reply) > 10:
+        print(Fore.GREEN)
         print('--------------------------------------------------')
         print('Outgoing reply to ' + id + ':\n' + reply + FOOTER)
         print('--------------------------------------------------')
+        print(Style.RESET_ALL)
         reply_func(reply + FOOTER)
         bot_tools.pause(1, 20)
         print('Continuing to parse submissions...')
     else:
-        # logging.debug("No reply conditions met.") DEBUG LINE
-        pass
+        logging.info("No reply conditions met.")
 
     if cid is not None:
         check_comment(cid)
