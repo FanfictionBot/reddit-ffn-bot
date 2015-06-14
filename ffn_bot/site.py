@@ -80,6 +80,6 @@ class Story(object):
             line = line.strip()
             result.append("> " + line)
         result.append("")
-        print(self.get_stats())
+        # print(self.get_stats())
         result.append(">" + WHITESPACE.sub(r"\g<0>^", self.get_stats()))
         return "\n".join(result)

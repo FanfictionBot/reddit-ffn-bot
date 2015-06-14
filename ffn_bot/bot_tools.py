@@ -101,10 +101,10 @@ def pause(minutes, seconds):
                 "Paused: {:2d} seconds remaining.".format(remaining))
             sys.stdout.flush()
             if wait(1):
-                output_message = "\rSkipped at " + str(remaining) + " seconds!        \n"
-                sys.stdout.write(output_message)
+                output_message = "\rSkipped at " + str(remaining) + " seconds!"
+                sys.stdout.write(str.ljust(output_message, 55) + '\n')
                 break
-        sys.stdout.write("\rComplete!                                                 \n")
+        sys.stdout.write(str.ljust("\rComplete!", 55) + '\n')
     except KeyboardInterrupt:
         sys.stdout.flush()
         time.sleep(1)

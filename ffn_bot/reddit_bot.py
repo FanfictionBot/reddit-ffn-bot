@@ -143,10 +143,12 @@ def check_submission(submission):
     """Mark the submission as checked."""
     check_comment("SUBMISSION_" + str(submission.id))
 
+
 def is_submission_checked(submission):
     """Check if the submission was checked."""
     global CHECKED_COMMENTS
     return "SUBMISSION_" + str(submission.id) in CHECKED_COMMENTS
+
 
 def parse_submissions(SUBREDDIT):
     """Parses all user-submissions."""
@@ -181,12 +183,15 @@ def make_reply(body, cid, id, reply_func):
     if reply is None:
         print("Empty reply!")
     elif len(reply) > 10:
+        print('--------------------------------------------------')
         print('Outgoing reply to ' + id + ':\n' + reply + FOOTER)
+        print('--------------------------------------------------')
         reply_func(reply + FOOTER)
         bot_tools.pause(1, 20)
         print('Continuing to parse submissions...')
     else:
-        print("No reply conditions met.")
+        # logging.debug("No reply conditions met.") DEBUG LINE
+        pass
 
     if cid is not None:
         check_comment(cid)
@@ -199,7 +204,6 @@ def formulate_reply(comment_body):
     for name, regexp in REGEXPS.items():
         tofind = regexp.findall(comment_body)
         requests[name] = tofind
-    print("FINDING: ", requests)
     return parse_comment_requests(requests)
 
 
@@ -215,7 +219,8 @@ def _parse_comment_requests(requests):
     sites = get_sites()
 
     for site, queries in requests.items():
-        print("Requests for '%s': %r" % (site, queries))
+        if len(queries) > 0:
+            print("Requests for '%s': %r" % (site, queries))
         for comment in sites[site].from_requests(queries):
             if comment is None:
                 continue
