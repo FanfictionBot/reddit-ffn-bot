@@ -2,8 +2,6 @@
 # **THE GOAL**
 Lately, I've seen everyone likes to link fics. Though, that can be tedious, especially if you are on mobile. You have to _go_ to fanfiction.net, and then you have to _copy_ the link, _hyperlink_ it, and then _format_ the description. This bot aims to simplify it all - all you'll have to type is...
 
-I recommend this method.
-
 # **USAGE AND OUTPUT**
 _(Temporary Note: Results can take time - up to an hour, until this bot has enough comment karma.)_
 
