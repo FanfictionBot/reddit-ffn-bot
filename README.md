@@ -80,6 +80,3 @@ Check out this completely awesome fic I found! linkffn(By the Divining Light by 
 ###**UPCOMING FEATURES**
 - Support for DLP forums
 - Linking from OP.
-
-###**BUGS**
-- Sometimes the description (word count, etc) doesn't display, but I'm not sure why.
