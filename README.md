@@ -8,10 +8,10 @@ _(Temporary Note: Results can take time - up to an hour, until this bot has enou
 ###**USAGE, TIPS, AND TRICKS**
 
 #### SUPPORTED WEBSITES:
-#### *`linkffn(...)`* (fanfiction.net)
-#### *`linkao3(...)`* (archiveofourown.org)
-#### *`linkffa(...)`* (hpfanficarchive.com)
-#### *`linkfp(...)`* (fictionpress.com)
+#### *`linkffn(...)`* ([fanfiction.net](https://www.fanfiction.net/))
+#### *`linkao3(...)`* ([archiveofourown.org](http://archiveofourown.org/))
+#### *`linkffa(...)`* ([hpfanficarchive.com](http://www.hpfanficarchive.com/stories/))
+#### *`linkfp(...)`* ([fictionpress.com](https://www.fictionpress.com/))
 
 &nbsp;
 
