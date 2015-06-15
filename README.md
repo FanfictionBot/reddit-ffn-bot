@@ -26,7 +26,7 @@ _(Temporary Note: Results can take time - up to an hour, until this bot has enou
 * You can use **direct links**.
 * You can use the **story ID**.
 
-You can expect the *last two methods to be the **most accurate***.
+You can expect the *last two methods to be the* ***most accurate***.
 
 
 ***Thus, the following will all yield the same result.***
