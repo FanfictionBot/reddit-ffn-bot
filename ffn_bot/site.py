@@ -92,7 +92,10 @@ class Story(object):
         self.stats = re.sub('([\n]+)', '\n', self.stats)
         self.stats = re.sub('([\n]+)', ' ^**|** ', self.stats)
         self.stats = '>' + self.stats
-        self.stats.replace("^-  ^**|**", "**|**")
-        self.stats.replace("^**|**    ^**|**", "^**|**")
-        self.stats.replace("   ^**|**   ^**|**", "")
-        self.stats.replace("> ^**|** *", "> ")
+
+        # Hardcoded because I don't know regex well yet.
+        self.stats = self.stats.replace("^-  ^**|** ", " ^**|** ")
+        self.stats = self.stats.replace("  ^**|**   ^**|**", "")
+        self.stats = self.stats.replace("^**|**    ^**|**", " ^**|** ")
+        self.stats = self.stats.replace("> ^**|**", "> ")
+        self.stats = self.stats.replace("^(Work ^in ^progress)", "^(Work In Progress)")

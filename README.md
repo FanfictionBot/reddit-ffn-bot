@@ -9,12 +9,35 @@ _(Temporary Note: Results can take time - up to an hour, until this bot has enou
 
 ###**USAGE, TIPS, AND TRICKS**
 
-####**(UPDATE: AO3 AND FICTIONPRESS SUPPORT ADDED!)**
-*Just use `linkao3(ficname)` and `linkfp(ficname)`, respectively. Below tips still apply.*
+#### SUPPORTED WEBSITES:
+#### *`linkffn(...)`* (fanfiction.net)
+#### *`linkao3(...)`* (archiveofourown.org)
+#### *`linkffa(...)`* (hpfanficarchive.com)
+#### *`linkfp(...)`* (fictionpress.com)
 
-**To link Harry Potter and the Natural 20:**
+&nbsp;
+
+#### *The following tips apply for all supported websites!*
+
+***To link Harry Potter and the Natural 20:***
+
+* You can use the **name of the story**.
+* You can use the **author name** in the link request for more accuracy. This is *especially* helpful if your requested fic has a generic name.
+* You can use **direct links**.
+* You can use the **story ID**.
+
+You can expect the *last two methods to be the **most accurate***.
+
+
+***Thus, the following will all yield the same result.***
 ```
 linkffn(Harry Potter and the Natural 20)
+
+linkffn(Harry Potter and the Natural 20 by Sir Poley)
+
+linkffn(https://www.fanfiction.net/s/8096183/1/Harry-Potter-and-the-Natural-20)
+
+linkffn(8096183)
 ```
 > [***Harry Potter and the Natural 20***](https://www.fanfiction.net/s/8096183/1/Harry-Potter-and-the-Natural-20) by [*Sir Poley*](https://www.fanfiction.net/u/3989854/Sir-Poley)
 >
@@ -24,39 +47,11 @@ linkffn(Harry Potter and the Natural 20)
 >
 >
 >
-> *Read usage tips and tricks  [here](https://github.com/tusing/reddit-ffn-bot/blob/master/README.md). Brought to you by me - /u/tusing's bot, with improvements by /u/MikroMan.*
+> *Read usage tips and tricks  [here](https://github.com/tusing/reddit-ffn-bot/blob/master/README.md).*
 
+&nbsp;
 
-**You can use the author name** in the link request for more accuracy. This is *especially* helpful if your requested fic has a generic name, as follows:
-```
-linkffn(Emperor by Marquis Black)
-```
-
-> [***Emperor***](https://www.fanfiction.net/s/5904185/1/Emperor) by [*Marquis Black*](https://www.fanfiction.net/u/1227033/Marquis-Black)
->
-> >Some men live their whole lives at peace and are content. Others are born with an unquenchable fire and change the world forever. Inspired by the rise of Napoleon, Augustus, Nobunaga, and T'sao T'sao. Very AU.
->
-> >Fiction  M - English - Adventure -  Harry P. - Chapters: 42   - Words: 619,123 - Reviews: 1,693 - Favs: 2,494 - Follows: 2,270 - Updated: 12/25/20144/17/2010 - id: 5904185
->
->
-> *Read usage tips and tricks  [here](https://github.com/tusing/reddit-ffn-bot/blob/master/README.md). Brought to you by me - /u/tusing's bot, with improvements by /u/MikroMan.*
-
-**You can use direct links** - they will also work, and rather accurately:
-
-```
-linkffn(https://www.fanfiction.net/s/8303194/1/Magics-of-the-Arcane)
-```
-
-> [***Magics of the Arcane***](https://www.fanfiction.net/s/8303194/1/Magics-of-the-Arcane) by [*Eilyfe*](https://www.fanfiction.net/u/2552465/Eilyfe)
->
-> >Sometimes, all it takes for a man to rise to greatness is a helping hand and the incentive to survive. Amid giants, there is no choice but become one yourself. If you want to keep on living, that is. [GoF, Mentor!Albus]
->
-> >Fiction  M - English - Adventure -  Harry P., Albus D. - Chapters: 27   - Words: 193,359 - Reviews: 1,448 - Favs: 3,814 - Follows: 4,050 - Updated: 4/23/20147/9/2012 - id: 8303194
->
->
-> *Read usage tips and tricks  [here](https://github.com/tusing/reddit-ffn-bot/blob/master/README.md). Brought to you by me - /u/tusing's bot, with improvements by /u/MikroMan.*
-
-You can namedrop multiple links in a comment.
+**You can namedrop multiple links in a comment.**
 
 ```
 Check out this completely awesome fic I found! linkffn(By the Divining Light by enembee) and it's sequel! linkffn(Conlaodh's Song enembee)
@@ -78,7 +73,7 @@ Check out this completely awesome fic I found! linkffn(By the Divining Light by 
 >
 >
 >
-> *Read usage tips and tricks  [here](https://github.com/tusing/reddit-ffn-bot/blob/master/README.md). Brought to you by me - /u/tusing's bot, with improvements by /u/MikroMan.*
+> *Read usage tips and tricks  [here](https://github.com/tusing/reddit-ffn-bot/blob/master/README.md).*
 
 
 ###**WHAT YOU CAN'T DO** _(yet)_
@@ -86,9 +81,7 @@ Check out this completely awesome fic I found! linkffn(By the Divining Light by 
 
 ###**UPCOMING FEATURES**
 - Support for DLP forums
-- Support for AO3 (Done!)
-- Support for Fictionpress (Done!)
-- More at request
+- Linking from OP.
 
 ###**BUGS**
 - Sometimes the description (word count, etc) doesn't display, but I'm not sure why.
