@@ -94,8 +94,7 @@ class Story(site.Story):
         self.parse_html()
 
     def parse_html(self):
-        page = requests.get(self.url)
-        tree = html.fromstring(page.text)
+        tree = html.fromstring(default_cache.get_page(self.url))
 
         self.summary_and_meta = ''.join(tree.xpath(FFA_SUMMARY_AND_META))
         self.summary = ''.join(re.findall('Summary: (.*?)\n', self.summary_and_meta))
