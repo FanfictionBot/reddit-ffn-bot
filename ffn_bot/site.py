@@ -80,8 +80,19 @@ class Story(object):
             line = line.strip()
             result.append("> " + line)
         result.append("")
-        # print(self.get_stats())
-        for line in self.get_stats().split("\n"):
-            result.append("> " + WHITESPACE.sub(r"\g<0>^", line.strip()))
-            
+
+        self.format_stats()
+        result.append(self.stats)
+
         return "\n".join(result)
+
+    def format_stats(self):
+        self.stats = re.sub('(\w+:)', '\n\n*' + r"\1" + '*', self.stats)
+        self.stats = re.sub('((\w|[/>,\.\-\(])+)', '^' + r'\1', self.stats)
+        self.stats = re.sub('([\n]+)', '\n', self.stats)
+        self.stats = re.sub('([\n]+)', ' ^**|** ', self.stats)
+        self.stats = '>' + self.stats
+        self.stats.replace("^-  ^**|**", "**|**")
+        self.stats.replace("^**|**    ^**|**", "^**|**")
+        self.stats.replace("   ^**|**   ^**|**", "")
+        self.stats.replace("> ^**|** *", "> ")

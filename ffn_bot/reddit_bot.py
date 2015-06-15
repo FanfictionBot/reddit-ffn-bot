@@ -6,10 +6,11 @@ import praw
 
 from ffn_bot import fanfiction_parser
 from ffn_bot import ao3
+from ffn_bot import ffa
 from ffn_bot import bot_tools
 
 # For pretty text
-from ffn_bot.bot_tools import Fore, Back, Style 
+from ffn_bot.bot_tools import Fore, Back, Style
 
 __author__ = 'tusing, MikroMan, StuxSoftware'
 
@@ -26,10 +27,12 @@ CHECKED_COMMENTS = set()
 SITES = [
     fanfiction_parser.FanfictionNetSite(),
     fanfiction_parser.FictionPressSite(),
-    ao3.ArchiveOfOurOwn()
+    ao3.ArchiveOfOurOwn(),
+    ffa.HPFanfictionArchive()
 ]
 
-FOOTER = "\n\n*NOW WITH AO3 (linkao3) and FICTIONPRESS (linkfp) support! Read usage tips and tricks  [here](https://github.com/tusing/reddit-ffn-bot/blob/master/README.md).*"
+FOOTER = "\n\nSupporting fanfiction.net (*linkffn*), AO3 (*linkao3*), HPFanficArchive (*linkffa*), and FictionPress (*linkfp*)." + \
+    "\n\nRead usage tips and tricks  [here](https://github.com/tusing/reddit-ffn-bot/blob/master/README.md).*"
 
 
 def get_regexps():
@@ -172,7 +175,12 @@ def parse_submissions(SUBREDDIT):
                 logging.info("Comment " + comment.id + " already parsed!")
             else:
                 print("Parsing comment ", comment.id, ' in submission ', submission.id)
-                make_reply(comment.body, comment.id, comment.id, comment.reply)
+                try:
+                    make_reply(comment.body, comment.id, comment.id, comment.reply)
+                except:
+                    logging.error("\n\nPARSING COMMENT: Error has occured!")
+                    bot_tools.print_exception()
+                    check_comment(comment.id)
     print("Parsing on SUBREDDIT ", SUBREDDIT, " complete.")
     print("==================================================")
 
@@ -219,7 +227,6 @@ def parse_comment_requests(requests):
 
 def _parse_comment_requests(requests):
     sites = get_sites()
-
     for site, queries in requests.items():
         if len(queries) > 0:
             print("Requests for '%s': %r" % (site, queries))

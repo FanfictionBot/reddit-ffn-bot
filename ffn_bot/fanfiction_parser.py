@@ -103,8 +103,9 @@ class _Story(site.Story):
         self.image = tree.xpath('//*[@id="profile_top"]/span[1]/img')
 
         self.raw_stats = []
-        self.raw_stats.extend(tree.xpath('//*[@id="pre_story_links"]/span/a[last()]/text()'))
-        self.raw_stats.append(" - ")
+        self.raw_stats.extend(
+            tree.xpath('//*[@id="pre_story_links"]/span/a[last()]/text()'))
+        self.raw_stats.extend(['\n'])
 
         # XPath changes depending on the presence of an image
         if len(self.image) is not 0:
@@ -117,8 +118,7 @@ class _Story(site.Story):
         self.author = self.author.encode('ascii', errors='replace')
         self.summary = self.summary.encode('ascii', errors='replace')
         self.stats = "".join(itertools.chain(
-            (self.stats,), self.raw_stats
-        )).encode('ascii', errors='replace')
+            (self.stats,), self.raw_stats)).encode('ascii', errors='replace')
 
     def decode(self):
         _decode = lambda s: s.decode('ascii', errors='replace')

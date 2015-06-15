@@ -13,7 +13,8 @@ from ffn_bot import site
 
 __all__ = ["ArchiveOfOurOwn"]
 
-AO3_LINK_REGEX = re.compile(r"http(s)?://([^.]+\.)?archiveofourown.org/works/(?P<sid>\d+).*", re.IGNORECASE)
+AO3_LINK_REGEX = re.compile(
+    r"http(s)?://([^.]+\.)?archiveofourown.org/works/(?P<sid>\d+).*", re.IGNORECASE)
 AO3_FUNCTION = "linkao3"
 AO3_SEARCH_QUERY = "site:archiveofourown.org/works/ %s"
 
@@ -24,6 +25,7 @@ AO3_TITLE = '//h2/text()'
 AO3_SUMMARY_FINDER = '//*[@id="workskin"]//*[@role="complementary"]//blockquote//text()'
 
 AO3_FANDOM_TAGS = CSSSelector("dd.fandom ul li").path + "//text()"
+
 
 class ArchiveOfOurOwn(Site):
 
@@ -106,8 +108,3 @@ class Story(site.Story):
         self.title = self.get_value_from_tree(AO3_TITLE)
         self.author = self.get_value_from_tree(AO3_AUTHOR_NAME)
         self.authorlink = self.get_value_from_tree(AO3_AUTHOR_URL)
-        self.stats = "\n".join((
-            self.get_value_from_tree(AO3_FANDOM_TAGS, ", "),
-            self.get_value_from_tree(AO3_META_PARTS, " ")
-        ))
-        
