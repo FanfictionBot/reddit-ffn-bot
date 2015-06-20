@@ -20,10 +20,6 @@ DEFAULT_SUBREDDITS = ['HPFanfiction', 'fanfiction', 'HPMOR']
 SUBREDDIT_LIST = set()
 CHECKED_COMMENTS = set()
 
-# New regex shoul match more possible letter combinations, see screenshot below
-# http://prntscr.com/7g0oeq
-
-# REGEXPS = {'[Ll][iI][nN][kK][fF]{2}[nN]\((.*?)\)': 'ffn'}
 SITES = [
     fanfiction_parser.FanfictionNetSite(),
     fanfiction_parser.FictionPressSite(),
@@ -230,7 +226,8 @@ def _parse_comment_requests(requests):
     for site, queries in requests.items():
         if len(queries) > 0:
             print("Requests for '%s': %r" % (site, queries))
-        for comment in sites[site].from_requests(queries):
-            if comment is None:
-                continue
-            yield str(comment)
+        for query in queries:
+            for comment in sites[site].from_requests(query.split(";")):
+                if comment is None:
+                    continue
+                yield str(comment)
