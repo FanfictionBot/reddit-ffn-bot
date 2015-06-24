@@ -29,7 +29,7 @@ SITES = [
 
 FOOTER = "\n\nSupporting fanfiction.net (*linkffn*), AO3 (*linkao3*), HPFanficArchive (*linkffa*), and FictionPress (*linkfp*)." + \
     "\n\nRead usage tips and tricks  [**here**](https://github.com/tusing/reddit-ffn-bot/blob/master/README.md).\n\n" + \
-    "^(**Update 6/23/15:** Parse multiple fics in a single call! (separate by semicolons) and **linkffn formatting bug fixed!**)"
+    "^(**Update 6/23/15:** Parse multiple fics in a single call! (separate by semicolons) and linkffn formatting bug fixed!)"
 
 
 def get_regexps():
