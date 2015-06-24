@@ -1,10 +1,6 @@
 # Fanfiction Data Bot for Reddit
-# **THE GOAL**
-Lately, I've seen everyone likes to link fics. Though, that can be tedious, especially if you are on mobile. You have to _go_ to fanfiction.net, and then you have to _copy_ the link, _hyperlink_ it, and then _format_ the description. This bot aims to simplify it all - all you'll have to type is...
 
-# **USAGE AND OUTPUT**
-_(Temporary Note: Results can take time - up to an hour, until this bot has enough comment karma.)_
-
+#### *Update 6/24/15: You can now separate queries in a single call with semicolons. Fanfiction.net formatting bug is fixed.*
 ###**USAGE, TIPS, AND TRICKS**
 
 #### SUPPORTED WEBSITES:
@@ -50,9 +46,14 @@ linkffn(8096183)
 &nbsp;
 
 **You can namedrop multiple links in a comment.**
+**You can separate queries with semicolons.**
 
 ```
 Check out this completely awesome fic I found! linkffn(By the Divining Light by enembee) and it's sequel! linkffn(Conlaodh's Song enembee)
+
+or
+
+Check out these awesome fics! linkffn(By the Divining Light; Conlaodh's Song)
 ```
 > [***By the Divining Light***](https://www.fanfiction.net/s/5201703/1/By-the-Divining-Light) by [*enembee*](https://www.fanfiction.net/u/980211/enembee)
 >

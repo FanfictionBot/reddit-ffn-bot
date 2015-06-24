@@ -1,7 +1,7 @@
 import re
 
 
-WHITESPACE = re.compile("(^|[ ]+(?!\Z))")
+WHITESPACE = re.compile("(|[ ]+(?!\Z))")
 
 
 class Site(object):
@@ -82,20 +82,17 @@ class Story(object):
         result.append("")
 
         self.format_stats()
+        self.stats = '> ^(' + self.stats + ')'
         result.append(self.stats)
-
         return "\n".join(result)
 
     def format_stats(self):
         self.stats = re.sub('(\w+:)', '\n\n*' + r"\1" + '*', self.stats)
-        self.stats = re.sub('((\w|[/>,\.\-\(])+)', '^' + r'\1', self.stats)
+        self.stats = re.sub('((\w|[/,\.\-\(])+)', '' + r'\1', self.stats)
         self.stats = re.sub('([\n]+)', '\n', self.stats)
-        self.stats = re.sub('([\n]+)', ' ^**|** ', self.stats)
-        self.stats = '>' + self.stats
-
-        # Hardcoded because I don't know regex well yet.
-        self.stats = self.stats.replace("^-  ^**|** ", " ^**|** ")
-        self.stats = self.stats.replace("  ^**|**   ^**|**", "")
-        self.stats = self.stats.replace("^**|**    ^**|**", " ^**|** ")
-        self.stats = self.stats.replace("> ^**|**", "> ")
-        self.stats = self.stats.replace("^(Work ^in ^progress)", "^(Work In Progress)")
+        self.stats = re.sub('([\n]+)', ' **|** ', self.stats)
+        self.stats = self.stats.replace("-  **|** ", " **|** ")
+        self.stats = self.stats.replace("  **|**   **|**", "")
+        self.stats = self.stats.replace("**|**    **|**", " **|** ")
+        self.stats = self.stats.replace("(Work in progress)", "(Work In Progress)")
+        self.stats = self.stats.replace("> (***|**", "> (")
