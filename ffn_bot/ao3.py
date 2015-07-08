@@ -32,12 +32,12 @@ class ArchiveOfOurOwn(Site):
     def __init__(self, regex=AO3_FUNCTION + r"\((.*?)\)", name=None):
         super(ArchiveOfOurOwn, self).__init__(regex, name)
 
-    def from_requests(self, requests):
+    def from_requests(self, requests, context):
         _pitem = []
         item = _pitem
         for request in requests:
             try:
-                item = self.process(request)
+                item = self.process(request, context)
             except Exception as e:
                 continue
 
@@ -46,9 +46,9 @@ class ArchiveOfOurOwn(Site):
         # Make sure we yield something.
         yield ""
 
-    def process(self, request):
+    def process(self, request, context):
         try:
-            link = self.find_link(request)
+            link = self.find_link(request, context)
         except IOError as e:
             logging.info("FF not found: %s" % request)
             return
@@ -56,9 +56,9 @@ class ArchiveOfOurOwn(Site):
         if link is None:
             return
 
-        return self.generate_response(link)
+        return self.generate_response(link, context)
 
-    def find_link(self, request):
+    def find_link(self, request, context):
         # Find link by ID.
         id = safe_int(request)
         if id is not None:
@@ -71,17 +71,18 @@ class ArchiveOfOurOwn(Site):
 
         return default_cache.search(AO3_SEARCH_QUERY % request)
 
-    def generate_response(self, link):
+    def generate_response(self, link, context):
         assert link is not None
-        return Story(link)
+        return Story(link, context)
 
     def get_story(self, query):
-        return Story(self.find_link(query))
+        return Story(self.find_link(query, set()))
 
 
 class Story(site.Story):
 
-    def __init__(self, url):
+    def __init__(self, url, context=None):
+        super(Story, self).__init__(context)
         self.url = url
         self.raw_stats = []
 
