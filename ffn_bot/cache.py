@@ -54,14 +54,18 @@ class RequestCache(object):
             del self.cache[cache_id]
         self.cache[cache_id] = (data, time.time())
 
-    def get_page(self, page, **kwargs):
+    def get_page(self, page, throttle=0, **kwargs):
         print("LOADING: " + str(page))
         try:
             return self.hit_cache("get", page)
         except KeyError:
             pass
 
+        # Throtle only if we don't have a version cached.
+        if throttle:
+            time.sleep(throttle)
         result = get(page, **kwargs).text
+
         self.push_cache("get", page, result)
         return result
 
