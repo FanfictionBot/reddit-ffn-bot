@@ -65,11 +65,6 @@ class FanfictionBaseSite(site.Site):
         if match is not None:
             return fic_name
 
-        # Obfuscation.
-        time.sleep(randint(1, 3))
-        sleep_milliseconds = randint(500, 3000)
-        time.sleep(sleep_milliseconds / 1000)
-
         search_request = 'site:www.{1}/s/ {0}'.format(fic_name, self.site)
         return default_cache.search(search_request)
 
@@ -92,7 +87,7 @@ class _Story(site.Story):
         self.decode()
 
     def parse_html(self):
-        page = default_cache.get_page(self.url)
+        page = default_cache.get_page(self.url, throttle=randint(1000,4000)/1000)
         tree = html.fromstring(page)
 
         self.title = (tree.xpath('//*[@id="profile_top"]/b/text()'))[0]
