@@ -1,6 +1,7 @@
 import re
 import sys
 import argparse
+import itertools
 import logging
 import praw
 
@@ -27,10 +28,21 @@ SITES = [
     ffa.HPFanfictionArchive()
 ]
 
+# Allow to modify the behaviour of the comments
+# by adding a special function into the system
+#
+# Currently only two marker is supported:
+# ffnbot!ignore              Ignore the comment entirely
+# ffnbot!noreformat          Fix FFN formatting by not reformatting.
+#
+# However more could be implemented like
+# ffnbot!ignorecache,nothrottle               # Not Implemented
+CONTEXT_MARKER_REGEX = re.compile(r"ffnbot!([^ ]+)")
+
 FOOTER = "\n\nSupporting fanfiction.net (*linkffn*), AO3 (buggy) (*linkao3*), HPFanficArchive (*linkffa*), and FictionPress (*linkfp*)." + \
     "\n\nRead usage tips and tricks  [**here**](https://github.com/tusing/reddit-ffn-bot/blob/master/README.md).\n\n" + \
     "^(**New Feature:** Parse multiple fics in a single call with;semicolons;like;this!)\n\n" + \
-    "^^**Update** ^^**7/7/2015:** ^^More ^^formatting ^^bugs ^^fixed."
+    "^^**Update** ^^**7/7/2015:** ^^More ^^formatting ^^bugs ^^fixed.\n\nffnbot!ignore"
 
 
 def get_regexps():
@@ -187,7 +199,7 @@ def make_reply(body, cid, id, reply_func):
     """Makes a reply for the given comment."""
     reply = formulate_reply(body)
 
-    if reply is None:
+    if not reply:
         print("Empty reply!")
     elif len(reply) > 10:
         print(Fore.GREEN)
@@ -205,31 +217,54 @@ def make_reply(body, cid, id, reply_func):
         check_comment(cid)
 
 
+def parse_context_markers(comment_body):
+    """
+    Changes the context of the story subsystem.
+    """
+    # The power of generators, harnessed in this
+    # oneliner.
+    return set(
+        s.lower()
+        for s in itertools.chain.from_iterable(
+            v.split(",")
+            for v in CONTEXT_MARKER_REGEX.findall(comment_body)
+        )
+    )
+
 def formulate_reply(comment_body):
     """Creates the reply for the given comment."""
+
+    # Parse the context markers as some may be required here
+    markers = parse_context_markers(comment_body)
+
+    # Ignore this message if we hit this marker
+    if "ignore" in markers:
+        return None
+
+    # Just parse normally of nothing other turns up.
     REGEXPS = get_regexps()
     requests = {}
     for name, regexp in REGEXPS.items():
         tofind = regexp.findall(comment_body)
         requests[name] = tofind
-    return parse_comment_requests(requests)
+    return parse_comment_requests(requests, markers)
 
 
-def parse_comment_requests(requests):
+def parse_comment_requests(requests, context):
     """
     Executes the queries and return the
     generated story strings as a single string
     """
-    return "".join(_parse_comment_requests(requests))
+    return "".join(_parse_comment_requests(requests, context))
 
 
-def _parse_comment_requests(requests):
+def _parse_comment_requests(requests, context):
     sites = get_sites()
     for site, queries in requests.items():
         if len(queries) > 0:
             print("Requests for '%s': %r" % (site, queries))
         for query in queries:
-            for comment in sites[site].from_requests(query.split(";")):
+            for comment in sites[site].from_requests(query.split(";"), context):
                 if comment is None:
                     continue
                 yield str(comment)
