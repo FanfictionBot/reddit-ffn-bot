@@ -94,7 +94,7 @@ class Story(site.Story):
         self.parse_html()
 
     def get_real_url(self):
-        return "http://archiveofourown.org/works/%s" % AO3_LINK_REGEX.match(self.url).groupdict()["sid"]
+        return "http://archiveofourown.org/works/%s?view_adult=true" % AO3_LINK_REGEX.match(self.url).groupdict()["sid"]
     get_url = get_real_url
 
     def get_value_from_tree(self, xpath, sep=""):
