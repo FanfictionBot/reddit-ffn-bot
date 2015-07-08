@@ -15,7 +15,7 @@ from lxml import html
 
 __all__ = ["FanfictionNetSite", "FictionPressSite"]
 
-LINK_REGEX = "http(s?)://((www|m)\\.)?%s/s/(\\d+)/.*"
+LINK_REGEX = "http(s?)://((www|m)\\.)?%s/s/(?P<sid>\\d+).*"
 ID_LINK = "https://www.{0}/s/%s"
 
 
@@ -87,8 +87,14 @@ class Story(site.Story):
         self.encode()
         self.decode()
 
+    def get_url(self):
+        return "http://www.%s/s/%s/1/" % (
+            self.site,
+            re.match(LINK_REGEX%self.site, self.url).groupdict()["sid"]
+        )
+
     def parse_html(self):
-        page = default_cache.get_page(self.url, throttle=randint(1000,4000)/1000)
+        page = default_cache.get_page(self.get_url(), throttle=randint(1000,4000)/1000)
         tree = html.fromstring(page)
 
         self.title = (tree.xpath('//*[@id="profile_top"]/b/text()'))[0]

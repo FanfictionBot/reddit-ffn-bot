@@ -107,3 +107,7 @@ class Story(object):
         self.stats = self.stats.replace("^(> ^(", "^(")
         self.stats = self.stats.replace("> ^(> ^(", "> ^(")
         self.stats = re.sub('([\)]+)', ')', self.stats)
+
+    def __hash__(self):
+        # We will use the URL for a hash.
+        return hash(self.get_url())

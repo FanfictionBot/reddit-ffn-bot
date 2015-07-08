@@ -34,6 +34,7 @@ SITES = [
 # Currently only two marker is supported:
 # ffnbot!ignore              Ignore the comment entirely
 # ffnbot!noreformat          Fix FFN formatting by not reformatting.
+# ffnbot!nodistinct          Don't make sure that we get distinct requests
 #
 # However more could be implemented like
 # ffnbot!ignorecache,nothrottle               # Not Implemented
@@ -231,6 +232,7 @@ def parse_context_markers(comment_body):
         )
     )
 
+
 def formulate_reply(comment_body):
     """Creates the reply for the given comment."""
 
@@ -255,7 +257,10 @@ def parse_comment_requests(requests, context):
     Executes the queries and return the
     generated story strings as a single string
     """
-    return "".join(_parse_comment_requests(requests, context))
+    results = _parse_comment_requests(requests, context)
+    if "nodistinct" not in context:
+        results = set(results)
+    return "".join(results)
 
 
 def _parse_comment_requests(requests, context):
