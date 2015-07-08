@@ -99,3 +99,7 @@ class Story(object):
         self.stats = self.stats.replace("> ^(> ^(", "> ^(")
         self.stats = self.stats.replace("**|** * **|**", "**|**")
         self.stats = self.stats.replace(":**", ":*")
+        self.stats = self.stats.replace("^(> ^(", "^(")
+        self.stats = self.stats.replace("^(> ^(", "^(")
+        self.stats = self.stats.replace("> ^(> ^(", "> ^(")
+        self.stats = re.sub('([\)]+)', ')', self.stats)
