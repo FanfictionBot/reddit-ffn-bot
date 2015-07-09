@@ -80,7 +80,7 @@ class AdultFanfiction(Site):
     """
 
     def __init__(self):
-        super(AdultFanfiction, self).__init__(r"linkaf\([^)]+)")
+        super(AdultFanfiction, self).__init__(r"linkaff\(([^)]*)\)")
 
     def from_requests(self, requests, context):
         for request in requests:
