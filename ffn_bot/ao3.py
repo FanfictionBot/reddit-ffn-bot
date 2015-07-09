@@ -14,7 +14,7 @@ from ffn_bot import site
 __all__ = ["ArchiveOfOurOwn"]
 
 AO3_LINK_REGEX = re.compile(
-    r"http(s)?://([^.]+\.)?archiveofourown.org/works/(?P<sid>\d+).*", re.IGNORECASE)
+    r"http(s)?://([^.]+\.)?archiveofourown.org/works/(?P<sid>\d+)[^ ]*", re.IGNORECASE)
 AO3_FUNCTION = "linkao3"
 AO3_SEARCH_QUERY = "site:archiveofourown.org/works/ %s"
 
@@ -58,11 +58,14 @@ class ArchiveOfOurOwn(Site):
 
         return self.generate_response(link, context)
 
+    def _id_to_link(self, id):
+        return "http://archiveofourown.org/works/%s/" % id
+
     def find_link(self, request, context):
         # Find link by ID.
         id = safe_int(request)
         if id is not None:
-            return "http://archiveofourown.org/works/%d/" % id
+            return self._id_to_link(str(id))
 
         # Filter out direct links.
         match = AO3_LINK_REGEX.match(request)
@@ -77,7 +80,13 @@ class ArchiveOfOurOwn(Site):
 
     def get_story(self, query):
         return Story(self.find_link(query, set()))
-
+    def extract_direct_links(self, body, context):
+        # for _,_,id in AO3_LINK_REGEX.findall(body):
+        #     yield self.generate_response(self.id_to_link(id), context)
+        return (
+            self.generate_response(self._id_to_link(id), context)
+            for _,_,id in AO3_LINK_REGEX.findall(body)
+        )
 
 class Story(site.Story):
 

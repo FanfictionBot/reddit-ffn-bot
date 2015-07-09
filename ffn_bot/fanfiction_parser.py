@@ -45,10 +45,13 @@ class FanfictionBaseSite(site.Site):
             return None
 
         try:
-            return Story(link, self.site, context)
+            return self.generate_response(link, context)
         except Exception as e:
             bot_tools.print_exception()
             return None
+
+    def generate_response(self, link, context):
+        return Story(link, self.site, context)
 
     def find_link(self, fic_name, context):
         # Prevent users from crashing program with bad link names.
@@ -68,7 +71,11 @@ class FanfictionBaseSite(site.Site):
         search_request = 'site:www.{1}/s/ {0}'.format(fic_name, self.site)
         return default_cache.search(search_request)
 
-
+    def extract_direct_links(self, body, context):
+        return (
+            self.generate_response(self.id_link % id, context)
+            for _,_,_,id in self.link_regex.findall(body)
+        )
 class Story(site.Story):
 
     def __init__(self, url, site, context):

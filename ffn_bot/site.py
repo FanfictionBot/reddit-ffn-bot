@@ -25,6 +25,19 @@ class Site(object):
         self.regex = regex
         self.name = name
 
+    def extract_direct_links(self, body, context):
+        """
+        Extracts all direct links
+
+        It is the responsibility of the site-class to
+        make sure, that there will be no repeated requests.
+
+        :param body:  The comment body.
+        :param context:  The comment context.
+        :returns: An iterable of story objects.
+        """
+        return ()
+
     def from_requests(self, requests, context):
         """
         Returns an iterable of story objects that are assiciated with this request.
