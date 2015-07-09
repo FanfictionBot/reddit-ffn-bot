@@ -34,6 +34,7 @@ SITES = [
 # Currently only two marker is supported:
 # ffnbot!ignore              Ignore the comment entirely
 # ffnbot!noreformat          Fix FFN formatting by not reformatting.
+# ffnbot!nodistinct          Don't make sure that we get distinct requests
 # ffnbot!directlinks         Also extract story requests from direct links
 #
 # However more could be implemented like
@@ -270,10 +271,12 @@ def parse_comment_requests(requests, context, additions):
     # Merge the story-list
     results = itertools.chain(
         _parse_comment_requests(requests, context),
-        (str(addition) for addition in additions)
+        additions
     )
 
-    return "".join(results)
+    if "nodistinct" not in context:
+        results = set(results)
+    return "".join(str(result) for result in results if result)
 
 
 def _parse_comment_requests(requests, context):
@@ -285,4 +288,4 @@ def _parse_comment_requests(requests, context):
             for comment in sites[site].from_requests(query.split(";"), context):
                 if comment is None:
                     continue
-                yield str(comment)
+                yield comment
