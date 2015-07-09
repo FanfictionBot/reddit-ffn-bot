@@ -34,6 +34,7 @@ SITES = [
 # Currently only two marker is supported:
 # ffnbot!ignore              Ignore the comment entirely
 # ffnbot!noreformat          Fix FFN formatting by not reformatting.
+# ffnbot!directlinks         Also extract story requests from direct links
 #
 # However more could be implemented like
 # ffnbot!ignorecache,nothrottle               # Not Implemented
@@ -231,6 +232,7 @@ def parse_context_markers(comment_body):
         )
     )
 
+
 def formulate_reply(comment_body):
     """Creates the reply for the given comment."""
 
@@ -247,15 +249,31 @@ def formulate_reply(comment_body):
     for name, regexp in REGEXPS.items():
         tofind = regexp.findall(comment_body)
         requests[name] = tofind
-    return parse_comment_requests(requests, markers)
+
+    direct_links = []
+    if "directlinks" in markers:
+        for site in SITES:
+            direct_links.append(
+                site.extract_direct_links(comment_body, markers)
+            )
+        # Flatten the story-list
+        direct_links = itertools.chain.from_iterable(direct_links)
+
+    return parse_comment_requests(requests, markers, direct_links)
 
 
-def parse_comment_requests(requests, context):
+def parse_comment_requests(requests, context, additions):
     """
     Executes the queries and return the
     generated story strings as a single string
     """
-    return "".join(_parse_comment_requests(requests, context))
+    # Merge the story-list
+    results = itertools.chain(
+        _parse_comment_requests(requests, context),
+        (str(addition) for addition in additions)
+    )
+
+    return "".join(results)
 
 
 def _parse_comment_requests(requests, context):
