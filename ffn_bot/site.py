@@ -124,3 +124,7 @@ class Story(object):
     def __hash__(self):
         # We will use the URL for a hash.
         return hash(self.get_url())
+    def __eq__(self, other):
+        if not isinstance(other, Story):
+            return False
+        return other.get_url() == self.get_url()

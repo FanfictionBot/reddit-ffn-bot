@@ -276,7 +276,6 @@ def parse_comment_requests(requests, context, additions):
 
     if "nodistinct" not in context:
         results = set(results)
-
     return "".join(str(result) for result in results if result)
 
 
