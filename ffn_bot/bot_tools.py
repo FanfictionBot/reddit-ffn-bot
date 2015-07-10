@@ -85,6 +85,11 @@ if platform.system() == "Windows":
         # return False.
         return False
 else:
+    import os
+    import select
+    import termios
+    import fcntl
+
     def wait(timeout=1, precision=None):
         """
         Wait for a keypress.
@@ -98,10 +103,6 @@ else:
                           polls (means nothing for this operating system)
         :returns:  True if at least one key was hit. False otherwise.
         """
-        import os
-        import select
-        import termios
-        import fcntl
 
         # Should be zero, but who knows what OS
         # we're actually in, so... yeah
@@ -131,13 +132,14 @@ else:
 
                 # Read incoming bytes until there are no more.
                 try:
-                    while True:
-                        try:
-                            c = sys.stdin.read(1)
-                            if not c:
-                                break
-                        except:
-                            break
+                    while sys.stdin.read(1):
+                        pass
+
+                # Do only catch anything that is not
+                # a python system exception like
+                # SystemExit and KeyboardInterrupt
+                except Exception:
+                    pass
                 finally:
                     # And reset the IO-System no matter what happens.
                     fcntl.fcntl(fd, fcntl.F_SETFL, oldflags)
