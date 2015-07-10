@@ -110,7 +110,7 @@ else:
 
         # Yeah, we have to rape the terminal settings
         # before we think of polling the damn thing.
-        oldterm = termios.tcgetattr(fd)
+        oldterm = termios.tcgetattr(fd)     # Store old state.
         newattr = termios.tcgetattr(fd)
         newattr[3] = newattr[3] & ~termios.ICANON & ~termios.ECHO
         termios.tcsetattr(fd, termios.TCSANOW, newattr)
