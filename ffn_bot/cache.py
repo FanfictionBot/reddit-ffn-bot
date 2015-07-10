@@ -43,7 +43,7 @@ class RequestCache(object):
         if result is not self.EMPTY_RESULT:
             # Let values expire.
             if time.time() - result[1] <= self.expire_time:
-                self.push_cache(type, query, result[0], result[1]))
+                self.push_cache(type, query, result[0], result[1])
                 return result[0]
         raise KeyError("Not cached")
 
