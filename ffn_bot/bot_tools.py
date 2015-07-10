@@ -153,9 +153,9 @@ def print_exception(etype=None, evalue=None, etb=None):
         else:
             exc_type, exc_value, exc_tb = etype, evalue, etb
     else:
-        exc_type, exc_value, exc_traceback = sys.exc_info()
+        exc_type, exc_value, exc_tb = sys.exc_info()
 
     # Format the exception
-    lines = traceback.format_exception(exc_type, exc_value, exc_traceback)
+    lines = traceback.format_exception(exc_type, exc_value, exc_tb)
     logging.error(''.join('!! ' + line for line in lines))
     print(Style.RESET_ALL)
