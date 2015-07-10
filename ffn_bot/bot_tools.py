@@ -98,11 +98,57 @@ else:
                           polls (means nothing for this operating system)
         :returns:  True if at least one key was hit. False otherwise.
         """
-        import sys
+        import os
         import select
+        import termios
+        import fcntl
 
-        rlist, wlist, xlist = select.select([sys.stdin], [], [], timeout)
-        return bool(rlist)
+        # Should be zero, but who knows what OS
+        # we're actually in, so... yeah
+        fd = sys.stdin.fileno
+
+        # Yeah, we have to rape the terminal settings
+        # before we think of polling the damn thing.
+        oldterm = termios.tcgetattr(fd)
+        newattr = termios.tcgetattr(fd)
+        newattr[3] = newattr[3] & ~termios.ICANON & ~termios.ECHO
+        termios.tcsetattr(fd, termios.TCSANOW, newattr)
+
+        try:
+            # Now wait for the user to press a key
+            rlist, wlist, xlist = select.select([fd], [], [], timeout)
+
+            # And if the user pressed a key, we have to catch them
+            # before another call to this function will not be
+            # returning immediately
+            if rlist:
+
+                # And now, we have to modify the IO-System Flags.
+                # So we have a non-blocking IO and thus can read
+                # incoming bytes one by one.
+                oldflags = fcntl.fcntl(fd, fcntl.F_GETFL)
+                fcntl.fcntl(fd, fcntl.F_SETFL, oldflags | os.O_NONBLOCK)
+
+                # Read incoming bytes until there are no more.
+                try:
+                    while True:
+                        try:
+                            sys.stdin.read(1)
+                        except:
+                            break
+                finally:
+                    # And reset the IO-System no matter what happens.
+                    fcntl.fcntl(fd, fcntl.F_SETFL, oldflags)
+
+                # And while we're at it, yeah I think, we did all
+                # just to catch key presses.
+                return True
+
+            # And if we did nothing, we just return false.
+            return False
+        finally:
+            # And don't forget resetting the terminal.
+            termios.tcsetattr(fd, termios.TCSAFLUSH, oldterm)
 
 
 def pause(minutes, seconds):
