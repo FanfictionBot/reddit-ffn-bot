@@ -47,6 +47,8 @@ FOOTER = "\n\nSupporting fanfiction.net (*linkffn*), AO3 (buggy) (*linkao3*), HP
     "^(**New Feature:** Parse multiple fics in a single call with;semicolons;like;this!)\n\n" + \
     "^^**Update** ^^**7/7/2015:** ^^More ^^formatting ^^bugs ^^fixed.\n\nffnbot!ignore"
 
+DRY_RUN = False
+
 
 def get_regexps():
     """Returns the regular expressions for the sites."""
@@ -72,12 +74,15 @@ def run_forever():
 
 
 def main():
+    global DRY_RUN
     """Basic main function."""
     # moved call for agruments to avoid double calling
     bot_parameters = get_bot_parameters()
     login_to_reddit(bot_parameters)
     load_checked_comments()
     load_subreddits(bot_parameters)
+
+    DRY_RUN = bool(bot_parameters["dry"])
 
     while True:
         for SUBREDDIT in SUBREDDIT_LIST:
@@ -89,24 +94,39 @@ def get_bot_parameters():
     """Parse the command-line arguments."""
     # initialize parser and add options for username and password
     parser = argparse.ArgumentParser()
-    parser.add_argument('-u', '--user', help='define Reddit login username')
-    parser.add_argument('-p', '--password', help='define Reddit login password')
     parser.add_argument(
-        '-s', '--subreddits', help='define target subreddits; seperate with commas')
-
-    # Can also add possibility with -s option to aquire comma separated list of subreddits
-    # then do: subs = args.subreddit.split(',')
-    # and return this list, then append/extend to Subreddit_list or default_subs
-    # and possibl transform to set to avoid duplicates.
-
-    # Alternatively we can just use docopt. (See http://docopt.org/)
+        '-u', '--user',
+        help='define Reddit login username'
+    )
+    parser.add_argument(
+        '-p', '--password',
+        help='define Reddit login password'
+    )
 
     parser.add_argument(
-        '-d', '--default', action='store_true', help='add default subreddits, can be in addition to -s')
+        '-s', '--subreddits',
+        help='define target subreddits; seperate with commas'
+    )
+
+    parser.add_argument(
+        '-d', '--default',
+        action='store_true',
+        help='add default subreddits, can be in addition to -s'
+    )
+
+    parser.add_argument(
+        '-l', '--dry',
+        action='store_true',
+        help="do not send comments."
+    )
 
     args = parser.parse_args()
 
-    return {'user': args.user, 'password': args.password, 'user_subreddits': args.subreddits, 'default': args.default}
+    return {
+        'user': args.user, 'password': args.password,
+        'user_subreddits': args.subreddits, 'default': args.default,
+        'dryrun': args.dry
+    }
 
 
 def login_to_reddit(bot_parameters):
@@ -137,11 +157,16 @@ def load_subreddits(bot_parameters):
         SUBREDDIT_LIST.add('tusingtestfield')
     print("LOADED SUBREDDITS: ", SUBREDDIT_LIST)
 
-
 def check_comment(id):
     """Marks a comment as checked."""
-    global CHECKED_COMMENTS
+    global CHECKED_COMMENTS, DRY_RUN
     CHECKED_COMMENTS.add(str(id))
+
+    # This is a dry run, do not pretend we
+    # store anything in any way.
+    if DRY_RUN:
+        return
+
     with open('CHECKED_COMMENTS.txt', 'w') as file:
         for id in CHECKED_COMMENTS:
             file.write(str(id) + '\n')
@@ -239,7 +264,11 @@ def make_reply(body, cid, id, reply_func, markers=None, additions=()):
         print('Outgoing reply to ' + id + ':\n' + reply + FOOTER)
         print('--------------------------------------------------')
         print(Style.RESET_ALL)
-        reply_func(reply + FOOTER)
+
+        # Do not send the comment.
+        if not DRY_RUN:
+            reply_func(reply + FOOTER)
+
         bot_tools.pause(1, 20)
         print('Continuing to parse submissions...')
     else:
