@@ -246,7 +246,7 @@ def parse_submissions(SUBREDDIT):
                 print("Parsing comment ", comment.id, ' in submission ', submission.id)
                 try:
                     make_reply(comment.body, comment.id, comment.id, comment.reply)
-                except:
+                except Exception:
                     logging.error("\n\nPARSING COMMENT: Error has occured!")
                     bot_tools.print_exception()
                     check_comment(comment.id)
