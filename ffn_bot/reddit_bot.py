@@ -197,6 +197,7 @@ def parse_submission_text(submission):
         additions
     )
 
+
 def parse_submissions(SUBREDDIT):
     """Parses all user-submissions."""
     print("==================================================")
