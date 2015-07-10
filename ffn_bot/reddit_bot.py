@@ -31,14 +31,12 @@ SITES = [
 # Allow to modify the behaviour of the comments
 # by adding a special function into the system
 #
-# Currently only two marker is supported:
+# Currently the following markers are supported:
 # ffnbot!ignore              Ignore the comment entirely
 # ffnbot!noreformat          Fix FFN formatting by not reformatting.
 # ffnbot!nodistinct          Don't make sure that we get distinct requests
 # ffnbot!directlinks         Also extract story requests from direct links
-#
-# However more could be implemented like
-# ffnbot!ignorecache,nothrottle               # Not Implemented
+# ffnbot!submissionlink      Direct-Links just for the submission-url
 CONTEXT_MARKER_REGEX = re.compile(r"ffnbot!([^ ]+)")
 
 FOOTER = "\n\nSupporting fanfiction.net (*linkffn*), AO3 (buggy) (*linkao3*), HPFanficArchive (*linkffa*), and FictionPress (*linkfp*)." + \
@@ -167,15 +165,39 @@ def is_submission_checked(submission):
     return "SUBMISSION_" + str(submission.id) in CHECKED_COMMENTS
 
 
+def parse_submission_text(submission):
+    body = submission.selftext
+
+    markers = parse_context_markers(body)
+
+    # Since the bot would start downloading the stories
+    # here, we add the ignore option here
+    if "ignore" in markers:
+        return
+
+    additions = []
+    if "submissionlink" in markers:
+        additions.extend(
+            get_direct_links(submission.url, markers)
+        )
+
+    make_reply(
+        submission.selftext,
+        None,
+        submission.id,
+        submission.add_comment,
+        markers,
+        additions
+    )
+
 def parse_submissions(SUBREDDIT):
     """Parses all user-submissions."""
-    # FIXME: Also parse submission-text itself.
     print("==================================================")
     print("Parsing submissions on SUBREDDIT", SUBREDDIT)
     for submission in SUBREDDIT.get_hot(limit=25):
         # Also parse the submission text.
         if not is_submission_checked(submission):
-            make_reply(submission.selftext, None, submission.id, submission.add_comment)
+            parse_submission_text(submission)
             check_submission(submission)
 
         logging.info("Checking SUBMISSION: ", submission.id)
@@ -197,9 +219,9 @@ def parse_submissions(SUBREDDIT):
     print("==================================================")
 
 
-def make_reply(body, cid, id, reply_func):
+def make_reply(body, cid, id, reply_func, markers=None, additions=()):
     """Makes a reply for the given comment."""
-    reply = formulate_reply(body)
+    reply = formulate_reply(body, markers, additions)
 
     if not reply:
         print("Empty reply!")
@@ -234,11 +256,21 @@ def parse_context_markers(comment_body):
     )
 
 
-def formulate_reply(comment_body):
-    """Creates the reply for the given comment."""
+def get_direct_links(string, markers):
+    direct_links = []
+    for site in SITES:
+        direct_links.append(
+            site.extract_direct_links(string, markers)
+        )
+    # Flatten the story-list
+    return itertools.chain.from_iterable(direct_links)
 
-    # Parse the context markers as some may be required here
-    markers = parse_context_markers(comment_body)
+
+def formulate_reply(comment_body, markers=None, additions=()):
+    """Creates the reply for the given comment."""
+    if markers is None:
+        # Parse the context markers as some may be required here
+        markers = parse_context_markers(comment_body)
 
     # Ignore this message if we hit this marker
     if "ignore" in markers:
@@ -251,14 +283,11 @@ def formulate_reply(comment_body):
         tofind = regexp.findall(comment_body)
         requests[name] = tofind
 
-    direct_links = []
+    direct_links = additions
     if "directlinks" in markers:
-        for site in SITES:
-            direct_links.append(
-                site.extract_direct_links(comment_body, markers)
-            )
-        # Flatten the story-list
-        direct_links = itertools.chain.from_iterable(direct_links)
+        direct_links = itertools.chain(
+            direct_links, get_direct_links(comment_body, markers)
+        )
 
     return parse_comment_requests(requests, markers, direct_links)
 
