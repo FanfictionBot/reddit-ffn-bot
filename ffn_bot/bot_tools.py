@@ -105,7 +105,7 @@ else:
 
         # Should be zero, but who knows what OS
         # we're actually in, so... yeah
-        fd = sys.stdin.fileno
+        fd = sys.stdin.fileno()
 
         # Yeah, we have to rape the terminal settings
         # before we think of polling the damn thing.
@@ -133,7 +133,9 @@ else:
                 try:
                     while True:
                         try:
-                            sys.stdin.read(1)
+                            c = sys.stdin.read(1)
+                            if not c:
+                                break
                         except:
                             break
                 finally:
