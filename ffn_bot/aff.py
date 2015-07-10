@@ -1,10 +1,9 @@
 import re
 
 from lxml import html
-from lxml.cssselect import CSSSelector
 
+from ffn_bot.metaparse import MetadataItem, Metaparser, parser
 from ffn_bot.cache import default_cache
-from ffn_bot.bot_tools import safe_int
 from ffn_bot.site import Site
 from ffn_bot import site
 
@@ -47,32 +46,37 @@ AFF_AUTHOR_URL = "//tr[5]/td[2]//a/@href"
 # the metadata ourselves.
 AFF_DEFAULT_SUMMARY = ""
 
-# Generate the metadata with this values
-AFF_GENERATED_META = (
-    ("Archive", (
-        lambda tree, archive, id: archive
-    )),
-    ("Category", (
-        lambda tree, archive, id: " > ".join(
-            x.strip()
+
+class AFFMetadata(Metaparser):
+    """
+    Functions that will determine the metadata.
+    """
+
+    @parser
+    @staticmethod
+    def add_id(id, tree):
+        for item in zip(("Archive", "ID"), id):
+            yield item
+
+    @parser
+    @staticmethod
+    def Category(id, tree):
+        return " > ".join(
+            x.strip().replace(" - ", "-")
             for x in tree.xpath("//tr[5]//td[1]//a/text()")
             if x.strip() != "Next chapter>"
-        ).replace(" - ", "-")
-    )),
-    ("Chapters", (
-        lambda tree, archive, id: len(
-            tree.xpath("//select[@name='chapnav']/option")
         )
-    )),
-    ("Hits", (
-        lambda tree, archive, id: (
-            tree.xpath("//tr[5]/td[3]/text()")[0].strip()[len("Hits: "):]
-        )
-    )),
-    ("ID", (
-        lambda tree, archive, id: id
-    ))
-)
+
+    @parser
+    @staticmethod
+    def Chapters(id, tree):
+        return len(tree.xpath("//select[@name='chapnav']/option"))
+
+    @parser
+    @staticmethod
+    def Hits(id, tree):
+        return tree.xpath("//tr[5]/td[3]/text()")[0].strip()[len("Hits: "):]
+
 
 class AdultFanfiction(Site):
     """
@@ -128,14 +132,12 @@ class Story(site.Story):
             allow_redirects=False
         ))
 
-        # We will generate the stats ourselves.
-        self.stats = " - ".join((
-            (title + ": " + str(result(
-                tree, self.archive, self.id
-            )))
-            for title, result in AFF_GENERATED_META
-        ))
+        self.tree = tree
 
+        # We will generate the stats ourselves.
+        self.stats = AFFMetadata.parse_to_string(
+            (self.archive, self.id), tree
+        )
         self.title = tree.xpath(AFF_TITLE_XPATH)[0].strip()[len("Story: "):]
         self.author = tree.xpath(AFF_AUTHOR_NAME)[0].strip()
         self.authorlink = tree.xpath(AFF_AUTHOR_URL)[0]
