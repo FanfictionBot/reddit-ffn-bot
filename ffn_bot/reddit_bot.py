@@ -151,8 +151,12 @@ def load_checked_comments():
     """Loads all comments that have been checked."""
     global CHECKED_COMMENTS
     logging.info('Loading CHECKED_COMMENTS...')
-    with open('CHECKED_COMMENTS.txt', 'r') as file:
-        CHECKED_COMMENTS = {str(line.rstrip('\n')) for line in file}
+    try:
+        with open('CHECKED_COMMENTS.txt', 'r') as file:
+            CHECKED_COMMENTS = {str(line.rstrip('\n')) for line in file}
+    except IOError:
+        bot_tools.print_exception()
+        CHECKED_COMMENTS = set()
     print('Loaded CHECKED_COMMENTS.')
     logging.info(CHECKED_COMMENTS)
 
