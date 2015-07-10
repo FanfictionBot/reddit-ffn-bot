@@ -86,7 +86,6 @@ def main():
     load_subreddits(bot_parameters)
 
     DRY_RUN = bool(bot_parameters["dry"])
-    sys.exit(DRY_RUN)
     while True:
         for SUBREDDIT in SUBREDDIT_LIST:
             parse_submissions(r.get_subreddit(SUBREDDIT))
