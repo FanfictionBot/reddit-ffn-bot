@@ -8,6 +8,8 @@ import praw
 from ffn_bot import fanfiction_parser
 from ffn_bot import ao3
 from ffn_bot import ffa
+from ffn_bot import aff
+
 from ffn_bot import bot_tools
 
 # For pretty text
@@ -25,7 +27,8 @@ SITES = [
     fanfiction_parser.FanfictionNetSite(),
     fanfiction_parser.FictionPressSite(),
     ao3.ArchiveOfOurOwn(),
-    ffa.HPFanfictionArchive()
+    ffa.HPFanfictionArchive(),
+    aff.AdultFanfiction()
 ]
 
 # Allow to modify the behaviour of the comments
