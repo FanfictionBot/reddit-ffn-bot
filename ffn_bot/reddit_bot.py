@@ -67,6 +67,9 @@ def run_forever():
     while True:
         try:
             main()
+        # Exit on sys.exit and keyboard interrupts.
+        except (SystemExit, KeyboardInterrupt):
+            raise
         except:
             logging.error("MAIN: AN EXCEPTION HAS OCCURED!")
             bot_tools.print_exception()
@@ -83,7 +86,7 @@ def main():
     load_subreddits(bot_parameters)
 
     DRY_RUN = bool(bot_parameters["dry"])
-
+    sys.exit(DRY_RUN)
     while True:
         for SUBREDDIT in SUBREDDIT_LIST:
             parse_submissions(r.get_subreddit(SUBREDDIT))
@@ -125,7 +128,7 @@ def get_bot_parameters():
     return {
         'user': args.user, 'password': args.password,
         'user_subreddits': args.subreddits, 'default': args.default,
-        'dryrun': args.dry
+        'dry': args.dry
     }
 
 
