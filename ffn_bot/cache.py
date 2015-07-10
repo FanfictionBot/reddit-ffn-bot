@@ -43,16 +43,18 @@ class RequestCache(object):
         if result is not self.EMPTY_RESULT:
             # Let values expire.
             if time.time() - result[1] <= self.expire_time:
-                self.push_cache(type, query, result[0])
+                self.push_cache(type, query, result[0], result[1]))
                 return result[0]
         raise KeyError("Not cached")
 
-    def push_cache(self, type, query, data):
+    def push_cache(self, type, query, data, t=None):
         """Push a value into the cache."""
         cache_id = "%s:%s" % (type, query)
         if cache_id in self.cache:
             del self.cache[cache_id]
-        self.cache[cache_id] = (data, time.time())
+        if t is None:
+            t = time.time()
+        self.cache[cache_id] = (data, t)
 
     def get_page(self, page, throttle=0, **kwargs):
         print("LOADING: " + str(page))
