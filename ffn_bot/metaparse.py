@@ -1,7 +1,14 @@
 """
 I want a nicer implementation of some parsers.
 """
+import inspect
+import functools
 import collections
+
+
+basestring = (str, bytes)
+MetadataItem = collections.namedtuple("MetadataItem", "name value")
+
 
 class MetaparserMeta(type):
     """
@@ -34,6 +41,21 @@ class MetaparserMeta(type):
         return result
 
 
+def _apply_generator(func, *args, **kwargs):
+    result = func(*args, **kwargs)
+    if inspect.isgenerator(result):
+        for item in result:
+            yield item
+    elif (
+        (not isinstance(result, collections.Sequence))
+        or len(result)!=2
+        or (isinstance(result, basestring))
+    ):
+        yield func.__name__, result
+    else:
+        yield result
+
+
 class Metaparser(metaclass=MetaparserMeta):
     """
     What wonderful magic is happening here...
@@ -44,14 +66,11 @@ class Metaparser(metaclass=MetaparserMeta):
         result = collections.OrderedDict()
 
         for parser in cls._parsers:
-            actual_name = parser.__name__.replace("_", " ")
-            result[actual_name] = parser(url, tree)
+            for name, value in _apply_generator(parser, url, tree):
+                result[name] = value
 
         return result
 
 def parser(func):
-    """
-    Decorator to stick into the metaparser class.
-    """
-    func._parser = True
+    func._parser= True
     return func
