@@ -62,14 +62,27 @@ class Metaparser(metaclass=MetaparserMeta):
     :)
     """
 
-    def __new__(cls, url, tree):
+    def __new__(cls, id, tree):
         result = collections.OrderedDict()
 
         for parser in cls._parsers:
-            for name, value in _apply_generator(parser, url, tree):
+            for name, value in _apply_generator(parser, id, tree):
                 result[name] = value
 
         return result
+
+    @classmethod
+    def parse_to_string(
+            cls,
+            id, tree,
+
+            # Pass a function that will join the two strings
+            join=" - ".join,
+
+            # Pass a function that will format each item
+            itemfmt="{0}: {1}".format
+    ):
+        return join(map((lambda i: itemfmt(*i)), cls(id, tree).items()))
 
 def parser(func):
     func._parser= True
