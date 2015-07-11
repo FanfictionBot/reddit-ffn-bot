@@ -5,11 +5,8 @@ import itertools
 import logging
 import praw
 
-from ffn_bot import fanfiction_parser
+from ffn_bot.fetchers import SITES
 from ffn_bot import reddit_markdown
-from ffn_bot import ao3
-from ffn_bot import ffa
-from ffn_bot import aff
 
 from ffn_bot import bot_tools
 
@@ -23,14 +20,6 @@ r = praw.Reddit(USER_AGENT)
 DEFAULT_SUBREDDITS = ['HPFanfiction', 'fanfiction', 'HPMOR']
 SUBREDDIT_LIST = set()
 CHECKED_COMMENTS = set()
-
-SITES = [
-    fanfiction_parser.FanfictionNetSite(),
-    fanfiction_parser.FictionPressSite(),
-    ao3.ArchiveOfOurOwn(),
-    ffa.HPFanfictionArchive(),
-    aff.AdultFanfiction()
-]
 
 # Allow to modify the behaviour of the comments
 # by adding a special function into the system
