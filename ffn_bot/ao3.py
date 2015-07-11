@@ -1,11 +1,13 @@
 import re
 import logging
+import itertools
 
 from google import search
 from requests import get
 from lxml import html
 from lxml.cssselect import CSSSelector
 
+from ffn_bot.metaparse import Metaparser, parser
 from ffn_bot.cache import default_cache
 from ffn_bot.bot_tools import safe_int
 from ffn_bot.site import Site
@@ -25,6 +27,32 @@ AO3_TITLE = '//h2/text()'
 AO3_SUMMARY_FINDER = '//*[@id="workskin"]//*[@role="complementary"]//blockquote//text()'
 
 AO3_FANDOM_TAGS = CSSSelector("dd.fandom ul li").path + "//text()"
+
+
+class AO3Metadata(Metaparser):
+    @parser
+    @staticmethod
+    def parse_fandom(id, tree):
+        res = tree.xpath(AO3_FANDOM_TAGS)
+        if len(res)>1:
+            yield "Fandoms", ", ".join(res)
+        else:
+            yield "Fandom", res[0]
+
+    @parser
+    @staticmethod
+    def parse_basemeta(id, tree):
+        res = tree.xpath(AO3_META_PARTS)
+
+        yield from (
+            (k[:-1], v)
+            for k, v in itertools.islice(zip(res, res[1:]), None, None, 2)
+        )
+
+    @parser
+    @staticmethod
+    def ID(id, tree):
+        return id
 
 
 class ArchiveOfOurOwn(Site):
@@ -120,3 +148,8 @@ class Story(site.Story):
         self.title = self.get_value_from_tree(AO3_TITLE)
         self.author = self.get_value_from_tree(AO3_AUTHOR_NAME)
         self.authorlink = self.get_value_from_tree(AO3_AUTHOR_URL)
+        self.stats = AO3Metadata.parse_to_string(
+            AO3_LINK_REGEX.match(self.url).groupdict()["sid"],
+            self.tree
+        )
+
