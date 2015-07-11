@@ -105,7 +105,7 @@ class Story(object):
             return
 
         # Separate by lines.
-        self.stats = re.sub('(\w+:)', '**|**' + reddit_markdown.italics(r"\1") + ' ', self.stats)
+        self.stats = re.sub('(\w+:)', '**|** ' + reddit_markdown.italics(r"\1") + ' ', self.stats)
 
         # Fix the first word.
         self.stats = self.stats.replace('(**|**', '(')
@@ -114,7 +114,7 @@ class Story(object):
         self.stats = self.stats.replace('- **|**', '**|**')
 
         # Exponentiate.
-        self.stats = reddit_markdown.exponentiate(self.stats)
+        self.stats = reddit_markdown.quote(reddit_markdown.exponentiate(self.stats))
 
     def __hash__(self):
         # We will use the URL for a hash.

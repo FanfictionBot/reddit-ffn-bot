@@ -8,3 +8,6 @@ def italics(string):
 
 def exponentiate(string):
     return '^(' + string + ')'
+
+def quote(string):
+    return '> ' + string
