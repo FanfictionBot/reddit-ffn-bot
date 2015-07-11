@@ -3,8 +3,8 @@
 [![Join the chat at https://gitter.im/tusing/reddit-ffn-bot](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/tusing/reddit-ffn-bot?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 #### New features!
-- ##### Parse multiple links in a single call using semicolons: ```linkffn(fic1; fic2; fic3; fic4)```
-- ##### Automatically find links to fanfics in a comment and reply, without even calling the bot by adding  ```ffnbot!directlinks``` to a comment
+##### - Parse multiple links in a single call using semicolons: ```linkffn(fic1; fic2; fic3; fic4)```
+##### - Automatically find links to fanfics in a comment and reply, without even calling the bot by adding  ```ffnbot!directlinks``` to a comment
 
 ###**USAGE, TIPS, AND TRICKS**
 
