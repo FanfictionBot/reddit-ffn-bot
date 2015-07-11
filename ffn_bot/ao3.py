@@ -43,8 +43,6 @@ class ArchiveOfOurOwn(Site):
 
             if item is not None:
                 yield item
-        # Make sure we yield something.
-        yield ""
 
     def process(self, request, context):
         try:
