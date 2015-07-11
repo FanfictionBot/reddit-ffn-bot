@@ -27,7 +27,7 @@ class MetaparserMeta(type):
         # Find all parsers
         parsers = []
         for base in result.mro():
-            for parser in getattr(base, "_parser", ()):
+            for parser in getattr(base, "_parsers", ()):
                 if parser not in parsers:
                     parsers.append(parser)
 
@@ -77,10 +77,10 @@ class Metaparser(metaclass=MetaparserMeta):
             id, tree,
 
             # Pass a function that will join the two strings
-            join=" - ".join,
+            join=" **|** ".join,
 
             # Pass a function that will format each item
-            itemfmt="{0}: {1}".format
+            itemfmt="*{0}*: {1}".format
     ):
         return join(map((lambda i: itemfmt(*i)), cls(id, tree).items()))
 
