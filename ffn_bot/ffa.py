@@ -2,17 +2,14 @@
 
 import re
 import logging
-import requests
 
-from google import search
-from requests import get
 from lxml import html
 
 from ffn_bot.cache import default_cache
 from ffn_bot.bot_tools import safe_int
 from ffn_bot.site import Site
 from ffn_bot import site
-
+from ffn_bot.metaparse import Metaparser, parser
 
 __all__ = ["HPFanfictionArchive"]
 
@@ -26,6 +23,28 @@ FFA_AUTHOR_URL = '//*[@id="pagetitle"]/a[2]/@href'
 FFA_SUMMARY_AND_META = '//*[@id="mainpage"]/div[4]//text()'
 FFA_TITLE = '//*[@id="pagetitle"]/a[1]/text()'
 
+FFA_SPLITTER_REGEX = re.compile(
+    "[A-Z][a-z ]*?[a-z]*?:.*?(?=\s*[A-Z](?:[a-z ]*?[a-z]*?:))"
+)
+
+
+class FFAMetadata(Metaparser):
+    @parser
+    @staticmethod
+    def parse_metadata(id, tree):
+        summary_and_meta = ' '.join(tree.xpath(FFA_SUMMARY_AND_META))
+        stats = summary_and_meta.split("Rated: ")
+        stats[1] = "Rated: " + stats[1]
+        stats = stats[1]
+        stats = re.sub("\s+", " ", stats.replace("\n", " "))
+        stats = FFA_SPLITTER_REGEX.findall(stats)
+        for l in stats:
+            yield tuple(p.strip() for p in l.split(":",2))
+
+    @parser
+    @staticmethod
+    def ID(id, tree):
+        return id
 
 class HPFanfictionArchive(Site):
 
@@ -109,25 +128,22 @@ class Story(site.Story):
         )
 
     def parse_html(self):
-        tree = html.fromstring(default_cache.get_page(self.url))
+        self.tree = tree = html.fromstring(default_cache.get_page(self.url))
 
-        self.summary_and_meta = ''.join(tree.xpath(FFA_SUMMARY_AND_META))
-        self.summary = ''.join(re.findall('Summary: (.*?)\n', self.summary_and_meta))
-        self.make_stats()
+        self.summary_and_meta = ' '.join(tree.xpath(FFA_SUMMARY_AND_META))
+        self.summary = ''.join(
+            re.findall(
+                'Summary: (.*?)(?=Rated:)',
+                self.summary_and_meta,
+                re.DOTALL
+            )
+        ).replace("\n"," ").strip()
+        self.stats = FFAMetadata.parse_to_string(
+             str(FFA_LINK_REGEX.match(self.url).groupdict()["sid"]),
+            self.tree
+
+        )
         self.title = tree.xpath(FFA_TITLE)[0]
         self.author = tree.xpath(FFA_AUTHOR_NAME)[0]
         self.authorlink = 'http://www.hpfanficarchive.com/stories/' + \
             tree.xpath(FFA_AUTHOR_URL)[0]
-
-        print(self.summary)
-        print(self.stats)
-
-    def make_stats(self):
-        self.stats = self.summary_and_meta.split("Rated: ")
-        self.stats[1] = "Rated: " + self.stats[1]
-        self.stats = self.stats[1]
-        self.stats.replace("\n\n", "\n")
-        self.stats.replace("\n\n\n", "\n")
-        self.stats.replace("\n", "\n\n")
-        self.stats.replace("  ", " ")
-        self.stats.replace("   ", " ")
