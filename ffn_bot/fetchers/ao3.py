@@ -148,7 +148,7 @@ class Story(site.Story):
         self.title = self.get_value_from_tree(AO3_TITLE)
         self.author = self.get_value_from_tree(AO3_AUTHOR_NAME)
         self.authorlink = self.get_value_from_tree(AO3_AUTHOR_URL)
-        self.stats = AO3Metadata.parse_to_string(
+        self.stats = AO3Metadata(
             AO3_LINK_REGEX.match(self.url).groupdict()["sid"],
             self.tree
         )

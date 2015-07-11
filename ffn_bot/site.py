@@ -94,27 +94,14 @@ class Story(object):
             line = line.strip()
             result.append("> " + line)
         result.append("")
-
-        self.format_stats()
-        result.append(self.stats)
+        result.append(reddit_markdown.exponentiate(self.format_stats()))
         return "\n".join(result)
 
     def format_stats(self):
-        # Allow the user to opt out of the reformatting
-        if "noreformat" in self.context:
-            return
-
-        # Separate by lines.
-        self.stats = re.sub('(\w+:)', '**|** ' + reddit_markdown.italics(r"\1") + ' ', self.stats)
-
-        # Fix the first word.
-        self.stats = self.stats.replace('(**|**', '(')
-
-        # Replace the "dashes" with spaces.
-        self.stats = self.stats.replace('- **|**', '**|**')
-
-        # Exponentiate.
-        self.stats = reddit_markdown.quote(reddit_markdown.exponentiate(self.stats))
+        res = []
+        for key, value in self.get_stats().items():
+            res.append(reddit_markdown.italics(key) + ": " + value)
+        return (" " + reddit_markdown.bold("|") + " ").join(res)
 
     def __hash__(self):
         # We will use the URL for a hash.

@@ -138,7 +138,7 @@ class Story(site.Story):
         self.tree = tree
 
         # We will generate the stats ourselves.
-        self.stats = AFFMetadata.parse_to_string(
+        self.stats = AFFMetadata(
             (self.archive, self.id), tree
         )
         self.title = tree.xpath(AFF_TITLE_XPATH)[0].strip()[len("Story: "):]

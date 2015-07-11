@@ -136,7 +136,7 @@ class Story(site.Story):
                 re.DOTALL
             )
         ).replace("\n"," ").strip()
-        self.stats = FFAMetadata.parse_to_string(
+        self.stats = FFAMetadata(
              str(FFA_LINK_REGEX.match(self.url).groupdict()["sid"]),
             self.tree
 

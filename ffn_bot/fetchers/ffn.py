@@ -41,7 +41,6 @@ class FanfictionParser(Metaparser):
     @classmethod
     def parse_metadata_simple(cls, id, tree):
         story_info = cls.get_story_information(tree)
-        print(story_info)
         for part in re.split(r"\s+-\s+", story_info):
             subparts = re.split(r":\s+", part)
             if len(subparts) == 2:
@@ -178,7 +177,7 @@ class Story(site.Story):
             tree.xpath('//*[@id="profile_top"]/a[1]/@href')[0]
         self.image = tree.xpath('//*[@id="profile_top"]/span[1]/img')
         self.tree = tree
-        self.stats = self.parser.parse_to_string(None, tree)
+        self.stats = self.parser(None, tree)
 
 
 class FanfictionNetSite(FanfictionBaseSite):
