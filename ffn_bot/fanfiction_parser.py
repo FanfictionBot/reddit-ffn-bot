@@ -138,7 +138,7 @@ class FanfictionBaseSite(site.Site):
     def extract_direct_links(self, body, context):
         return (
             self.generate_response(self.id_link % id, context)
-            for _,_,_,id in self.link_regex.findall(body)
+            for _, _, _, id in self.link_regex.findall(body)
         )
 
 
@@ -161,7 +161,7 @@ class Story(site.Story):
     def get_url(self):
         return "http://www.%s/s/%s/1/" % (
             self.site,
-            re.match(LINK_REGEX%self.site, self.url).groupdict()["sid"]
+            re.match(LINK_REGEX % self.site, self.url).groupdict()["sid"]
         )
 
     def parse_html(self):
@@ -197,4 +197,3 @@ class FictionPressSite(FanfictionBaseSite):
         )
 
 # We don't need to cache the story objects anymore.
-

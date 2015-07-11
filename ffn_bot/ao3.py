@@ -71,8 +71,6 @@ class ArchiveOfOurOwn(Site):
 
             if item is not None:
                 yield item
-        # Make sure we yield something.
-        yield ""
 
     def process(self, request, context):
         try:
@@ -108,13 +106,15 @@ class ArchiveOfOurOwn(Site):
 
     def get_story(self, query):
         return Story(self.find_link(query, set()))
+
     def extract_direct_links(self, body, context):
         # for _,_,id in AO3_LINK_REGEX.findall(body):
         #     yield self.generate_response(self.id_to_link(id), context)
         return (
             self.generate_response(self._id_to_link(id), context)
-            for _,_,id in AO3_LINK_REGEX.findall(body)
+            for _, _, id in AO3_LINK_REGEX.findall(body)
         )
+
 
 class Story(site.Story):
 

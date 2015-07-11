@@ -1,6 +1,11 @@
 # Fanfiction Data Bot for Reddit
 
-#### *Update 6/24/15: You can now separate queries in a single call with semicolons. Fanfiction.net formatting bug is fixed.*
+[![Join the chat at https://gitter.im/tusing/reddit-ffn-bot](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/tusing/reddit-ffn-bot?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
+#### New features!
+##### - Parse multiple links in a single call using semicolons: ```linkffn(fic1; fic2; fic3; fic4)```
+##### - Automatically find links to fanfics in a comment and reply, without even calling the bot by adding  ```ffnbot!directlinks``` to a comment
+
 ###**USAGE, TIPS, AND TRICKS**
 
 #### SUPPORTED WEBSITES:
@@ -32,6 +37,11 @@ linkffn(Harry Potter and the Natural 20 by Sir Poley)
 linkffn(https://www.fanfiction.net/s/8096183/1/Harry-Potter-and-the-Natural-20)
 
 linkffn(8096183)
+
+---- OR ----
+
+[Check out this awesome fic!](https://www.fanfiction.net/s/8096183/1/Harry-Potter-and-the-Natural-20)
+ffnbot!directlinks
 ```
 > [***Harry Potter and the Natural 20***](https://www.fanfiction.net/s/8096183/1/Harry-Potter-and-the-Natural-20) by [*Sir Poley*](https://www.fanfiction.net/u/3989854/Sir-Poley)
 >
@@ -73,11 +83,3 @@ Check out these awesome fics! linkffn(By the Divining Light; Conlaodh's Song)
 >
 >
 > *Read usage tips and tricks  [here](https://github.com/tusing/reddit-ffn-bot/blob/master/README.md).*
-
-
-###**WHAT YOU CAN'T DO** _(yet)_
-- You can't link from OP.
-
-###**UPCOMING FEATURES**
-- Support for DLP forums
-- Linking from OP.
