@@ -1,4 +1,5 @@
 import re
+from ffn_bot import reddit_markdown
 
 
 WHITESPACE = re.compile("(|[ ]+(?!\Z))")
@@ -95,7 +96,6 @@ class Story(object):
         result.append("")
 
         self.format_stats()
-        self.stats = '> ^(' + self.stats + ')'
         result.append(self.stats)
         return "\n".join(result)
 
@@ -104,22 +104,17 @@ class Story(object):
         if "noreformat" in self.context:
             return
 
-        self.stats = re.sub('(\w+:)', '\n\n*' + r"\1" + '*', self.stats)
-        self.stats = re.sub('((\w|[/,\.\-\(])+)', '' + r'\1', self.stats)
-        self.stats = re.sub('([\n]+)', '\n', self.stats)
-        self.stats = re.sub('([\n]+)', ' **|** ', self.stats)
-        self.stats = self.stats.replace("-  **|** ", " **|** ")
-        self.stats = self.stats.replace("  **|**   **|**", "")
-        self.stats = self.stats.replace("**|**    **|**", " **|** ")
-        self.stats = self.stats.replace("(Work in progress)", " *WIP* ")
-        self.stats = self.stats.replace("> (***|**", "> (")
-        self.stats = self.stats.replace("> ^(> ^(", "> ^(")
-        self.stats = self.stats.replace("**|** * **|**", "**|**")
-        self.stats = self.stats.replace(":**", ":*")
-        self.stats = self.stats.replace("^(> ^(", "^(")
-        self.stats = self.stats.replace("^(> ^(", "^(")
-        self.stats = self.stats.replace("> ^(> ^(", "> ^(")
-        self.stats = re.sub('([\)]+)', ')', self.stats)
+        # Separate by lines.
+        self.stats = re.sub('(\w+:)', '**|**' + reddit_markdown.italics(r"\1") + ' ', self.stats)
+
+        # Fix the first word.
+        self.stats = self.stats.replace('(**|**', '(')
+
+        # Replace the "dashes" with spaces.
+        self.stats = self.stats.replace('- **|**', '**|**')
+
+        # Exponentiate.
+        self.stats = reddit_markdown.exponentiate(self.stats)
 
     def __hash__(self):
         # We will use the URL for a hash.
