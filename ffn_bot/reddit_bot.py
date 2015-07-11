@@ -6,6 +6,7 @@ import logging
 import praw
 
 from ffn_bot import fanfiction_parser
+from ffn_bot import reddit_markdown
 from ffn_bot import ao3
 from ffn_bot import ffa
 from ffn_bot import aff
@@ -45,7 +46,8 @@ CONTEXT_MARKER_REGEX = re.compile(r"ffnbot!([^ ]+)")
 FOOTER = "\n\nSupporting fanfiction.net (*linkffn*), AO3 (buggy) (*linkao3*), HPFanficArchive (*linkffa*), and FictionPress (*linkfp*)." + \
     "\n\nRead usage tips and tricks  [**here**](https://github.com/tusing/reddit-ffn-bot/blob/master/README.md).\n\n" + \
     "^(**New Feature:** Parse multiple fics in a single call with;semicolons;like;this!)\n\n" + \
-    "^^**Update** ^^**7/7/2015:** ^^More ^^formatting ^^bugs ^^fixed.\n\nffnbot!ignore"
+    "^(**New Feature:** Type 'ffnbot!directlinks' in any comment to have the bot **automatically parse fanfiction links** and make a reply, without even calling the bot!)" + \
+    "^^**Update** ^^**7/11/2015:** ^^More ^^formatting ^^bugs ^^fixed. ^^Feature ^^added!\n\n^^^^^^^^^^^^^^^^^ffnbot!ignore"
 
 DRY_RUN = False
 
