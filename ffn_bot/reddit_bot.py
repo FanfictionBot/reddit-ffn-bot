@@ -158,7 +158,7 @@ def parse_submissions(SUBREDDIT):
     # FIXME: Also parse submission-text itself.
     print("==================================================")
     print("Parsing submissions on SUBREDDIT", SUBREDDIT)
-    for submission in SUBREDDIT.get_hot(limit=25):
+    for submission in SUBREDDIT.get_hot(limit=50):
         # Also parse the submission text.
         if not is_submission_checked(submission):
             make_reply(submission.selftext, None, submission.id, submission.add_comment)
