@@ -13,6 +13,7 @@ try:
     from colorama import Fore, Back, Style
 except ImportError:
     class FakeANSI(object):
+
         def __getattr__(self, name):
             try:
                 return super(FakeANSI, self).__getattr__(name)

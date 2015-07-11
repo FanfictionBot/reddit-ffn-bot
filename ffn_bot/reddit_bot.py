@@ -65,6 +65,7 @@ def get_sites():
 def run_forever():
     sys.exit(_run_forever())
 
+
 def _run_forever():
     """Run-Forever"""
     while True:
@@ -163,6 +164,7 @@ def load_subreddits(bot_parameters):
         print("No subreddit specified. Adding test subreddit.")
         SUBREDDIT_LIST.add('tusingtestfield')
     print("LOADED SUBREDDITS: ", SUBREDDIT_LIST)
+
 
 def check_comment(id):
     """Marks a comment as checked."""

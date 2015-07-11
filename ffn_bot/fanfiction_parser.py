@@ -74,8 +74,10 @@ class FanfictionBaseSite(site.Site):
     def extract_direct_links(self, body, context):
         return (
             self.generate_response(self.id_link % id, context)
-            for _,_,_,id in self.link_regex.findall(body)
+            for _, _, _, id in self.link_regex.findall(body)
         )
+
+
 class Story(site.Story):
 
     def __init__(self, url, site, context):
@@ -97,11 +99,11 @@ class Story(site.Story):
     def get_url(self):
         return "http://www.%s/s/%s/1/" % (
             self.site,
-            re.match(LINK_REGEX%self.site, self.url).groupdict()["sid"]
+            re.match(LINK_REGEX % self.site, self.url).groupdict()["sid"]
         )
 
     def parse_html(self):
-        page = default_cache.get_page(self.get_url(), throttle=randint(1000,4000)/1000)
+        page = default_cache.get_page(self.get_url(), throttle=randint(1000, 4000) / 1000)
         tree = html.fromstring(page)
 
         self.title = (tree.xpath('//*[@id="profile_top"]/b/text()'))[0]
@@ -149,4 +151,3 @@ class FictionPressSite(FanfictionBaseSite):
         super(FictionPressSite, self).__init__("fictionpress.com", "linkfp", name)
 
 # We don't need to cache the story objects anymore.
-

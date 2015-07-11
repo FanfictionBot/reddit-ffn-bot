@@ -74,7 +74,9 @@ AFF_GENERATED_META = (
     ))
 )
 
+
 class AdultFanfiction(Site):
+
     """
     Implementation of adult fanfiction
     """
@@ -106,6 +108,7 @@ class AdultFanfiction(Site):
 
 
 class Story(site.Story):
+
     """
     Implementation of a story
     """
@@ -121,7 +124,7 @@ class Story(site.Story):
             self.get_url(),
 
             # Got this header from the ficsave codebase
-            headers = {
+            headers={
                 "Cookie": AFF_BYPASS_COOKIE
             },
             # Do not even try to follow to the adult form url.
