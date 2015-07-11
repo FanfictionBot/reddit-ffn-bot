@@ -17,7 +17,7 @@ from ffn_bot import site
 __all__ = ["HPFanfictionArchive"]
 
 FFA_LINK_REGEX = re.compile(
-    r"http(s)?://www.hpfanficarchive.com/stories/viewstory.php?sid=(?P<sid>\d+)", re.IGNORECASE)
+    r"http(?:s)?://www\.hpfanficarchive\.com/stories/viewstory\.php\?sid=(?P<sid>\d+)", re.IGNORECASE)
 FFA_FUNCTION = "linkffa"
 FFA_SEARCH_QUERY = "http://www.hpfanficarchive.com/stories/viewstory.php?sid= %s"
 
@@ -32,23 +32,21 @@ class HPFanfictionArchive(Site):
     def __init__(self, regex=FFA_FUNCTION + r"\((.*?)\)", name=None):
         super(HPFanfictionArchive, self).__init__(regex, name)
 
-    def from_requests(self, requests):
+    def from_requests(self, requests, context):
         _pitem = []
         item = _pitem
         for request in requests:
             try:
-                item = self.process(request)
+                item = self.process(request, context)
             except Exception as e:
                 continue
 
             if item is not None:
                 yield item
-        # Make sure we yield something.
-        yield ""
 
-    def process(self, request):
+    def process(self, request, context):
         try:
-            link = self.find_link(request)
+            link = self.find_link(request, context)
         except IOError as e:
             logging.error("FF not found: %s" % request)
             return
@@ -56,14 +54,17 @@ class HPFanfictionArchive(Site):
         if link is None:
             return
 
-        return self.generate_response(link)
+        return self.generate_response(link, context)
 
-    def find_link(self, request):
+    @staticmethod
+    def id_to_url(id):
+        return "http://www.hpfanficarchive.com/stories/viewstory.php?sid=%s" % id
+
+    def find_link(self, request, context):
         # Find link by ID.
         id = safe_int(request)
         if id is not None:
-            return "http://www.hpfanficarchive.com/stories/viewstory.php?sid=%d" % id
-
+            return self.id_to_url(id)
         # Filter out direct links.
         match = FFA_LINK_REGEX.match(request)
         if match is not None:
@@ -71,17 +72,24 @@ class HPFanfictionArchive(Site):
 
         return default_cache.search(FFA_SEARCH_QUERY % request)
 
-    def generate_response(self, link):
+    def generate_response(self, link, context):
         assert link is not None
-        return Story(link)
+        return Story(link, context)
+
+    def extract_direct_links(self, body, context):
+        return (
+            self.generate_response(self.id_to_url(safe_int(id)), context)
+            for id in FFA_LINK_REGEX.findall(body)
+        )
 
     def get_story(self, query):
-        return Story(self.find_link(query))
+        return Story(self.find_link(query, set()))
 
 
 class Story(site.Story):
 
-    def __init__(self, url):
+    def __init__(self, url, context=None):
+        super(Story, self).__init__(context)
         self.url = url
         self.raw_stats = []
 
@@ -92,6 +100,11 @@ class Story(site.Story):
         self.summary = ""
         self.summary_and_meta = ""
         self.parse_html()
+
+    def get_url(self):
+        return HPFanfictionArchive.id_to_url(
+            str(FFA_LINK_REGEX.match(self.url).groupdict()["sid"])
+        )
 
     def parse_html(self):
         tree = html.fromstring(default_cache.get_page(self.url))

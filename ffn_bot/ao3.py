@@ -14,7 +14,7 @@ from ffn_bot import site
 __all__ = ["ArchiveOfOurOwn"]
 
 AO3_LINK_REGEX = re.compile(
-    r"http(s)?://([^.]+\.)?archiveofourown.org/works/(?P<sid>\d+).*", re.IGNORECASE)
+    r"http(s)?://([^.]+\.)?archiveofourown.org/works/(?P<sid>\d+)[^ ]*", re.IGNORECASE)
 AO3_FUNCTION = "linkao3"
 AO3_SEARCH_QUERY = "site:archiveofourown.org/works/ %s"
 
@@ -32,23 +32,21 @@ class ArchiveOfOurOwn(Site):
     def __init__(self, regex=AO3_FUNCTION + r"\((.*?)\)", name=None):
         super(ArchiveOfOurOwn, self).__init__(regex, name)
 
-    def from_requests(self, requests):
+    def from_requests(self, requests, context):
         _pitem = []
         item = _pitem
         for request in requests:
             try:
-                item = self.process(request)
+                item = self.process(request, context)
             except Exception as e:
                 continue
 
             if item is not None:
                 yield item
-        # Make sure we yield something.
-        yield ""
 
-    def process(self, request):
+    def process(self, request, context):
         try:
-            link = self.find_link(request)
+            link = self.find_link(request, context)
         except IOError as e:
             logging.info("FF not found: %s" % request)
             return
@@ -56,13 +54,16 @@ class ArchiveOfOurOwn(Site):
         if link is None:
             return
 
-        return self.generate_response(link)
+        return self.generate_response(link, context)
 
-    def find_link(self, request):
+    def _id_to_link(self, id):
+        return "http://archiveofourown.org/works/%s/" % id
+
+    def find_link(self, request, context):
         # Find link by ID.
         id = safe_int(request)
         if id is not None:
-            return "http://archiveofourown.org/works/%d/" % id
+            return self._id_to_link(str(id))
 
         # Filter out direct links.
         match = AO3_LINK_REGEX.match(request)
@@ -71,17 +72,24 @@ class ArchiveOfOurOwn(Site):
 
         return default_cache.search(AO3_SEARCH_QUERY % request)
 
-    def generate_response(self, link):
+    def generate_response(self, link, context):
         assert link is not None
-        return Story(link)
+        return Story(link, context)
 
     def get_story(self, query):
-        return Story(self.find_link(query))
-
+        return Story(self.find_link(query, set()))
+    def extract_direct_links(self, body, context):
+        # for _,_,id in AO3_LINK_REGEX.findall(body):
+        #     yield self.generate_response(self.id_to_link(id), context)
+        return (
+            self.generate_response(self._id_to_link(id), context)
+            for _,_,id in AO3_LINK_REGEX.findall(body)
+        )
 
 class Story(site.Story):
 
-    def __init__(self, url):
+    def __init__(self, url, context=None):
+        super(Story, self).__init__(context)
         self.url = url
         self.raw_stats = []
 
@@ -94,8 +102,10 @@ class Story(site.Story):
         self.parse_html()
 
     def get_real_url(self):
+        return "http://archiveofourown.org/works/%s?view_adult=true" % AO3_LINK_REGEX.match(self.url).groupdict()["sid"]
+
+    def get_url(self):
         return "http://archiveofourown.org/works/%s" % AO3_LINK_REGEX.match(self.url).groupdict()["sid"]
-    get_url = get_real_url
 
     def get_value_from_tree(self, xpath, sep=""):
         return sep.join(self.tree.xpath(xpath)).strip()

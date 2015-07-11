@@ -85,6 +85,11 @@ if platform.system() == "Windows":
         # return False.
         return False
 else:
+    import os
+    import select
+    import termios
+    import fcntl
+
     def wait(timeout=1, precision=None):
         """
         Wait for a keypress.
@@ -98,11 +103,56 @@ else:
                           polls (means nothing for this operating system)
         :returns:  True if at least one key was hit. False otherwise.
         """
-        import sys
-        import select
 
-        rlist, wlist, xlist = select.select([sys.stdin], [], [], timeout)
-        return bool(rlist)
+        # Should be zero, but who knows what OS
+        # we're actually in, so... yeah
+        fd = sys.stdin.fileno()
+
+        # Yeah, we have to rape the terminal settings
+        # before we think of polling the damn thing.
+        oldterm = termios.tcgetattr(fd)     # Store old state.
+        newattr = termios.tcgetattr(fd)
+        newattr[3] = newattr[3] & ~termios.ICANON & ~termios.ECHO
+        termios.tcsetattr(fd, termios.TCSANOW, newattr)
+
+        try:
+            # Now wait for the user to press a key
+            rlist, wlist, xlist = select.select([fd], [], [], timeout)
+
+            # And if the user pressed a key, we have to catch them
+            # before another call to this function will not be
+            # returning immediately
+            if rlist:
+
+                # And now, we have to modify the IO-System Flags.
+                # So we have a non-blocking IO and thus can read
+                # incoming bytes one by one.
+                oldflags = fcntl.fcntl(fd, fcntl.F_GETFL)
+                fcntl.fcntl(fd, fcntl.F_SETFL, oldflags | os.O_NONBLOCK)
+
+                # Read incoming bytes until there are no more.
+                try:
+                    while sys.stdin.read(1):
+                        pass
+
+                # Do only catch anything that is not
+                # a python system exception like
+                # SystemExit and KeyboardInterrupt
+                except Exception:
+                    pass
+                finally:
+                    # And reset the IO-System no matter what happens.
+                    fcntl.fcntl(fd, fcntl.F_SETFL, oldflags)
+
+                # And while we're at it, yeah I think, we did all
+                # just to catch key presses.
+                return True
+
+            # And if we did nothing, we just return false.
+            return False
+        finally:
+            # And don't forget resetting the terminal.
+            termios.tcsetattr(fd, termios.TCSAFLUSH, oldterm)
 
 
 def pause(minutes, seconds):
@@ -153,9 +203,9 @@ def print_exception(etype=None, evalue=None, etb=None):
         else:
             exc_type, exc_value, exc_tb = etype, evalue, etb
     else:
-        exc_type, exc_value, exc_traceback = sys.exc_info()
+        exc_type, exc_value, exc_tb = sys.exc_info()
 
     # Format the exception
-    lines = traceback.format_exception(exc_type, exc_value, exc_traceback)
+    lines = traceback.format_exception(exc_type, exc_value, exc_tb)
     logging.error(''.join('!! ' + line for line in lines))
     print(Style.RESET_ALL)

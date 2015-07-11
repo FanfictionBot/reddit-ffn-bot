@@ -25,7 +25,20 @@ class Site(object):
         self.regex = regex
         self.name = name
 
-    def from_requests(self, requests):
+    def extract_direct_links(self, body, context):
+        """
+        Extracts all direct links
+
+        It is the responsibility of the site-class to
+        make sure, that there will be no repeated requests.
+
+        :param body:  The comment body.
+        :param context:  The comment context.
+        :returns: An iterable of story objects.
+        """
+        return ()
+
+    def from_requests(self, requests, context):
         """
         Returns an iterable of story objects that are assiciated with this request.
         :param request:  The list of request that have been sent.
@@ -40,8 +53,8 @@ class Story(object):
     Represents a single story.
     """
 
-    def __init__(self):
-        pass
+    def __init__(self, context=None):
+        self.context = set() if context is None else context
 
     def get_title(self):
         """Returns the title of the story"""
@@ -87,6 +100,10 @@ class Story(object):
         return "\n".join(result)
 
     def format_stats(self):
+        # Allow the user to opt out of the reformatting
+        if "noreformat" in self.context:
+            return
+
         self.stats = re.sub('(\w+:)', '\n\n*' + r"\1" + '*', self.stats)
         self.stats = re.sub('((\w|[/,\.\-\(])+)', '' + r'\1', self.stats)
         self.stats = re.sub('([\n]+)', '\n', self.stats)
@@ -103,3 +120,12 @@ class Story(object):
         self.stats = self.stats.replace("^(> ^(", "^(")
         self.stats = self.stats.replace("> ^(> ^(", "> ^(")
         self.stats = re.sub('([\)]+)', ')', self.stats)
+
+    def __hash__(self):
+        # We will use the URL for a hash.
+        return hash(self.get_url())
+
+    def __eq__(self, other):
+        if not isinstance(other, Story):
+            return False
+        return other.get_url() == self.get_url()

@@ -15,7 +15,7 @@ from lxml import html
 
 __all__ = ["FanfictionNetSite", "FictionPressSite"]
 
-LINK_REGEX = "http(s?)://((www|m)\\.)?%s/s/(\\d+)/.*"
+LINK_REGEX = "http(s?)://((www|m)\\.)?%s/s/(?P<sid>\\d+).*"
 ID_LINK = "https://www.{0}/s/%s"
 
 
@@ -29,14 +29,14 @@ class FanfictionBaseSite(site.Site):
             LINK_REGEX % self.site.replace(".", "\\."), re.IGNORECASE)
         self.id_link = ID_LINK.format(self.site)
 
-    def from_requests(self, requests):
+    def from_requests(self, requests, context):
         # I'd love to use 'yield from'
         for request in requests:
-            yield self.process(request)
+            yield self.process(request, context)
 
-    def process(self, request):
+    def process(self, request, context):
         try:
-            link = self.find_link(request)
+            link = self.find_link(request, context)
         except (StopIteration, Exception) as e:
             bot_tools.print_exception()
             return None
@@ -45,12 +45,15 @@ class FanfictionBaseSite(site.Site):
             return None
 
         try:
-            return Story(link, self.site)
+            return self.generate_response(link, context)
         except Exception as e:
             bot_tools.print_exception()
             return None
 
-    def find_link(self, fic_name):
+    def generate_response(self, link, context):
+        return Story(link, self.site, context)
+
+    def find_link(self, fic_name, context):
         # Prevent users from crashing program with bad link names.
         fic_name = fic_name.encode('ascii', errors='replace')
         fic_name = fic_name.decode('ascii', errors='replace')
@@ -65,18 +68,18 @@ class FanfictionBaseSite(site.Site):
         if match is not None:
             return fic_name
 
-        # Obfuscation.
-        time.sleep(randint(1, 3))
-        sleep_milliseconds = randint(500, 3000)
-        time.sleep(sleep_milliseconds / 1000)
-
         search_request = 'site:www.{1}/s/ {0}'.format(fic_name, self.site)
         return default_cache.search(search_request)
 
+    def extract_direct_links(self, body, context):
+        return (
+            self.generate_response(self.id_link % id, context)
+            for _,_,_,id in self.link_regex.findall(body)
+        )
+class Story(site.Story):
 
-class _Story(site.Story):
-
-    def __init__(self, url, site):
+    def __init__(self, url, site, context):
+        super(Story, self).__init__(context)
         self.url = url
         self.site = site
         self.raw_stats = []
@@ -91,8 +94,14 @@ class _Story(site.Story):
         self.encode()
         self.decode()
 
+    def get_url(self):
+        return "http://www.%s/s/%s/1/" % (
+            self.site,
+            re.match(LINK_REGEX%self.site, self.url).groupdict()["sid"]
+        )
+
     def parse_html(self):
-        page = default_cache.get_page(self.url)
+        page = default_cache.get_page(self.get_url(), throttle=randint(1000,4000)/1000)
         tree = html.fromstring(page)
 
         self.title = (tree.xpath('//*[@id="profile_top"]/b/text()'))[0]
@@ -139,23 +148,5 @@ class FictionPressSite(FanfictionBaseSite):
     def __init__(self, command="linkfp", name=None):
         super(FictionPressSite, self).__init__("fictionpress.com", "linkfp", name)
 
+# We don't need to cache the story objects anymore.
 
-try:
-    from functools import lru_cache
-except ImportError:
-    print("Python version too old for caching.")
-    Story = _Story
-else:
-    # We will use a simple lru_cache for now.
-    @lru_cache(maxsize=10000)
-    def Story(url, site):
-        return _Story(url, site)
-
-# # DEBUG
-# x = Story('https://www.fanfiction.net/s/11096853/1/She-Chose-Me')  # No self.image
-# print(str(x))
-# print(x.authorlink)
-# print(x.title)
-# print(x.author)
-# print(x.summary)
-# print(x.stats)
