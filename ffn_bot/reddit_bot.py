@@ -38,7 +38,15 @@ FOOTER = "\n\nSupporting fanfiction.net (*linkffn*), AO3 (buggy) (*linkao3*), HP
     "^(**New Feature:** Type 'ffnbot!directlinks' in any comment to have the bot **automatically parse fanfiction links** and make a reply, without even calling the bot! Added AdultFanFiction support!)" + \
     "\n\n^^**Update** ^^**7/11/2015:** ^^More ^^formatting ^^bugs ^^fixed. ^^Feature ^^added!\n\n^^^^^^^^^^^^^^^^^ffnbot!ignore"
 
+# For testing purposes
 DRY_RUN = False
+
+# This is a experimental feature of the program
+# Please use with caution
+USE_GET_COMMENTS = False
+
+
+logging.getLogger().setLevel(logging.DEBUG)
 
 
 def get_regexps():
@@ -74,19 +82,29 @@ def _run_forever():
 
 
 def main():
-    global DRY_RUN
     """Basic main function."""
     # moved call for agruments to avoid double calling
     bot_parameters = get_bot_parameters()
     login_to_reddit(bot_parameters)
     load_checked_comments()
     load_subreddits(bot_parameters)
+    init_global_flags(bot_parameters)
+
+    while True:
+        single_pass()
+
+
+def init_global_flags(bot_parameters):
+    global USE_GET_COMMENTS, DRY_RUN
+
+    if bot_parameters["experimental"]["getcomments"]:
+        print("You are using the experimental comment parsing")
+        print("strategy. It may not immidiately work.")
+        USE_GET_COMMENTS = True
 
     DRY_RUN = bool(bot_parameters["dry"])
-    while True:
-        for SUBREDDIT in SUBREDDIT_LIST:
-            parse_submissions(r.get_subreddit(SUBREDDIT))
-            bot_tools.pause(1, 0)
+    if DRY_RUN:
+        print("Dry run enabled. No comment will be sent.")
 
 
 def get_bot_parameters():
@@ -119,12 +137,23 @@ def get_bot_parameters():
         help="do not send comments."
     )
 
+    parser.add_argument(
+        "--getcomments",
+        action="store_true",
+        help="Experimental feature. Makes a more reliable bot."
+    )
+
     args = parser.parse_args()
 
     return {
         'user': args.user, 'password': args.password,
         'user_subreddits': args.subreddits, 'default': args.default,
-        'dry': args.dry
+        'dry': args.dry,
+
+        # Switches for experimental features
+        'experimental': {
+            "getcomments": args.getcomments
+        }
     }
 
 
@@ -155,6 +184,64 @@ def load_subreddits(bot_parameters):
         print("No subreddit specified. Adding test subreddit.")
         SUBREDDIT_LIST.add('tusingtestfield')
     print("LOADED SUBREDDITS: ", SUBREDDIT_LIST)
+
+
+def handle_submission(submission):
+    if not is_submission_checked(submission):
+        logging.info("Found new submission: " + submission.id)
+        try:
+            parse_submission_text(submission)
+        finally:
+            check_submission(submission)
+
+
+def handle_comment(comment):
+    logging.debug("Handling comment: " + comment.id)
+    if str(comment.id) not in CHECKED_COMMENTS:
+        logging.info("Found new comment: " + comment.id)
+        try:
+            make_reply(comment.body, comment.id, comment.reply)
+        finally:
+            check_comment(comment.id)
+
+
+def single_pass():
+    try:
+        if USE_GET_COMMENTS:
+            single_pass_experimental()
+        else:
+            single_pass_normal()
+    except Exception:
+        bot_tools.print_exception()
+    bot_tools.pause(1, 0)
+
+
+def single_pass_normal():
+    for subreddit in SUBREDDIT_LIST:
+        logging.info("Handling Subreddit: " + subreddit)
+        for submission in r.get_subreddit(subreddit).get_hot(limit=50):
+            handle_submission(submission)
+
+            logging.info("Checking SUBMISSION: " + submission.id)
+            flat_comments = praw.helpers.flatten_tree(submission.comments)
+            for comment in flat_comments:
+                handle_comment(comment)
+
+
+def single_pass_experimental():
+    # We actually use a multireddit to acieve our goal
+    # of watching multiple reddits.
+    subreddit = r.get_subreddit("+".join(SUBREDDIT_LIST))
+
+    print(subreddit)
+
+    logging.info("Parsing new submissions.")
+    for submission in subreddit.get_new(limit=50):
+        handle_submission(submission)
+
+    logging.info("Parsing new comments.")
+    for comment in subreddit.get_comments(limit=100):
+        handle_comment(comment)
 
 
 def check_comment(id):
@@ -215,7 +302,6 @@ def parse_submission_text(submission):
 
     make_reply(
         submission.selftext,
-        None,
         submission.id,
         submission.add_comment,
         markers,
@@ -223,36 +309,7 @@ def parse_submission_text(submission):
     )
 
 
-def parse_submissions(SUBREDDIT):
-    """Parses all user-submissions."""
-    print("==================================================")
-    print("Parsing submissions on SUBREDDIT", SUBREDDIT)
-    for submission in SUBREDDIT.get_hot(limit=50):
-        # Also parse the submission text.
-        if not is_submission_checked(submission):
-            parse_submission_text(submission)
-            check_submission(submission)
-
-        logging.info("Checking SUBMISSION: ", submission.id)
-        flat_comments = praw.helpers.flatten_tree(submission.comments)
-        for comment in flat_comments:
-            logging.info(
-                'Checking COMMENT: ' + comment.id + ' in submission ' + submission.id)
-            if str(comment.id) in CHECKED_COMMENTS:
-                logging.info("Comment " + comment.id + " already parsed!")
-            else:
-                print("Parsing comment ", comment.id, ' in submission ', submission.id)
-                try:
-                    make_reply(comment.body, comment.id, comment.id, comment.reply)
-                except Exception:
-                    logging.error("\n\nPARSING COMMENT: Error has occured!")
-                    bot_tools.print_exception()
-                    check_comment(comment.id)
-    print("Parsing on SUBREDDIT ", SUBREDDIT, " complete.")
-    print("==================================================")
-
-
-def make_reply(body, cid, id, reply_func, markers=None, additions=()):
+def make_reply(body, id, reply_func, markers=None, additions=()):
     """Makes a reply for the given comment."""
     reply = formulate_reply(body, markers, additions)
 
@@ -273,9 +330,6 @@ def make_reply(body, cid, id, reply_func, markers=None, additions=()):
         print('Continuing to parse submissions...')
     else:
         logging.info("No reply conditions met.")
-
-    if cid is not None:
-        check_comment(cid)
 
 
 def parse_context_markers(comment_body):
