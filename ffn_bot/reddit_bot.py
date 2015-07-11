@@ -63,13 +63,18 @@ def get_sites():
 
 
 def run_forever():
+    sys.exit(_run_forever())
+
+def _run_forever():
     """Run-Forever"""
     while True:
         try:
             main()
         # Exit on sys.exit and keyboard interrupts.
-        except (SystemExit, KeyboardInterrupt):
+        except KeyboardInterrupt:
             raise
+        except SystemExit as e:
+            return e.code
         except:
             logging.error("MAIN: AN EXCEPTION HAS OCCURED!")
             bot_tools.print_exception()
