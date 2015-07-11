@@ -41,7 +41,8 @@ class Site(object):
 
     def from_requests(self, requests, context):
         """
-        Returns an iterable of story objects that are assiciated with this request.
+        Returns an iterable of story objects that are assiciated with this
+        request.
         :param request:  The list of request that have been sent.
         :returns: An iterable of Story objects.
         """
