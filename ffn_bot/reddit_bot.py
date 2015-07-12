@@ -341,20 +341,27 @@ def parse_submission_text(submission):
 
 def make_reply(body, id, reply_func, markers=None, additions=()):
     """Makes a reply for the given comment."""
-    reply = formulate_reply(body, markers, additions)
+    try:
+        reply = list(formulate_reply(body, markers, additions))
+    except LookupError:
+        if not DRY_RUN:
+            reply_func("You requested too many fics.\n"
+                       "\nWe allow a maximum of 30 stories")
+        print("Too many fics...")
+        return
 
-    if not reply:
+    raw_reply = "".join(reply)
+    if not raw_reply:
         print("Empty reply!")
-    elif len(reply) > 10:
-        print(Fore.GREEN)
-        print('--------------------------------------------------')
-        print('Outgoing reply to ' + id + ':\n' + reply + FOOTER)
-        print('--------------------------------------------------')
-        print(Style.RESET_ALL)
-
+    elif len(raw_reply) > 10:
+        print(
+            "Writing reply to", id,
+            "(", len(raw_reply), "characters in", len(reply), "messages)"
+        )
         # Do not send the comment.
         if not DRY_RUN:
-            reply_func(reply + FOOTER)
+            for part in reply:
+                reply_func(part + FOOTER)
 
         bot_tools.pause(1, 20)
         print('Continuing to parse submissions...')

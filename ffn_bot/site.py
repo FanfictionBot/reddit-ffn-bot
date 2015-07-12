@@ -58,7 +58,7 @@ class Story(object):
 
     def __init__(self, context=None):
         self.context = set() if context is None else context
-
+        self._loaded = False
     def get_title(self):
         """Returns the title of the story"""
         return self.title
@@ -88,6 +88,7 @@ class Story(object):
 
     def __str__(self):
         """Generates the response string."""
+        self.load()
         result = ["\n\n"]
         result.append(
             reddit_markdown.link(
@@ -131,3 +132,9 @@ class Story(object):
         if not isinstance(other, Story):
             return False
         return other.get_url() == self.get_url()
+    def load(self):
+        if not self._loaded:
+            self.parse_html()
+        self.loaded = True
+    def parse_html(self):
+        pass

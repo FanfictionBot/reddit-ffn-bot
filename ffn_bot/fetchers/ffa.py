@@ -120,7 +120,6 @@ class Story(site.Story):
         self.authorlink = ""
         self.summary = ""
         self.summary_and_meta = ""
-        self.parse_html()
 
     def get_url(self):
         return HPFanfictionArchive.id_to_url(

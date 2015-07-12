@@ -121,7 +121,6 @@ class Story(site.Story):
         super(Story, self).__init__(context)
         self.archive = archive
         self.id = id
-        self.parse_html()
 
     def parse_html(self):
         tree = html.fromstring(default_cache.get_page(

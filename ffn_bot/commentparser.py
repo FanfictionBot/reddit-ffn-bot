@@ -6,6 +6,10 @@ import itertools
 from ffn_bot.fetchers import SITES, get_sites
 
 
+STORIES_PER_REPLY = 10
+MAX_STORIES_PER_POST = 30
+
+
 # Allow to modify the behaviour of the comments
 # by adding a special function into the system
 #
@@ -45,7 +49,7 @@ def formulate_reply(comment_body, markers=None, additions=()):
 
     # Ignore this message if we hit this marker
     if "ignore" in markers:
-        return None
+        return
 
     requests = {}
     # Just parse normally of nothing other turns up.
@@ -58,7 +62,7 @@ def formulate_reply(comment_body, markers=None, additions=()):
         direct_links = itertools.chain(
             direct_links, get_direct_links(comment_body, markers))
 
-    return parse_comment_requests(requests, markers, direct_links)
+    yield from parse_comment_requests(requests, markers, direct_links)
 
 
 def parse_comment_requests(requests, context, additions):
@@ -72,7 +76,21 @@ def parse_comment_requests(requests, context, additions):
 
     if "nodistinct" not in context:
         results = set(results)
-    return "".join(str(result) for result in results if result)
+
+    if len(results) > MAX_STORIES_PER_POST:
+        raise LookupError("Maximum exceeded.")
+
+    cur_part = []
+    for part in results:
+        if not part:
+            continue
+
+        if len(cur_part) == STORIES_PER_REPLY:
+            yield "".join(str(p) for p in cur_part)
+            cur_part = []
+
+        cur_part.append(part)
+    yield "".join(str(p) for p in cur_part)
 
 
 def _parse_comment_requests(requests, context):

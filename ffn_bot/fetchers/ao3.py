@@ -130,7 +130,6 @@ class Story(site.Story):
         self.authorlink = ""
         self.summary = ""
 
-        self.parse_html()
 
     def get_real_url(self):
         return "http://archiveofourown.org/works/%s?view_adult=true" % AO3_LINK_REGEX.match(self.url).groupdict()["sid"]

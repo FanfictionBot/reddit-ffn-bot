@@ -153,7 +153,6 @@ class Story(site.Story):
         self.summary = ""
 
         self.parser = parser
-        self.parse_html()
 
     def get_url(self):
         return "http://www.%s/s/%s/1/" % (
