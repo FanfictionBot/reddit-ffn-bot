@@ -1,4 +1,5 @@
 import os.path
+import collections
 from itertools import chain
 from pkgutil import iter_modules
 
@@ -28,5 +29,19 @@ SITES = list(filter(
                 module, ispkg in iter_modules(
                     [os.path.dirname(__file__)]))
         ))))
+
+
+
+def get_site(name):
+    """Returns the site by name"""
+    for site in SITES:
+        if site.name == name:
+            return site.name
+    return None
+
+
+def get_sites():
+    """Returns a dictionary of all sites."""
+    return collections.OrderedDict((site.name, site) for site in SITES)
 
 __all__ = ["SITES"]
