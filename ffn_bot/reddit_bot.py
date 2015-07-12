@@ -1,12 +1,12 @@
 import re
 import sys
+import atexit
 import argparse
 import itertools
 import logging
 import praw
 
 from ffn_bot.fetchers import SITES
-from ffn_bot import reddit_markdown
 
 from ffn_bot import bot_tools
 
@@ -61,6 +61,7 @@ def get_sites():
 
 
 def run_forever():
+    atexit.register(save_comments)
     sys.exit(_run_forever())
 
 
@@ -236,19 +237,21 @@ def single_pass_experimental():
         handle_comment(comment)
 
 
+def save_comments():
+    """Saves all comments"""
+    if DRY_RUN:
+        return
+
+    with open("CHECKED_COMMENTS.txt", "w") as file:
+        for id in CHECKED_COMMENTS:
+            file.write(id)
+
+
 def check_comment(id):
     """Marks a comment as checked."""
     global CHECKED_COMMENTS, DRY_RUN
     CHECKED_COMMENTS.add(str(id))
-
-    # This is a dry run, do not pretend we
-    # store anything in any way.
-    if DRY_RUN:
-        return
-
-    with open('CHECKED_COMMENTS.txt', 'w') as file:
-        for id in CHECKED_COMMENTS:
-            file.write(str(id) + '\n')
+    save_comments()
 
 
 def load_checked_comments():
