@@ -3,6 +3,7 @@ This file handles the comment parsing.
 """
 import re
 import itertools
+from ffn_bot import site
 from ffn_bot.fetchers import SITES, get_sites
 
 
@@ -77,7 +78,9 @@ def parse_comment_requests(requests, context, additions):
     if "nodistinct" not in context:
         results = set(results)
 
-    if len(results) > MAX_STORIES_PER_POST:
+    if len(tuple(filter(
+            lambda x:isinstance(x, site.Story), results
+    ))) > MAX_STORIES_PER_POST:
         raise LookupError("Maximum exceeded.")
 
     cur_part = []
