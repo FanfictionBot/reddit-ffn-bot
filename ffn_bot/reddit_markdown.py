@@ -11,4 +11,4 @@ def exponentiate(string):
 
 
 def quote(string):
-    return '> ' + string
+    return "> " + string.replace("\n", "\n> ")
