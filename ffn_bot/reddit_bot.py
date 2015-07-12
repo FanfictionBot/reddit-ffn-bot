@@ -7,7 +7,7 @@ import logging
 import praw
 
 from ffn_bot.fetchers import SITES
-
+from ffn_bot.commentlist import CommentList
 from ffn_bot import bot_tools
 
 # For pretty text
@@ -19,7 +19,7 @@ USER_AGENT = "Python:FanfictionComment:v0.5 (by tusing, StuxSoftware, and MikroM
 r = praw.Reddit(USER_AGENT)
 DEFAULT_SUBREDDITS = ['HPFanfiction', 'fanfiction', 'HPMOR']
 SUBREDDIT_LIST = set()
-CHECKED_COMMENTS = set()
+CHECKED_COMMENTS = None
 
 # Allow to modify the behaviour of the comments
 # by adding a special function into the system
@@ -61,7 +61,6 @@ def get_sites():
 
 
 def run_forever():
-    atexit.register(save_comments)
     sys.exit(_run_forever())
 
 
@@ -79,6 +78,9 @@ def _run_forever():
             logging.error("MAIN: AN EXCEPTION HAS OCCURED!")
             bot_tools.print_exception()
             bot_tools.pause(1, 0)
+        finally:
+            if CHECKED_COMMENTS is not None:
+                CHECKED_COMMENTS.save()
 
 
 def main():
@@ -86,7 +88,6 @@ def main():
     # moved call for agruments to avoid double calling
     bot_parameters = get_bot_parameters()
     login_to_reddit(bot_parameters)
-    load_checked_comments()
     load_subreddits(bot_parameters)
     init_global_flags(bot_parameters)
 
@@ -95,7 +96,7 @@ def main():
 
 
 def init_global_flags(bot_parameters):
-    global USE_GET_COMMENTS, DRY_RUN
+    global USE_GET_COMMENTS, DRY_RUN, CHECKED_COMMENTS
 
     if bot_parameters["experimental"]["getcomments"]:
         print("You are using the experimental comment parsing")
@@ -105,6 +106,11 @@ def init_global_flags(bot_parameters):
     DRY_RUN = bool(bot_parameters["dry"])
     if DRY_RUN:
         print("Dry run enabled. No comment will be sent.")
+
+    CHECKED_COMMENTS = CommentList(
+        bot_parameters["comments"],
+        DRY_RUN
+    )
 
 
 def get_bot_parameters():
@@ -126,6 +132,12 @@ def get_bot_parameters():
         help='add default subreddits, can be in addition to -s')
 
     parser.add_argument(
+        '-c', '--comments',
+        help="Filename where comments are stored",
+        default="CHECKED_COMMENTS.txt"
+    )
+
+    parser.add_argument(
         '-l', '--dry',
         action='store_true',
         help="do not send comments.")
@@ -143,6 +155,7 @@ def get_bot_parameters():
         'user_subreddits': args.subreddits,
         'default': args.default,
         'dry': args.dry,
+        'comments': args.comments,
         # Switches for experimental features
         'experimental': {
             "getcomments": args.getcomments
@@ -195,7 +208,7 @@ def handle_comment(comment):
         try:
             make_reply(comment.body, comment.id, comment.reply)
         finally:
-            check_comment(comment.id)
+            CHECKED_COMMENTS.add(str(comment.id))
 
 
 def single_pass():
@@ -237,40 +250,10 @@ def single_pass_experimental():
         handle_comment(comment)
 
 
-def save_comments():
-    """Saves all comments"""
-    if DRY_RUN:
-        return
-
-    with open("CHECKED_COMMENTS.txt", "w") as file:
-        for id in CHECKED_COMMENTS:
-            file.write(str(id) + "\n")
-
-
-def check_comment(id):
-    """Marks a comment as checked."""
-    global CHECKED_COMMENTS, DRY_RUN
-    CHECKED_COMMENTS.add(str(id))
-    save_comments()
-
-
-def load_checked_comments():
-    """Loads all comments that have been checked."""
-    global CHECKED_COMMENTS
-    logging.info('Loading CHECKED_COMMENTS...')
-    try:
-        with open('CHECKED_COMMENTS.txt', 'r') as file:
-            CHECKED_COMMENTS = {str(line.rstrip('\n')) for line in file}
-    except IOError:
-        bot_tools.print_exception()
-        CHECKED_COMMENTS = set()
-    print('Loaded CHECKED_COMMENTS.')
-    logging.info(CHECKED_COMMENTS)
-
-
 def check_submission(submission):
     """Mark the submission as checked."""
-    check_comment("SUBMISSION_" + str(submission.id))
+    global CHECKED_COMMENTS
+    CHECKED_COMMENTS.add("SUBMISSION_" + str(submission.id))
 
 
 def is_submission_checked(submission):
