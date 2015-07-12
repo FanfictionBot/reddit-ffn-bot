@@ -153,3 +153,5 @@ class Story(site.Story):
             AO3_LINK_REGEX.match(self.url).groupdict()["sid"],
             self.tree
         )
+    def get_site(self):
+        return "Archive of our Own", "http://www.archiveofourown.org/"

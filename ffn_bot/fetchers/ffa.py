@@ -147,3 +147,6 @@ class Story(site.Story):
         self.author = tree.xpath(FFA_AUTHOR_NAME)[0]
         self.authorlink = 'http://www.hpfanficarchive.com/stories/' + \
             tree.xpath(FFA_AUTHOR_URL)[0]
+
+    def get_site(self):
+        return "HP Fanfic Archive", "http://www.hpfanficarchive.com"

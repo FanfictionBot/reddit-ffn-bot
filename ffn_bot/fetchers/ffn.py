@@ -19,6 +19,11 @@ FFN_GENRES = [
     "Tragedy", "Western"
 ]
 
+DOMAIN_TO_ARCHIVE_NAME = {
+    "fanfiction.net": "Fanfiction.Net",
+    "fictionpress.com": "FictionPress"
+}
+
 
 class FanfictionParser(Metaparser):
     CATEGORY_TYPE = "Category"
@@ -169,6 +174,11 @@ class Story(site.Story):
         self.image = tree.xpath('//*[@id="profile_top"]/span[1]/img')
         self.tree = tree
         self.stats = self.parser(None, tree)
+    def get_site(self):
+        return (
+            DOMAIN_TO_ARCHIVE_NAME[self.site],
+            "http://www." + self.site + "/"
+        )
 
 
 class FanfictionNetSite(FanfictionBaseSite):
@@ -182,4 +192,3 @@ class FictionPressSite(FanfictionBaseSite):
         super(FictionPressSite, self).__init__(
             "fictionpress.com", "linkfp", name, "Category")
 
-# We don't need to cache the story objects anymore.

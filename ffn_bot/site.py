@@ -1,4 +1,6 @@
 import re
+from collections import OrderedDict
+
 from ffn_bot import reddit_markdown
 
 
@@ -25,7 +27,6 @@ class Site(object):
             name = self.__class__.__module__ + "." + self.__class__.__name__
         self.regex = regex
         self.name = name
-
     def extract_direct_links(self, body, context):
         """
         Extracts all direct links
@@ -62,6 +63,9 @@ class Story(object):
         """Returns the title of the story"""
         return self.title
 
+    def get_site(self):
+        """Return the name of the site. (None means unknown)"""
+        return None
     def get_summary(self):
         """Returns the summary of the story."""
         return self.summary
@@ -84,23 +88,38 @@ class Story(object):
 
     def __str__(self):
         """Generates the response string."""
-        result = []
-        result.append("\n\n[***%s***](%s) by [*%s*](%s)" % (
-            self.get_title(), self.get_url(),
-            self.get_author(), self.get_author_link()
-        ))
+        result = ["\n\n"]
+        result.append(
+            reddit_markdown.link(
+                reddit_markdown.bold(reddit_markdown.italics(self.get_title())),
+                self.get_url()
+            ) + " by " + reddit_markdown.link(
+                reddit_markdown.italics(self.get_author()),
+                self.get_author_link()
+            )
+        )
+        # result.append("\n\n[***%s***](%s) by [*%s*](%s)" %
+        #     self.get_title(), self.get_url(),
+        #     self.get_author(), self.get_author_link()
+        # ))
 
         result.append("")
-        for line in self.get_summary().split("\n"):
-            line = line.strip()
-            result.append("> " + line)
+        result.extend(reddit_markdown.quote(self.get_summary()).split("\n"))
         result.append("")
         result.append(reddit_markdown.exponentiate(self.format_stats()))
         return "\n".join(result)
 
     def format_stats(self):
+        site = self.get_site()
+        if site is not None:
+            site = reddit_markdown.link(*site)
+            stats = OrderedDict((("Site", site),))
+            stats.update(self.get_stats())
+        else:
+            stats = self.get_stats()
+
         res = []
-        for key, value in self.get_stats().items():
+        for key, value in stats.items():
             res.append(reddit_markdown.italics(key) + ": " + value)
         return (" " + reddit_markdown.bold("|") + " ").join(res)
 

@@ -12,3 +12,7 @@ def exponentiate(string):
 
 def quote(string):
     return "> " + string.replace("\n", "\n> ")
+
+
+def link(text, link):
+    return "[" + text + "](" + link + ")"

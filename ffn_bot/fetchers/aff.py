@@ -150,3 +150,5 @@ class Story(site.Story):
 
     def get_url(self):
         return AFF_LINK_BY_ID.format(self.archive, self.id)
+    def get_site(self):
+        return ("Adult Fanfiction", "http://www.adult-fanfiction.org/")
