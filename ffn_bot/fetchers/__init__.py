@@ -16,28 +16,17 @@ def _try_caller(func):
 
 
 SITES = list(filter(
-    lambda x: x is not None,
-    chain.from_iterable(
+    lambda x: x is not None, chain.from_iterable(
         (
             (
                 # Find and instantiate all Sites
-                _try_caller(getattr(module, name))
-                for name in dir(module)
-                if isinstance(getattr(module, name), type) and
-                    issubclass(
-                        getattr(module, name),
-                        Site
-                    )
-            )
-            # Import Submodules
+                _try_caller(getattr(module, name)) for name in dir(module)
+                if isinstance(getattr(module, name), type) and issubclass(
+                    getattr(module, name), Site))  # Import Submodules
             for module in (
-                loader.find_module(module).load_module(module)
-                for loader, module, ispkg in iter_modules(
-                    [os.path.dirname(__file__)]
-                )
-            )
-        )
-    )
-))
+                loader.find_module(module).load_module(module) for loader,
+                module, ispkg in iter_modules(
+                    [os.path.dirname(__file__)]))
+        ))))
 
 __all__ = ["SITES"]

@@ -48,6 +48,7 @@ AFF_DEFAULT_SUMMARY = ""
 
 
 class AFFMetadata(Metaparser):
+
     """
     Functions that will determine the metadata.
     """
@@ -76,7 +77,6 @@ class AFFMetadata(Metaparser):
     @staticmethod
     def Hits(id, tree):
         return tree.xpath("//tr[5]/td[3]/text()")[0].strip()[len("Hits: "):]
-
 
 
 class AdultFanfiction(Site):

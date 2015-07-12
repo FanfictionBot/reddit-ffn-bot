@@ -26,16 +26,18 @@ class FanfictionParser(Metaparser):
     @staticmethod
     def get_story_information(tree):
         if tree.xpath('//*[@id="profile_top"]/span[1]/img'):
-            return "".join(tree.xpath('//*[@id="profile_top"]/span[4]//text()'))
+            return "".join(
+                tree.xpath('//*[@id="profile_top"]/span[4]//text()'))
         else:
-            return "".join(tree.xpath('//*[@id="profile_top"]/span[3]//text()'))
+            return "".join(
+                tree.xpath('//*[@id="profile_top"]/span[3]//text()'))
+
     @parser
     @classmethod
     def parse_category(cls, id, tree):
         return (
             cls.CATEGORY_TYPE,
-            tree.xpath('//*[@id="pre_story_links"]/span/a[last()]/text()')[0]
-        )
+            tree.xpath('//*[@id="pre_story_links"]/span/a[last()]/text()')[0])
 
     @parser
     @classmethod
@@ -60,12 +62,8 @@ class FanfictionParser(Metaparser):
             if n_unnamed == 0:
                 yield "Language", subpart
             elif (
-                    n_unnamed == 1
-                    and sum(
-                        (g.strip() in FFN_GENRES)
-                        for g in subpart.split("/")
-                    )
-            ):
+                n_unnamed == 1 and sum(
+                    (g.strip() in FFN_GENRES) for g in subpart.split("/"))):
                 yield "Genre", subpart
             else:
                 yield "Characters", subpart
@@ -74,11 +72,7 @@ class FanfictionParser(Metaparser):
     @classmethod
     def create_implementation(cls, category):
         return type(cls).__new__(
-            type(cls),
-            "<FFNParser>",
-            (cls,),
-            {"CATEGORY_TYPE": category}
-        )
+            type(cls), "<FFNParser>", (cls, ), {"CATEGORY_TYPE": category})
 
 
 class FanfictionBaseSite(site.Site):
@@ -126,7 +120,7 @@ class FanfictionBaseSite(site.Site):
         if sid is not None:
             return self.id_link % sid
 
-        # Yield links directly without googling.
+# Yield links directly without googling.
         match = self.link_regex.match(fic_name)
         if match is not None:
             return fic_name
@@ -142,7 +136,6 @@ class FanfictionBaseSite(site.Site):
 
 
 class Story(site.Story):
-
     def __init__(self, url, site, context, parser):
         super(Story, self).__init__(context)
         self.url = url
@@ -160,39 +153,33 @@ class Story(site.Story):
     def get_url(self):
         return "http://www.%s/s/%s/1/" % (
             self.site,
-            re.match(LINK_REGEX % self.site, self.url).groupdict()["sid"]
-        )
+            re.match(LINK_REGEX % self.site, self.url).groupdict()["sid"])
 
     def parse_html(self):
         page = default_cache.get_page(
             self.get_url(),
-            throttle=randint(1000,4000)/1000
-        )
+            throttle=randint(1000, 4000) / 1000)
         tree = html.fromstring(page)
 
         self.title = (tree.xpath('//*[@id="profile_top"]/b/text()'))[0]
         self.summary = (tree.xpath('//*[@id="profile_top"]/div/text()'))[0]
         self.author += (tree.xpath('//*[@id="profile_top"]/a[1]/text()'))[0]
-        self.authorlink = 'https://www.' + self.site + \
-            tree.xpath('//*[@id="profile_top"]/a[1]/@href')[0]
+        self.authorlink = 'https://www.' + self.site + tree.xpath(
+            '//*[@id="profile_top"]/a[1]/@href')[0]
         self.image = tree.xpath('//*[@id="profile_top"]/span[1]/img')
         self.tree = tree
         self.stats = self.parser(None, tree)
 
 
 class FanfictionNetSite(FanfictionBaseSite):
-
     def __init__(self, command="linkffn", name=None):
         super(FanfictionNetSite, self).__init__(
-            "fanfiction.net", "linkffn", name, "Fandom"
-        )
+            "fanfiction.net", "linkffn", name, "Fandom")
 
 
 class FictionPressSite(FanfictionBaseSite):
-
     def __init__(self, command="linkfp", name=None):
         super(FictionPressSite, self).__init__(
-            "fictionpress.com", "linkfp", name, "Category"
-        )
+            "fictionpress.com", "linkfp", name, "Category")
 
 # We don't need to cache the story objects anymore.

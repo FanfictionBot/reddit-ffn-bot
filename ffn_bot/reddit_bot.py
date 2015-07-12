@@ -45,7 +45,6 @@ DRY_RUN = False
 # Please use with caution
 USE_GET_COMMENTS = False
 
-
 logging.getLogger().setLevel(logging.DEBUG)
 
 
@@ -111,45 +110,38 @@ def get_bot_parameters():
     """Parse the command-line arguments."""
     # initialize parser and add options for username and password
     parser = argparse.ArgumentParser()
-    parser.add_argument(
-        '-u', '--user',
-        help='define Reddit login username'
-    )
+    parser.add_argument('-u', '--user', help='define Reddit login username')
     parser.add_argument(
         '-p', '--password',
-        help='define Reddit login password'
-    )
+        help='define Reddit login password')
 
     parser.add_argument(
         '-s', '--subreddits',
-        help='define target subreddits; seperate with commas'
-    )
+        help='define target subreddits; seperate with commas')
 
     parser.add_argument(
         '-d', '--default',
         action='store_true',
-        help='add default subreddits, can be in addition to -s'
-    )
+        help='add default subreddits, can be in addition to -s')
 
     parser.add_argument(
         '-l', '--dry',
         action='store_true',
-        help="do not send comments."
-    )
+        help="do not send comments.")
 
     parser.add_argument(
         "--getcomments",
         action="store_true",
-        help="Experimental feature. Makes a more reliable bot."
-    )
+        help="Experimental feature. Makes a more reliable bot.")
 
     args = parser.parse_args()
 
     return {
-        'user': args.user, 'password': args.password,
-        'user_subreddits': args.subreddits, 'default': args.default,
+        'user': args.user,
+        'password': args.password,
+        'user_subreddits': args.subreddits,
+        'default': args.default,
         'dry': args.dry,
-
         # Switches for experimental features
         'experimental': {
             "getcomments": args.getcomments
@@ -296,17 +288,11 @@ def parse_submission_text(submission):
 
     additions = []
     if "submissionlink" in markers:
-        additions.extend(
-            get_direct_links(submission.url, markers)
-        )
+        additions.extend(get_direct_links(submission.url, markers))
 
     make_reply(
-        submission.selftext,
-        submission.id,
-        submission.add_comment,
-        markers,
-        additions
-    )
+        submission.selftext, submission.id, submission.add_comment, markers,
+        additions)
 
 
 def make_reply(body, id, reply_func, markers=None, additions=()):
@@ -339,20 +325,14 @@ def parse_context_markers(comment_body):
     # The power of generators, harnessed in this
     # oneliner.
     return set(
-        s.lower()
-        for s in itertools.chain.from_iterable(
-            v.split(",")
-            for v in CONTEXT_MARKER_REGEX.findall(comment_body)
-        )
-    )
+        s.lower() for s in itertools.chain.from_iterable(
+            v.split(",") for v in CONTEXT_MARKER_REGEX.findall(comment_body)))
 
 
 def get_direct_links(string, markers):
     direct_links = []
     for site in SITES:
-        direct_links.append(
-            site.extract_direct_links(string, markers)
-        )
+        direct_links.append(site.extract_direct_links(string, markers))
     # Flatten the story-list
     return itertools.chain.from_iterable(direct_links)
 
@@ -377,8 +357,7 @@ def formulate_reply(comment_body, markers=None, additions=()):
     direct_links = additions
     if "directlinks" in markers:
         direct_links = itertools.chain(
-            direct_links, get_direct_links(comment_body, markers)
-        )
+            direct_links, get_direct_links(comment_body, markers))
 
     return parse_comment_requests(requests, markers, direct_links)
 
@@ -390,9 +369,7 @@ def parse_comment_requests(requests, context, additions):
     """
     # Merge the story-list
     results = itertools.chain(
-        _parse_comment_requests(requests, context),
-        additions
-    )
+        _parse_comment_requests(requests, context), additions)
 
     if "nodistinct" not in context:
         results = set(results)
@@ -405,7 +382,8 @@ def _parse_comment_requests(requests, context):
         if len(queries) > 0:
             print("Requests for '%s': %r" % (site, queries))
         for query in queries:
-            for comment in sites[site].from_requests(query.split(";"), context):
+            for comment in sites[site].from_requests(query.split(";"),
+                                                     context):
                 if comment is None:
                     continue
                 yield comment

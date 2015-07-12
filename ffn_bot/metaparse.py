@@ -11,6 +11,7 @@ MetadataItem = collections.namedtuple("MetadataItem", "name value")
 
 
 class MetaparserMeta(type):
+
     """
     Metaclass for the Metadata-Parser class.
 
@@ -48,7 +49,7 @@ def _apply_generator(func, *args, **kwargs):
             yield item
     elif (
         (not isinstance(result, collections.Sequence))
-        or len(result)!=2
+        or len(result) != 2
         or (isinstance(result, basestring))
     ):
         yield func.__name__, result
@@ -57,6 +58,7 @@ def _apply_generator(func, *args, **kwargs):
 
 
 class Metaparser(metaclass=MetaparserMeta):
+
     """
     What wonderful magic is happening here...
     :)
@@ -84,6 +86,7 @@ class Metaparser(metaclass=MetaparserMeta):
     ):
         return join(map((lambda i: itemfmt(*i)), cls(id, tree).items()))
 
+
 def parser(func):
-    func._parser= True
+    func._parser = True
     return func

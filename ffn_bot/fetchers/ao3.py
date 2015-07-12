@@ -30,11 +30,12 @@ AO3_FANDOM_TAGS = CSSSelector("dd.fandom ul li").path + "//text()"
 
 
 class AO3Metadata(Metaparser):
+
     @parser
     @staticmethod
     def parse_fandom(id, tree):
         res = tree.xpath(AO3_FANDOM_TAGS)
-        if len(res)>1:
+        if len(res) > 1:
             yield "Fandoms", ", ".join(res)
         else:
             yield "Fandom", res[0]
@@ -152,4 +153,3 @@ class Story(site.Story):
             AO3_LINK_REGEX.match(self.url).groupdict()["sid"],
             self.tree
         )
-

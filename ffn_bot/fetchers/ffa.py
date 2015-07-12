@@ -29,6 +29,7 @@ FFA_SPLITTER_REGEX = re.compile(
 
 
 class FFAMetadata(Metaparser):
+
     @parser
     @staticmethod
     def parse_metadata(id, tree):
@@ -39,12 +40,13 @@ class FFAMetadata(Metaparser):
         stats = re.sub("\s+", " ", stats.replace("\n", " "))
         stats = FFA_SPLITTER_REGEX.findall(stats)
         for l in stats:
-            yield tuple(p.strip() for p in l.split(":",2))
+            yield tuple(p.strip() for p in l.split(":", 2))
 
     @parser
     @staticmethod
     def ID(id, tree):
         return id
+
 
 class HPFanfictionArchive(Site):
 
@@ -135,9 +137,9 @@ class Story(site.Story):
                 self.summary_and_meta,
                 re.DOTALL
             )
-        ).replace("\n"," ").strip()
+        ).replace("\n", " ").strip()
         self.stats = FFAMetadata(
-             str(FFA_LINK_REGEX.match(self.url).groupdict()["sid"]),
+            str(FFA_LINK_REGEX.match(self.url).groupdict()["sid"]),
             self.tree
 
         )
