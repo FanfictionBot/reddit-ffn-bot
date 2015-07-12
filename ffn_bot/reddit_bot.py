@@ -244,7 +244,7 @@ def save_comments():
 
     with open("CHECKED_COMMENTS.txt", "w") as file:
         for id in CHECKED_COMMENTS:
-            file.write(id)
+            file.write(str(id) + "\n")
 
 
 def check_comment(id):
