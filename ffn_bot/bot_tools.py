@@ -164,22 +164,16 @@ def pause(minutes, seconds):
     :param seconds:  The amount of seconds we sould wait.
     """
     print("A countdown timer is beginning. You can skip it by pressing a key.")
-    try:
-        totaltime = minutes * 60 + seconds
-        for remaining in range(totaltime, 0, -1):
-            sys.stdout.write("\r")
-            sys.stdout.write("Paused: {:2d} seconds remaining.".format(remaining))
-            sys.stdout.flush()
-            if wait(1):
-                output_message = "\rSkipped at " + str(remaining) + " seconds!"
-                sys.stdout.write(str.ljust(output_message, 55) + '\n')
-                break
-        sys.stdout.write(str.ljust("\rComplete!", 55) + '\n')
-    except KeyboardInterrupt:
+    totaltime = minutes * 60 + seconds
+    for remaining in range(totaltime, 0, -1):
+        sys.stdout.write("\r")
+        sys.stdout.write("Paused: {:2d} seconds remaining.".format(remaining))
         sys.stdout.flush()
-        time.sleep(1)
-        sys.stdout.write(str.ljust("\rCountdown bypassed!", 55) + "\n")
-
+        if wait(1):
+            output_message = "\rSkipped at " + str(remaining) + " seconds!"
+            sys.stdout.write(str.ljust(output_message, 55) + '\n')
+            break
+    sys.stdout.write(str.ljust("\rComplete!", 55) + '\n')
 
 def print_exception(etype=None, evalue=None, etb=None):
     """
