@@ -2,6 +2,7 @@
 This module stores the comment saving functionality.
 """
 import contextlib
+import logging
 
 
 class CommentList(object):
@@ -15,10 +16,12 @@ class CommentList(object):
         self.clist = None
         self.filename = filename
         self.dry = dry
+        self.logger = logging.getLogger("CommmentList")
 
     def _load(self):
         self.clist = set()
         with contextlib.suppress(FileNotFoundError):
+            self.logger.info("Loading comment list...")
             with open(self.filename, "r") as f:
                 for line in f:
                     self.clist.add(line.strip())
@@ -26,6 +29,8 @@ class CommentList(object):
     def save(self):
         if self.dry or self.clist is None:
             return
+
+        self.logger.info("Saving comment list...")
         with open(self.filename, "w") as f:
             f.writelines(self.clist)
 
@@ -35,6 +40,7 @@ class CommentList(object):
 
     def add(self, cid):
         self._init_clist()
+        self.logger.debug("Adding comment to list: " + cid)
         self.clist.add(cid)
         self.save()
 
