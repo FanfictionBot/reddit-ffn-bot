@@ -1,4 +1,5 @@
 import time
+import random
 from google import search
 from requests import get
 from collections import OrderedDict
@@ -77,6 +78,8 @@ class RequestCache(object):
             return self.hit_cache("search", query)
         except KeyError:
             pass
+
+        time.sleep(random.randint(2000,5000)/1000.0)
 
         result = next(search(query, num=1, stop=1), None)
         self.push_cache("search", query, result)
