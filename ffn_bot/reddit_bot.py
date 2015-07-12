@@ -32,8 +32,9 @@ DRY_RUN = False
 # This is a experimental feature of the program
 # Please use with caution
 USE_GET_COMMENTS = False
+USE_STREAMS = False
 
-logging.getLogger().setLevel(logging.DEBUG)
+logging.getLogger().setLevel(logging.INFO)
 
 
 def run_forever():
@@ -67,14 +68,26 @@ def main():
     load_subreddits(bot_parameters)
     init_global_flags(bot_parameters)
 
+    if USE_STREAMS:
+        print("========================================")
+        print("Stream Based, Will not gracefully restart.")
+        stream_strategy()
+        sys.exit()
+
     while True:
         single_pass()
 
 
 def init_global_flags(bot_parameters):
-    global USE_GET_COMMENTS, DRY_RUN, CHECKED_COMMENTS
+    global USE_GET_COMMENTS, DRY_RUN, CHECKED_COMMENTS, USE_STREAMS
 
-    if bot_parameters["experimental"]["getcomments"]:
+    if bot_parameters["experimental"]["streams"]:
+        print("You are using the stream approach.")
+        print("Please note that the application will not propely")
+        print("restart on creashes due to limitations of the")
+        print("Python threading interface.")
+        USE_STREAMS = True
+    elif bot_parameters["experimental"]["getcomments"]:
         print("You are using the experimental comment parsing")
         print("strategy. It may not immidiately work.")
         USE_GET_COMMENTS = True
@@ -123,6 +136,12 @@ def get_bot_parameters():
         action="store_true",
         help="Experimental feature. Makes a more reliable bot.")
 
+    parser.add_argument(
+        "--streams",
+        action="store_true",
+        help="Highly experimental feature. Handle posts as they come"
+    )
+
     args = parser.parse_args()
 
     return {
@@ -134,7 +153,8 @@ def get_bot_parameters():
         'comments': args.comments,
         # Switches for experimental features
         'experimental': {
-            "getcomments": args.getcomments
+            "getcomments": args.getcomments,
+            "streams": args.streams
         }
     }
 
@@ -185,6 +205,68 @@ def handle_comment(comment):
             make_reply(comment.body, comment.id, comment.reply)
         finally:
             CHECKED_COMMENTS.add(str(comment.id))
+
+
+def stream_handler(queue, iterator, handler):
+    def _raise(exc):
+        raise exc
+
+    try:
+        for post in iterator:
+            print("Queueing Post:", post.id)
+            queue.put_nowait((handler, post))
+    except BaseException as e:
+        # Send the actual exception to the main thread
+        queue.put_nowait((_raise, e))
+
+
+def post_receiver(queue):
+    while True:
+        handler, post = queue.get()
+        handler(post)
+
+
+def stream_strategy():
+    from queue import Queue
+    from threading import Thread
+    from praw.helpers import submission_stream, comment_stream
+
+    post_queue = Queue()
+
+    threads = []
+    threads.append(Thread(target=lambda: stream_handler(
+        post_queue,
+        comment_stream(
+            r,
+            "+".join(SUBREDDIT_LIST),
+            limit=100,
+            verbosity=0
+        ),
+        handle_comment
+    )))
+    threads.append(Thread(target=lambda: stream_handler(
+        post_queue,
+        submission_stream(
+            r,
+            "+".join(SUBREDDIT_LIST),
+            limit=100,
+            verbosity=0
+        ),
+        handle_submission
+    )))
+
+    for thread in threads:
+        thread.daemon = True
+        thread.start()
+
+    while True:
+        try:
+            post_receiver(post_queue)
+        except Exception as e:
+            for thread in threads:
+                if not thread.isAlive():
+                    raise KeyboardInterrupt from e
+            bot_tools.print_exception(e)
 
 
 def single_pass():
