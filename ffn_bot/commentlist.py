@@ -55,3 +55,11 @@ class CommentList(object):
     def _init_clist(self):
         if self.clist is None:
             self._load()
+
+    def __len__(self):
+        self._init_clist()
+        return len(self.clist)
+
+    def __iter__(self):
+        self._init_clist()
+        return iter(self.clist)
