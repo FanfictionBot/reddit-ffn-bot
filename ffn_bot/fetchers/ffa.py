@@ -50,7 +50,7 @@ class FFAMetadata(Metaparser):
 
 class HPFanfictionArchive(Site):
 
-    def __init__(self, regex=FFA_FUNCTION + r"\((.*?)\)", name=None):
+    def __init__(self, regex=FFA_FUNCTION, name=None):
         super(HPFanfictionArchive, self).__init__(regex, name)
 
     def from_requests(self, requests, context):

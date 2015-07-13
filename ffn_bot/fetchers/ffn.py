@@ -84,7 +84,7 @@ class FanfictionBaseSite(site.Site):
     # All regexps are automatically case insensitive for sites.
 
     def __init__(self, site, command, name=None, category="Category"):
-        super(FanfictionBaseSite, self).__init__(command + r"\((.*?)\)", name)
+        super(FanfictionBaseSite, self).__init__(command, name)
         self.site = site
         self.link_regex = re.compile(
             LINK_REGEX % self.site.replace(".", "\\."), re.IGNORECASE)

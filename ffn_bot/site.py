@@ -13,7 +13,7 @@ class Site(object):
     Base-Class for a supported fanfiction archive.
     """
 
-    def __init__(self, regex, name=None):
+    def __init__(self, fname, name=None):
         """
         Sets the state of the site.
 
@@ -25,7 +25,7 @@ class Site(object):
         if name is None:
             # Automatically assign a name for the site.
             name = self.__class__.__module__ + "." + self.__class__.__name__
-        self.regex = regex
+        self.regex = re.compile(re.escape(fname) + r"\((.*?)\)")
         self.name = name
     def extract_direct_links(self, body, context):
         """

@@ -58,7 +58,7 @@ class AO3Metadata(Metaparser):
 
 class ArchiveOfOurOwn(Site):
 
-    def __init__(self, regex=AO3_FUNCTION + r"\((.*?)\)", name=None):
+    def __init__(self, regex=AO3_FUNCTION, name=None):
         super(ArchiveOfOurOwn, self).__init__(regex, name)
 
     def from_requests(self, requests, context):
