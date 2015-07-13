@@ -35,11 +35,8 @@ def parse_context_markers(comment_body):
 
 
 def get_direct_links(string, markers):
-    direct_links = []
     for site in SITES:
-        direct_links.append(site.extract_direct_links(string, markers))
-    # Flatten the story-list
-    return itertools.chain.from_iterable(direct_links)
+        yield from site.extract_direct_links(string, markers))
 
 
 def formulate_reply(comment_body, markers=None, additions=()):
@@ -52,11 +49,20 @@ def formulate_reply(comment_body, markers=None, additions=()):
     if "ignore" in markers:
         return
 
-    requests = {}
+    requests = []
     # Just parse normally of nothing other turns up.
     for site in SITES:
-        tofind = re.findall(site.regex, comment_body)
-        requests[site.name] = tofind
+        tofind = site.regex.findall(comment_body)
+
+        request_list = []
+        for item in tofind:
+            request_list.extend(item.split(";"))
+
+        # Ensure we don't have empty request lists.
+        if not request_list:
+            continue
+
+        requests.append((site, request_list))
 
     direct_links = additions
     if "directlinks" in markers:
@@ -97,13 +103,10 @@ def parse_comment_requests(requests, context, additions):
 
 
 def _parse_comment_requests(requests, context):
-    sites = get_sites()
-    for site, queries in requests.items():
-        if len(queries) > 0:
-            print("Requests for '%s': %r" % (site, queries))
+    for site, queries in requests:
+        print("Requests for '%s': %r" % (site.name, queries))
         for query in queries:
-            for comment in sites[site].from_requests(query.split(";"),
-                                                     context):
+            for comment in site.from_requests(query, context):
                 if comment is None:
                     continue
                 yield comment
