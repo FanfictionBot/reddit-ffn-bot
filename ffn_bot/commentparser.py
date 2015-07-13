@@ -28,7 +28,7 @@ def parse_context_markers(comment_body):
     Changes the context of the story subsystem.
     """
     # The power of generators, harnessed in this
-    # oneliner.
+    # oneliner
     return set(
         s.lower() for s in itertools.chain.from_iterable(
             v.split(",") for v in CONTEXT_MARKER_REGEX.findall(comment_body)))
@@ -54,6 +54,7 @@ def formulate_reply(comment_body, markers=None, additions=()):
     for site in SITES:
         tofind = site.regex.findall(comment_body)
 
+        # Split the request list using semicolons.
         request_list = []
         for item in tofind:
             request_list.extend(item.split(";"))
