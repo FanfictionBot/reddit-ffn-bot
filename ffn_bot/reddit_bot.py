@@ -33,8 +33,6 @@ DRY_RUN = False
 # Please use with caution
 USE_STREAMS = False
 
-logging.getLogger().setLevel(logging.INFO)
-
 
 def run_forever():
     sys.exit(_run_forever())
@@ -96,6 +94,9 @@ def init_global_flags(bot_parameters):
         DRY_RUN
     )
 
+    level = getattr(logging, bot_parameters["verbosity"].upper())
+    logging.getLogger().setLevel(level)
+
 
 def get_bot_parameters():
     """Parse the command-line arguments."""
@@ -132,6 +133,12 @@ def get_bot_parameters():
         help="Highly experimental feature. Handle posts as they come"
     )
 
+    parser.add_argument(
+        "-v", "--verbosity",
+        default="INFO",
+        help="The default log level. Using python level states."
+    )
+
     args = parser.parse_args()
 
     return {
@@ -141,6 +148,8 @@ def get_bot_parameters():
         'default': args.default,
         'dry': args.dry,
         'comments': args.comments,
+        'verbosity': args.verbosity,
+
         # Switches for experimental features
         'experimental': {
             "streams": args.streams
