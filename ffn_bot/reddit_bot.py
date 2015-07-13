@@ -132,11 +132,6 @@ def get_bot_parameters():
         help="do not send comments.")
 
     parser.add_argument(
-        "--getcomments",
-        action="store_true",
-        help="Experimental feature. Makes a more reliable bot.")
-
-    parser.add_argument(
         "--streams",
         action="store_true",
         help="Highly experimental feature. Handle posts as they come"
@@ -153,7 +148,6 @@ def get_bot_parameters():
         'comments': args.comments,
         # Switches for experimental features
         'experimental': {
-            "getcomments": args.getcomments,
             "streams": args.streams
         }
     }
@@ -271,41 +265,20 @@ def stream_strategy():
 
 def single_pass():
     try:
-        if USE_GET_COMMENTS:
-            single_pass_experimental()
-        else:
-            single_pass_normal()
+        # We actually use a multireddit to acieve our goal
+        # of watching multiple reddits.
+        subreddit = r.get_subreddit("+".join(SUBREDDIT_LIST))
+
+        logging.info("Parsing new submissions.")
+        for submission in subreddit.get_new(limit=50):
+            handle_submission(submission)
+
+        logging.info("Parsing new comments.")
+        for comment in subreddit.get_comments(limit=100):
+            handle_comment(comment)
     except Exception:
         bot_tools.print_exception()
     bot_tools.pause(1, 0)
-
-
-def single_pass_normal():
-    for subreddit in SUBREDDIT_LIST:
-        logging.info("Handling Subreddit: " + subreddit)
-        for submission in r.get_subreddit(subreddit).get_hot(limit=50):
-            handle_submission(submission)
-
-            logging.info("Checking SUBMISSION: " + submission.id)
-            flat_comments = praw.helpers.flatten_tree(submission.comments)
-            for comment in flat_comments:
-                handle_comment(comment)
-
-
-def single_pass_experimental():
-    # We actually use a multireddit to acieve our goal
-    # of watching multiple reddits.
-    subreddit = r.get_subreddit("+".join(SUBREDDIT_LIST))
-
-    print(subreddit)
-
-    logging.info("Parsing new submissions.")
-    for submission in subreddit.get_new(limit=50):
-        handle_submission(submission)
-
-    logging.info("Parsing new comments.")
-    for comment in subreddit.get_comments(limit=100):
-        handle_comment(comment)
 
 
 def check_submission(submission):
