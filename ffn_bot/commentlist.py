@@ -25,13 +25,15 @@ class CommentList(object):
         return self
 
     def __exit__(self, exc, val, tb):
-        self.clist = self._transaction_stack.pop()
+        last_transaction = self._transaction_stack.pop()
+        if exc:
+            self.clist = last_transaction
         self.save()
 
     def _load(self):
         self.clist = set()
+        self.logger.info("Loading comment list...")
         with contextlib.suppress(FileNotFoundError):
-            self.logger.info("Loading comment list...")
             with open(self.filename, "r") as f:
                 for line in f:
                     self.clist.add(line.strip())
