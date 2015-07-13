@@ -31,7 +31,6 @@ DRY_RUN = False
 
 # This is a experimental feature of the program
 # Please use with caution
-USE_GET_COMMENTS = False
 USE_STREAMS = False
 
 logging.getLogger().setLevel(logging.INFO)
@@ -87,10 +86,6 @@ def init_global_flags(bot_parameters):
         print("restart on creashes due to limitations of the")
         print("Python threading interface.")
         USE_STREAMS = True
-    elif bot_parameters["experimental"]["getcomments"]:
-        print("You are using the experimental comment parsing")
-        print("strategy. It may not immidiately work.")
-        USE_GET_COMMENTS = True
 
     DRY_RUN = bool(bot_parameters["dry"])
     if DRY_RUN:
