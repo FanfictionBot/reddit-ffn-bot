@@ -106,8 +106,7 @@ def parse_comment_requests(requests, context, additions):
 def _parse_comment_requests(requests, context):
     for site, queries in requests:
         print("Requests for '%s': %r" % (site.name, queries))
-        for query in queries:
-            for comment in site.from_requests(query, context):
-                if comment is None:
-                    continue
-                yield comment
+        for comment in site.from_requests(queries, context):
+            if comment is None:
+                continue
+            yield comment
