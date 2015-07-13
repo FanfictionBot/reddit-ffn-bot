@@ -36,7 +36,7 @@ def parse_context_markers(comment_body):
 
 def get_direct_links(string, markers):
     for site in SITES:
-        yield from site.extract_direct_links(string, markers))
+        yield from site.extract_direct_links(string, markers)
 
 
 def formulate_reply(comment_body, markers=None, additions=()):
