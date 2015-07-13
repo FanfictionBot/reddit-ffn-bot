@@ -17,6 +17,16 @@ class CommentList(object):
         self.filename = filename
         self.dry = dry
         self.logger = logging.getLogger("CommmentList")
+        self._transaction_stack = []
+
+    def __enter__(self):
+        self._init_clist()
+        self._transaction_stack.append(self.clist.copy())
+        return self
+
+    def __exit__(self, exc, val, tb):
+        self.clist = self._transaction_stack.pop()
+        self.save()
 
     def _load(self):
         self.clist = set()
@@ -25,6 +35,11 @@ class CommentList(object):
             with open(self.filename, "r") as f:
                 for line in f:
                     self.clist.add(line.strip())
+
+    def _save(self):
+        if not len(self._transaction_stack):
+            self.save()
+
 
     def save(self):
         if self.dry or self.clist is None:
@@ -42,7 +57,7 @@ class CommentList(object):
         self._init_clist()
         self.logger.debug("Adding comment to list: " + cid)
         self.clist.add(cid)
-        self.save()
+        self._save()
 
     def __del__(self):
         """
