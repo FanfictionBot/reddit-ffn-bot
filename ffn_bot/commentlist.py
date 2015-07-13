@@ -42,7 +42,6 @@ class CommentList(object):
         if not len(self._transaction_stack):
             self.save()
 
-
     def save(self):
         if self.dry or self.clist is None:
             return
