@@ -16,20 +16,16 @@ def _try_caller(func):
         return None
 
 
-SITES = list(filter(
-    lambda x: x is not None, chain.from_iterable(
-        (
-            (
-                # Find and instantiate all Sites
-                _try_caller(getattr(module, name)) for name in dir(module)
-                if isinstance(getattr(module, name), type) and issubclass(
-                    getattr(module, name), Site))  # Import Submodules
-            for module in (
-                loader.find_module(module).load_module(module) for loader,
-                module, ispkg in iter_modules(
-                    [os.path.dirname(__file__)]))
-        ))))
-
+def _load_sites():
+    for loader, name, _ in iter_modules([os.path.dirname(__file__)]):
+        module = loader.find_module(name).load_module(name)
+        for var_name in dir(module):
+            item = getattr(module, var_name)
+            if isinstance(item, type) and issubclass(item, Site):
+                try:
+                    yield item()
+                except TypeError:
+                    pass
 
 
 def get_site(name):
@@ -43,5 +39,9 @@ def get_site(name):
 def get_sites():
     """Returns a dictionary of all sites."""
     return collections.OrderedDict((site.name, site) for site in SITES)
+
+
+SITES = list(_load_sites())
+
 
 __all__ = ["SITES"]
