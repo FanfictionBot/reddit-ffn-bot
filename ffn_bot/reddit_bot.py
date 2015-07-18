@@ -2,6 +2,7 @@ import sys
 import argparse
 import logging
 import praw
+from praw.objects import Submission
 
 from ffn_bot.commentlist import CommentList
 from ffn_bot.commentparser import formulate_reply, parse_context_markers
@@ -188,7 +189,7 @@ def load_subreddits(bot_parameters):
 
 
 def handle_submission(submission):
-    if not is_submission_checked(submission):
+    if not is_submission_checked(submission, markers=frozenset()):
         logging.info("Found new submission: " + submission.id)
         try:
             parse_submission_text(submission)
@@ -196,14 +197,31 @@ def handle_submission(submission):
             check_submission(submission)
 
 
-def handle_comment(comment):
+def handle_comment(comment, extra_markers=frozenset()):
     logging.debug("Handling comment: " + comment.id)
     if str(comment.id) not in CHECKED_COMMENTS:
         logging.info("Found new comment: " + comment.id)
+        markers = parse_context_markers(body)
+        markers |= extra_markers
+
+        if "parent" in markers:
+            if comment.is_root:
+                item = comment.submission
+            else:
+                item = r.get_info(thing_id=comment.parent_id)
+            handle(item, {"directlinks"})
+
         try:
-            make_reply(comment.body, comment.id, comment.reply)
+            make_reply(comment.body, comment.id, comment.reply, markers)
         finally:
             CHECKED_COMMENTS.add(str(comment.id))
+
+
+def handle(obj, markers=frozenset()):
+    if isinstance(handle, Submission):
+        handle_submission(obj, markers)
+    else:
+        handle_comment(obj, markers)
 
 
 def stream_handler(queue, iterator, handler):
@@ -298,10 +316,11 @@ def is_submission_checked(submission):
     return "SUBMISSION_" + str(submission.id) in CHECKED_COMMENTS
 
 
-def parse_submission_text(submission):
+def parse_submission_text(submission, extra_markers=frozenset()):
     body = submission.selftext
 
     markers = parse_context_markers(body)
+    markers |= extra_markers
 
     # Since the bot would start downloading the stories
     # here, we add the ignore option here
