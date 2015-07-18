@@ -328,9 +328,7 @@ def make_reply(body, id, reply_func, markers=None, additions=()):
         return
 
     raw_reply = "".join(reply)
-    if not raw_reply:
-        print("Empty reply!")
-    elif len(raw_reply) > 10:
+    if len(raw_reply) > 10:
         print(
             "Writing reply to", id,
             "(", len(raw_reply), "characters in", len(reply), "messages)"
