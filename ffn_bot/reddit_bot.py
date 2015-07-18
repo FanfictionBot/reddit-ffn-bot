@@ -324,6 +324,7 @@ def make_reply(body, id, reply_func, markers=None, additions=()):
         if not DRY_RUN:
             reply_func("You requested too many fics.\n"
                        "\nWe allow a maximum of 30 stories")
+        bot_tools.print_exception(level=logging.DEBUG)
         print("Too many fics...")
         return
 

@@ -175,7 +175,7 @@ def pause(minutes, seconds):
             break
     sys.stdout.write(str.ljust("\rComplete!", 55) + '\n')
 
-def print_exception(etype=None, evalue=None, etb=None):
+def print_exception(etype=None, evalue=None, etb=None, level=logging.ERROR):
     """
     Prints the exception. Defaults to the last exception that occured.
     If only `etype` is given, the function will try to extract the
@@ -202,5 +202,5 @@ def print_exception(etype=None, evalue=None, etb=None):
 
     # Format the exception
     lines = traceback.format_exception(exc_type, exc_value, exc_tb)
-    logging.error(''.join('!! ' + line for line in lines))
+    logging.log(level, ''.join('!! ' + line for line in lines))
     print(Style.RESET_ALL)
