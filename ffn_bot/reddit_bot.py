@@ -209,7 +209,7 @@ def handle_comment(comment, extra_markers=frozenset()):
                 item = comment.submission
             else:
                 item = r.get_info(thing_id=comment.parent_id)
-            handle(item, {"directlinks"})
+            handle(item, {"directlinks", "submissionlink"})
 
         try:
             make_reply(comment.body, comment.id, comment.reply, markers)
