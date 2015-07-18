@@ -92,11 +92,17 @@ class Story(object):
         result = ["\n\n"]
         result.append(
             reddit_markdown.link(
-                reddit_markdown.bold(reddit_markdown.italics(self.get_title())),
-                self.get_url()
+                reddit_markdown.bold(
+                    reddit_markdown.italics(
+                        reddit_markdown.escape(self.get_title())
+                    )
+                ),
+                reddit_markdown.escape(self.get_url())
             ) + " by " + reddit_markdown.link(
-                reddit_markdown.italics(self.get_author()),
-                self.get_author_link()
+                reddit_markdown.italics(
+                    reddit_markdown.escape(self.get_author())
+                ),
+                reddit_markdown.escape(self.get_author_link())
             )
         )
         # result.append("\n\n[***%s***](%s) by [*%s*](%s)" %
@@ -105,19 +111,26 @@ class Story(object):
         # ))
 
         result.append("")
-        result.extend(reddit_markdown.quote(self.get_summary()).split("\n"))
+        result.extend(
+            reddit_markdown.quote(
+                reddit_markdown.escape(self.get_summary())
+            ).split("\n")
+        )
         result.append("")
         result.append(reddit_markdown.exponentiate(self.format_stats()))
         return "\n".join(result)
 
     def format_stats(self):
+        _stats = self.get_stats()
+        stats = OrderedDict()
         site = self.get_site()
         if site is not None:
+            site = (reddit_markdown.escape(p) for p in site)
             site = reddit_markdown.link(*site)
-            stats = OrderedDict((("Site", site),))
-            stats.update(self.get_stats())
-        else:
-            stats = self.get_stats()
+            stats["Site"] = site
+
+        for k,v in self.get_stats().items():
+            stats[reddit_markdown.escape(k)] = reddit_markdown.escape(v)
 
         res = []
         for key, value in stats.items():
