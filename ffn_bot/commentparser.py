@@ -23,6 +23,10 @@ MAX_STORIES_PER_POST = 30
 CONTEXT_MARKER_REGEX = re.compile(r"ffnbot!([^ ]+)")
 
 
+class StoryLimitExceeded(Exception):
+    pass
+
+
 def parse_context_markers(comment_body):
     """
     Changes the context of the story subsystem.
@@ -88,7 +92,7 @@ def parse_comment_requests(requests, context, additions):
     if len(tuple(filter(
             lambda x:isinstance(x, site.Story), results
     ))) > MAX_STORIES_PER_POST:
-        raise LookupError("Maximum exceeded.")
+        raise StoryLimitExceeded("Maximum exceeded.")
 
     cur_part = []
     for part in results:
