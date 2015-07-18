@@ -18,7 +18,7 @@ def quote(string):
 
 
 def escape(string):
-    return re.sub(r"([\\\[\]\-(){}+_!.#`^>])", r"\\\1", string)
+    return re.sub(r"([\\\[\]\-(){}+_!.#`^>*])", r"\\\1", string)
 
 
 def link(text, link):
