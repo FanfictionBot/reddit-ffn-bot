@@ -66,6 +66,10 @@ class Story(object):
         """Return the name of the site. (None means unknown)"""
         return None
 
+    def get_download(self):
+        """Return the EPUB download link from FicSave"""
+        return None
+
     def get_summary(self):
         """Returns the summary of the story."""
         return self.summary
@@ -117,6 +121,7 @@ class Story(object):
     def format_stats(self):
         stats = OrderedDict()
         site = self.get_site()
+        download = self.get_download()
 
         if site is not None:
             _site = (reddit_markdown.escape(p) for p in site)
@@ -131,9 +136,9 @@ class Story(object):
         for key, value in stats.items():
             res.append(reddit_markdown.italics(key) + ": " + value)
 
-        if self.download_link is not None:
+        if download is not None:
             res.append(reddit_markdown.link(reddit_markdown.bold(
-                "Download EPUB"), self.download_link))
+                "Download EPUB"), download))
 
         return (" " + reddit_markdown.bold("|") + " ").join(res)
 

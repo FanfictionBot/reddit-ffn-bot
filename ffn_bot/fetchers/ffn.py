@@ -155,8 +155,6 @@ class Story(site.Story):
         self.author = ""
         self.authorlink = ""
         self.summary = ""
-        self.download_link = "http://ficsave.com/?story_url={0}&format=epub&auto_download=yes".format(
-            site)
 
         self.parser = parser
 
@@ -186,6 +184,10 @@ class Story(site.Story):
     def get_site(self):
         link = "http://www." + self.site + "/"
         return (DOMAIN_TO_ARCHIVE_NAME[self.site], link)
+
+    def get_download(self):
+        return "http://ficsave.com/?story_url={0}&format=epub&auto_download=yes".format(
+            self.site)
 
 
 class FanfictionNetSite(FanfictionBaseSite):

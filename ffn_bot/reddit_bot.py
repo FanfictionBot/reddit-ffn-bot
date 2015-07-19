@@ -21,12 +21,7 @@ DEFAULT_SUBREDDITS = ['HPFanfiction', 'fanfiction', 'HPMOR']
 SUBREDDIT_LIST = set()
 CHECKED_COMMENTS = None
 
-
-FOOTER = "\n\nSupporting fanfiction.net (*linkffn*), AO3 (buggy) (*linkao3*), HPFanficArchive (*linkffa*), FictionPress (*linkfp*), AdultFanFiction (linkaff) (story ID only)" + \
-    "\n\nRead usage tips and tricks  [**here**](https://github.com/tusing/reddit-ffn-bot/blob/master/README.md).\n\n" + \
-    "^(**New Feature:** Parse multiple fics in a single call with;semicolons;like;this!)\n\n" + \
-    "^(**New Feature:** Type 'ffnbot!directlinks' in any comment to have the bot **automatically parse fanfiction links** and make a reply, without even calling the bot! Added AdultFanFiction support!)" + \
-    "\n\n^^**Update** ^^**7/11/2015:** ^^More ^^formatting ^^bugs ^^fixed. ^^Feature ^^added!\n\n^^^^^^^^^^^^^^^^^ffnbot!ignore"
+FOOTER = "\n\nSupporting fanfiction.net (*linkffn*), AO3 (buggy) (*linkao3*), HPFanficArchive (*linkffa*), FictionPress (*linkfp*), AdultFanFiction (linkaff) (story ID only)" + "\n\nRead usage tips and tricks  [**here**](https://github.com/tusing/reddit-ffn-bot/blob/master/README.md).\n\n" + "^(**New Feature:** Parse multiple fics in a single call with;semicolons;like;this!)\n\n" + "^(**New Feature:** Type 'ffnbot!directlinks' in any comment to have the bot **automatically parse fanfiction links** and make a reply, without even calling the bot! Added AdultFanFiction support!)" + "\n\n^^**Update** ^^**7/11/2015:** ^^More ^^formatting ^^bugs ^^fixed. ^^Feature ^^added!\n\n^^^^^^^^^^^^^^^^^ffnbot!ignore"
 
 # For testing purposes
 DRY_RUN = False
@@ -91,10 +86,7 @@ def init_global_flags(bot_parameters):
     if DRY_RUN:
         print("Dry run enabled. No comment will be sent.")
 
-    CHECKED_COMMENTS = CommentList(
-        bot_parameters["comments"],
-        DRY_RUN
-    )
+    CHECKED_COMMENTS = CommentList(bot_parameters["comments"], DRY_RUN)
 
     level = getattr(logging, bot_parameters["verbosity"].upper())
     logging.getLogger().setLevel(level)
@@ -104,7 +96,8 @@ def get_bot_parameters():
     """Parse the command-line arguments."""
     # initialize parser and add options for username and password
     parser = argparse.ArgumentParser()
-    parser.add_argument('-u', '--user', help='define Reddit login username')
+    parser.add_argument('-u', '--user',
+                        help='define Reddit login username')
     parser.add_argument(
         '-p', '--password',
         help='define Reddit login password')
@@ -121,8 +114,7 @@ def get_bot_parameters():
     parser.add_argument(
         '-c', '--comments',
         help="Filename where comments are stored",
-        default="CHECKED_COMMENTS.txt"
-    )
+        default="CHECKED_COMMENTS.txt")
 
     parser.add_argument(
         '-l', '--dry',
@@ -132,14 +124,12 @@ def get_bot_parameters():
     parser.add_argument(
         "--streams",
         action="store_true",
-        help="Highly experimental feature. Handle posts as they come"
-    )
+        help="Highly experimental feature. Handle posts as they come")
 
     parser.add_argument(
         "-v", "--verbosity",
         default="INFO",
-        help="The default log level. Using python level states."
-    )
+        help="The default log level. Using python level states.")
 
     args = parser.parse_args()
 
@@ -151,7 +141,6 @@ def get_bot_parameters():
         'dry': args.dry,
         'comments': args.comments,
         'verbosity': args.verbosity,
-
         # Switches for experimental features
         'experimental': {
             "streams": args.streams
@@ -199,7 +188,8 @@ def handle_submission(submission, markers=frozenset()):
 
 def handle_comment(comment, extra_markers=frozenset()):
     logging.debug("Handling comment: " + comment.id)
-    if (str(comment.id) not in CHECKED_COMMENTS) or "force" in extra_markers:
+    if (str(comment.id) not in
+            CHECKED_COMMENTS) or "force" in extra_markers:
         logging.info("Found new comment: " + comment.id)
         markers = parse_context_markers(comment.body)
         markers |= extra_markers
@@ -225,6 +215,7 @@ def handle(obj, markers=frozenset()):
 
 
 def stream_handler(queue, iterator, handler):
+
     def _raise(exc):
         raise exc
 
@@ -332,8 +323,8 @@ def parse_submission_text(submission, extra_markers=frozenset()):
         additions.extend(get_direct_links(submission.url, markers))
 
     make_reply(
-        submission.selftext, submission.id, submission.add_comment, markers,
-        additions)
+        submission.selftext, submission.id, submission.add_comment,
+        markers, additions)
 
 
 def make_reply(body, id, reply_func, markers=None, additions=()):
@@ -351,9 +342,8 @@ def make_reply(body, id, reply_func, markers=None, additions=()):
     raw_reply = "".join(reply)
     if len(raw_reply) > 10:
         print(
-            "Writing reply to", id,
-            "(", len(raw_reply), "characters in", len(reply), "messages)"
-        )
+            "Writing reply to", id, "(", len(raw_reply), "characters in",
+            len(reply), "messages)")
         # Do not send the comment.
         if not DRY_RUN:
             for part in reply:
@@ -363,4 +353,3 @@ def make_reply(body, id, reply_func, markers=None, additions=()):
         print('Continuing to parse submissions...')
     else:
         logging.info("No reply conditions met.")
-
