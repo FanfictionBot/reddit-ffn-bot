@@ -222,7 +222,7 @@ def handle_comment(comment, extra_markers=frozenset()):
 
 
 def handle(obj, markers=frozenset()):
-    if isinstance(handle, Submission):
+    if isinstance(obj, Submission):
         handle_submission(obj, markers)
     else:
         handle_comment(obj, markers)
