@@ -16,7 +16,8 @@ from ffn_bot import site
 __all__ = ["ArchiveOfOurOwn"]
 
 AO3_LINK_REGEX = re.compile(
-    r"http(s)?://([^.]+\.)?archiveofourown.org/works/(?P<sid>\d+)[^ ]*", re.IGNORECASE)
+    r"http(s)?://([^.]+\.)?archiveofourown.org/works/(?P<sid>\d+)[^ ]*",
+    re.IGNORECASE)
 AO3_FUNCTION = "linkao3"
 AO3_SEARCH_QUERY = "site:archiveofourown.org/works/ %s"
 
@@ -94,7 +95,7 @@ class ArchiveOfOurOwn(Site):
         if id is not None:
             return self._id_to_link(str(id))
 
-        # Filter out direct links.
+# Filter out direct links.
         match = AO3_LINK_REGEX.match(request)
         if match is not None:
             return request
@@ -130,12 +131,13 @@ class Story(site.Story):
         self.authorlink = ""
         self.summary = ""
 
-
     def get_real_url(self):
-        return "http://archiveofourown.org/works/%s?view_adult=true" % AO3_LINK_REGEX.match(self.url).groupdict()["sid"]
+        return "http://archiveofourown.org/works/%s?view_adult=true" % AO3_LINK_REGEX.match(
+            self.url).groupdict()["sid"]
 
     def get_url(self):
-        return "http://archiveofourown.org/works/%s" % AO3_LINK_REGEX.match(self.url).groupdict()["sid"]
+        return "http://archiveofourown.org/works/%s" % AO3_LINK_REGEX.match(
+            self.url).groupdict()["sid"]
 
     def get_value_from_tree(self, xpath, sep=""):
         return sep.join(self.tree.xpath(xpath)).strip()
@@ -149,8 +151,7 @@ class Story(site.Story):
         self.author = self.get_value_from_tree(AO3_AUTHOR_NAME)
         self.authorlink = self.get_value_from_tree(AO3_AUTHOR_URL)
         self.stats = AO3Metadata(
-            AO3_LINK_REGEX.match(self.url).groupdict()["sid"],
-            self.tree
-        )
+            AO3_LINK_REGEX.match(self.url).groupdict()["sid"], self.tree)
+
     def get_site(self):
-        return "Archive of our Own", "http://www.archiveofourown.org/"
+        return "Archive of Our Own", "http://www.archiveofourown.org/"
