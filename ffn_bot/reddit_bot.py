@@ -192,7 +192,7 @@ def load_subreddits(bot_parameters):
 
 
 def handle_submission(submission, markers=frozenset()):
-    if not is_submission_checked(submission) or "force" in markers:
+    if not is_submission_checked(submission) or ("force" in markers):
         logging.info("Found new submission: " + submission.id)
         try:
             parse_submission_text(submission, markers)
@@ -202,11 +202,15 @@ def handle_submission(submission, markers=frozenset()):
 
 def handle_comment(comment, extra_markers=frozenset()):
     logging.debug("Handling comment: " + comment.id)
-    if (str(comment.id) not in
-            CHECKED_COMMENTS) or "force" in extra_markers:
+    if (str(comment.id) not in CHECKED_COMMENTS
+       ) or ("force" in extra_markers):
+
         logging.info("Found new comment: " + comment.id)
         markers = parse_context_markers(comment.body)
         markers |= extra_markers
+        if "ignore" in markers:
+            logging.info("Comment forcefully ignored: " + comment.id)
+            return
 
         if "parent" in markers:
             if comment.is_root:
