@@ -8,6 +8,7 @@ from ffn_bot.commentlist import CommentList
 from ffn_bot.commentparser import formulate_reply, parse_context_markers
 from ffn_bot.commentparser import get_direct_links
 from ffn_bot.commentparser import StoryLimitExceeded
+from ffn_bot import reddit_markdown
 from ffn_bot import bot_tools
 
 # For pretty text
@@ -21,7 +22,20 @@ DEFAULT_SUBREDDITS = ['HPFanfiction', 'fanfiction', 'HPMOR']
 SUBREDDIT_LIST = set()
 CHECKED_COMMENTS = None
 
-FOOTER = "\n\nSupporting fanfiction.net (*linkffn*), AO3 (buggy) (*linkao3*), HPFanficArchive (*linkffa*), FictionPress (*linkfp*), AdultFanFiction (linkaff) (story ID only)" + "\n\nRead usage tips and tricks  [**here**](https://github.com/tusing/reddit-ffn-bot/blob/master/README.md).\n\n" + "^(**New Feature:** Parse multiple fics in a single call with;semicolons;like;this!)\n\n" + "^(**New Feature:** Type 'ffnbot!directlinks' in any comment to have the bot **automatically parse fanfiction links** and make a reply, without even calling the bot! Added AdultFanFiction support!)" + "\n\n^^**Update** ^^**7/11/2015:** ^^More ^^formatting ^^bugs ^^fixed. ^^Feature ^^added!\n\n^^^^^^^^^^^^^^^^^ffnbot!ignore"
+FOOTER = "\n\nRead usage tips and tricks  [**here**](https://github.com/tusing/reddit-ffn-bot/blob/master/README.md).\n\n" + "\n\nSupporting fanfiction.net (*linkffn*), AO3 (buggy) (*linkao3*), HPFanficArchive (*linkffa*), FictionPress (*linkfp*), AdultFanFiction (linkaff) (story ID only)"
+
+exponentiated = [
+    "**New Features 7/19/15:** Download EPUB links for FFNet, FP, and AO3! ffnbot!parent call added!",
+    "Parse multiple fics in a single call with;semicolons;like;this!",
+    "*Add the following tags to any comment:* ",
+    "- *ffnbot!parent*: create a reply for all links in a parent comment",
+    "- *ffnbot!directlinks*: auto parse fanfiction site links without having to call the bot"
+]
+
+for string in exponentiated:
+    FOOTER += reddit_markdown.exponentiate(string) + "\n\n"
+
+FOOTER += "^^^^^^^^^^^^^^^^^ffnbot!ignore"
 
 # For testing purposes
 DRY_RUN = False
@@ -188,8 +202,8 @@ def handle_submission(submission, markers=frozenset()):
 
 def handle_comment(comment, extra_markers=frozenset()):
     logging.debug("Handling comment: " + comment.id)
-    if (str(comment.id) not in
-            CHECKED_COMMENTS) or "force" in extra_markers:
+    if (str(comment.id) not in CHECKED_COMMENTS
+       ) or "force" in extra_markers:
         logging.info("Found new comment: " + comment.id)
         markers = parse_context_markers(comment.body)
         markers |= extra_markers
