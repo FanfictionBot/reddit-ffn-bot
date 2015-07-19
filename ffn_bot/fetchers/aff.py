@@ -16,15 +16,11 @@ AFF_MATCH_REGEX = (
     re.compile(
         r"http(?:s)?://([^.]+)\.adult-fanfiction\.org/story\.php\?no=(\d+)",
         re.IGNORECASE
-    ),
-
-    # We need the id to be passed like this:
-    # <Archive>:<ID>
+    ),  # We need the id to be passed like this:
+  # <Archive>:<ID>
     re.compile(
-        "([^:]+):(\d+)",
-        re.IGNORECASE
-    ),
-)
+        "([^:]+):(\d+)", re.IGNORECASE
+    ),)
 
 AFF_LINK_REGEX = AFF_MATCH_REGEX[0]
 
@@ -35,8 +31,7 @@ AFF_LINK_BY_ID = "http://{0}.adult-fanfiction.org/story.php?no={1}"
 # I have no idea if it is really neccessary.
 AFF_BYPASS_COOKIE = (
     "HasVisited=bypass page next time; path=/; "
-    "domain={0}.adult-fanfiction.org"
-)
+    "domain={0}.adult-fanfiction.org")
 
 AFF_TITLE_XPATH = "//html/head/title/text()"
 AFF_AUTHOR_NAME = "//tr[5]/td[2]//a/text()"
@@ -48,7 +43,6 @@ AFF_DEFAULT_SUMMARY = ""
 
 
 class AFFMetadata(Metaparser):
-
     """
     Functions that will determine the metadata.
     """
@@ -65,8 +59,7 @@ class AFFMetadata(Metaparser):
         return " > ".join(
             x.strip().replace(" - ", "-")
             for x in tree.xpath("//tr[5]//td[1]//a/text()")
-            if x.strip() != "Next chapter>"
-        )
+            if x.strip() != "Next chapter>")
 
     @parser
     @staticmethod
@@ -76,11 +69,11 @@ class AFFMetadata(Metaparser):
     @parser
     @staticmethod
     def Hits(id, tree):
-        return tree.xpath("//tr[5]/td[3]/text()")[0].strip()[len("Hits: "):]
+        return tree.xpath(
+            "//tr[5]/td[3]/text()")[0].strip()[len("Hits: "):]
 
 
 class AdultFanfiction(Site):
-
     """
     Implementation of adult fanfiction
     """
@@ -112,7 +105,6 @@ class AdultFanfiction(Site):
 
 
 class Story(site.Story):
-
     """
     Implementation of a story
     """
@@ -124,23 +116,19 @@ class Story(site.Story):
 
     def parse_html(self):
         tree = html.fromstring(default_cache.get_page(
-            self.get_url(),
-
-            # Got this header from the ficsave codebase
+            self.get_url(),  # Got this header from the ficsave codebase
             headers={
                 "Cookie": AFF_BYPASS_COOKIE
-            },
-            # Do not even try to follow to the adult form url.
-            allow_redirects=False
-        ))
+            },  # Do not even try to follow to the adult form url.
+            allow_redirects=False))
 
         self.tree = tree
 
         # We will generate the stats ourselves.
-        self.stats = AFFMetadata(
-            (self.archive, self.id), tree
-        )
-        self.title = tree.xpath(AFF_TITLE_XPATH)[0].strip()[len("Story: "):]
+        self.stats = AFFMetadata((self.archive, self.id), tree)
+        self.title = tree.xpath(AFF_TITLE_XPATH)[0].strip()[
+            len("Story: "):
+        ]
         self.author = tree.xpath(AFF_AUTHOR_NAME)[0].strip()
         self.authorlink = tree.xpath(AFF_AUTHOR_URL)[0]
 
@@ -149,5 +137,6 @@ class Story(site.Story):
 
     def get_url(self):
         return AFF_LINK_BY_ID.format(self.archive, self.id)
+
     def get_site(self):
-        return ("Adult Fanfiction", "http://www.adult-fanfiction.org/")
+        return ("Adult FanFiction", "http://www.adult-fanfiction.org/")

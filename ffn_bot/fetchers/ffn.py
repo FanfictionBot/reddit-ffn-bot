@@ -20,7 +20,7 @@ FFN_GENRES = [
 ]
 
 DOMAIN_TO_ARCHIVE_NAME = {
-    "fanfiction.net": "Fanfiction.Net",
+    "fanfiction.net": "fanfiction.net",
     "fictionpress.com": "FictionPress"
 }
 
