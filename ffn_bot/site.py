@@ -124,7 +124,7 @@ class Story(object):
         download = self.get_download()
 
         if site is not None:
-            _site = (reddit_markdown.escape(p) for p in site)
+            _site = iter(site)
             site = "[" + next(_site) + "][" + str(id(self)) + "]"
             self._lnk = next(_site)
             stats["Site"] = site
