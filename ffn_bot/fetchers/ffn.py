@@ -187,7 +187,7 @@ class Story(site.Story):
 
     def get_download(self):
         return "http://ficsave.com/?story_url={0}&format=epub&auto_download=yes".format(
-            self.site)
+            self.url)
 
 
 class FanfictionNetSite(FanfictionBaseSite):

@@ -110,11 +110,6 @@ class Story(object):
         #     self.get_author(), self.get_author_link()
         # ))
 
-        download = self.get_download()
-        if download is not None:
-            result.append(reddit_markdown.link(
-                reddit_markdown.bold("Download EPUB"), download))
-
         result.append("\n\n")
         result.extend(
             reddit_markdown.quote(
@@ -122,6 +117,15 @@ class Story(object):
         result.append("")
         result.append(reddit_markdown.exponentiate(self.format_stats()))
         result.append("[" + str(id(self)) + "]: " + self._lnk)
+
+        download = self.get_download()
+        if download is not None:
+            result.append(reddit_markdown.link(
+                reddit_markdown.exponentiate(
+                    reddit_markdown.italics("Download EPUB")), download))
+
+        result.append("\n\n" + reddit_markdown.linebreak + "\n\n")
+
         return "\n".join(result)
 
     def format_stats(self):

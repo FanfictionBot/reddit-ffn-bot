@@ -1,5 +1,7 @@
 import re
 
+linebreak = "---"
+
 
 def bold(string):
     return '**' + string + '**'
