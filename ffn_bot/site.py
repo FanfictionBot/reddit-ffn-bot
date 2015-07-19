@@ -124,16 +124,17 @@ class Story(object):
             self._lnk = next(site)
             stats["Site"] = site
 
-            if self.download_link is not None:
-                stats["Download"] = reddit_markdown.link(
-                    reddit_markdown.bold('EPUB'), self.download_link)
-
         for k, v in self.get_stats().items():
             stats[reddit_markdown.escape(k)] = reddit_markdown.escape(v)
 
         res = []
         for key, value in stats.items():
             res.append(reddit_markdown.italics(key) + ": " + value)
+
+        if self.download_link is not None:
+            res.append(reddit_markdown.link(reddit_markdown.bold(
+                "Download EPUB"), self.download_link))
+
         return (" " + reddit_markdown.bold("|") + " ").join(res)
 
     def __hash__(self):
