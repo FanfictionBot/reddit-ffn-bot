@@ -7,9 +7,8 @@ from ffn_bot import site
 from ffn_bot.fetchers import SITES, get_sites
 
 
-STORIES_PER_REPLY = 10
+MAX_REPLY_LENGTH = 8000
 MAX_STORIES_PER_POST = 30
-
 
 # Allow to modify the behaviour of the comments
 # by adding a special function into the system
@@ -95,16 +94,21 @@ def parse_comment_requests(requests, context, additions):
         raise StoryLimitExceeded("Maximum exceeded.")
 
     cur_part = []
+    length = 0
     for part in results:
         if not part:
             continue
 
-        if len(cur_part) == STORIES_PER_REPLY:
+        if length + len(str(part)) >= MAX_REPLY_LENGTH:
             yield "".join(str(p) for p in cur_part)
             cur_part = []
+            length = 0
 
         cur_part.append(part)
-    yield "".join(str(p) for p in cur_part)
+        length += len(str(part))
+
+    if len(cur_part) > 0:
+        yield "".join(str(p) for p in cur_part)
 
 
 def _parse_comment_requests(requests, context):
