@@ -159,7 +159,7 @@ class Story(object):
     def load(self):
         if not self._loaded:
             self.parse_html()
-        self.loaded = True
+        self._loaded = True
 
     def parse_html(self):
         pass
