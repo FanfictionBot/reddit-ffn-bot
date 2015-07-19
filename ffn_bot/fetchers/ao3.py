@@ -26,7 +26,7 @@ AO3_AUTHOR_URL = '//a[@rel="author"]/@href'
 AO3_META_PARTS = '//dl[@class="stats"]//text()'
 AO3_TITLE = '//h2/text()'
 AO3_SUMMARY_FINDER = '//*[@id="workskin"]//*[@role="complementary"]//blockquote//text()'
-AO3_DOWNLOAD = '//*[@id="main"]/div[2]/ul/li[5]/ul/li[2]/a/text()'
+AO3_DOWNLOAD = '//*[@id="main"]/div[2]/ul/li[5]/ul/li[2]/a'
 
 AO3_FANDOM_TAGS = CSSSelector("dd.fandom ul li").path + "//text()"
 
