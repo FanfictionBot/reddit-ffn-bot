@@ -158,4 +158,5 @@ class Story(site.Story):
         return "Archive of Our Own", "http://www.archiveofourown.org/"
 
     def get_download(self):
-        return "http://archiveofourown.org/ + "self.get_value_from_tree(AO3_DOWNLOAD)
+        return "http://archiveofourown.org/" + self.get_value_from_tree(
+            AO3_DOWNLOAD)
