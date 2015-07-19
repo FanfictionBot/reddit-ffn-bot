@@ -48,7 +48,8 @@ class CommentList(object):
 
         self.logger.info("Saving comment list...")
         with open(self.filename, "w") as f:
-            f.writelines(self.clist)
+            for item in self.clist:
+                f.write(item + "\n")
 
     def __contains__(self, cid):
         self._init_clist()
