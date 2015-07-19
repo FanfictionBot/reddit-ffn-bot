@@ -189,7 +189,7 @@ def load_subreddits(bot_parameters):
 
 
 def handle_submission(submission, markers=frozenset()):
-    if not is_submission_checked(submission):
+    if not is_submission_checked(submission) or "force" in markers:
         logging.info("Found new submission: " + submission.id)
         try:
             parse_submission_text(submission, markers)
@@ -199,7 +199,7 @@ def handle_submission(submission, markers=frozenset()):
 
 def handle_comment(comment, extra_markers=frozenset()):
     logging.debug("Handling comment: " + comment.id)
-    if str(comment.id) not in CHECKED_COMMENTS:
+    if (str(comment.id) not in CHECKED_COMMENTS) or "force" in extra_markers:
         logging.info("Found new comment: " + comment.id)
         markers = parse_context_markers(comment.body)
         markers |= extra_markers
@@ -209,7 +209,7 @@ def handle_comment(comment, extra_markers=frozenset()):
                 item = comment.submission
             else:
                 item = r.get_info(thing_id=comment.parent_id)
-            handle(item, {"directlinks", "submissionlink"})
+            handle(item, {"directlinks", "submissionlink", "force"})
 
         try:
             make_reply(comment.body, comment.id, comment.reply, markers)
