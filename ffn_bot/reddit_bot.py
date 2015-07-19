@@ -201,7 +201,7 @@ def handle_comment(comment, extra_markers=frozenset()):
     logging.debug("Handling comment: " + comment.id)
     if str(comment.id) not in CHECKED_COMMENTS:
         logging.info("Found new comment: " + comment.id)
-        markers = parse_context_markers(body)
+        markers = parse_context_markers(comment.body)
         markers |= extra_markers
 
         if "parent" in markers:
