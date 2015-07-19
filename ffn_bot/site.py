@@ -104,12 +104,18 @@ class Story(object):
                 reddit_markdown.italics(
                     reddit_markdown.escape(self.get_author())),
                 reddit_markdown.escape(self.get_author_link())))
+        result.append("\n\n")
         # result.append("\n\n[***%s***](%s) by [*%s*](%s)" %
         #     self.get_title(), self.get_url(),
         #     self.get_author(), self.get_author_link()
         # ))
 
-        result.append("")
+        download = self.get_download()
+        if download is not None:
+            result.append(reddit_markdown.link(
+                reddit_markdown.bold("Download EPUB"), download))
+
+        result.append("\n\n")
         result.extend(
             reddit_markdown.quote(
                 reddit_markdown.escape(self.get_summary())).split("\n"))
@@ -121,7 +127,6 @@ class Story(object):
     def format_stats(self):
         stats = OrderedDict()
         site = self.get_site()
-        download = self.get_download()
 
         if site is not None:
             _site = iter(site)
@@ -135,10 +140,6 @@ class Story(object):
         res = []
         for key, value in stats.items():
             res.append(reddit_markdown.italics(key) + ": " + value)
-
-        if download is not None:
-            res.append(reddit_markdown.link(reddit_markdown.bold(
-                "Download EPUB"), download))
 
         return (" " + reddit_markdown.bold("|") + " ").join(res)
 
