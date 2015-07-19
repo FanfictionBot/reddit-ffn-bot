@@ -118,15 +118,16 @@ class Story(object):
         )
         result.append("")
         result.append(reddit_markdown.exponentiate(self.format_stats()))
+        result.append("[" + str(id(self)) + "]: " + self._lnk)
         return "\n".join(result)
 
     def format_stats(self):
-        _stats = self.get_stats()
         stats = OrderedDict()
         site = self.get_site()
         if site is not None:
             site = (reddit_markdown.escape(p) for p in site)
-            site = reddit_markdown.link(*site)
+            site = "[" + next(site) + "][" + str(id(self)) + "]"
+            self._lnk = next(site)
             stats["Site"] = site
 
         for k,v in self.get_stats().items():
