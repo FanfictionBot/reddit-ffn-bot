@@ -22,7 +22,7 @@ DEFAULT_SUBREDDITS = ['HPFanfiction', 'fanfiction', 'HPMOR']
 SUBREDDIT_LIST = set()
 CHECKED_COMMENTS = None
 
-FOOTER = "\n\nRead usage tips and tricks  [**here**](https://github.com/tusing/reddit-ffn-bot/blob/master/README.md).\n\n" + "\n\nSupporting fanfiction.net (*linkffn*), AO3 (buggy) (*linkao3*), HPFanficArchive (*linkffa*), FictionPress (*linkfp*), AdultFanFiction (linkaff) (story ID only)\n\n"
+FOOTER = "\n\nRead usage tips and tricks  [**here**](https://github.com/tusing/reddit-ffn-bot/blob/master/README.md).\n\n" + "\n\nSupporting fanfiction.net (*linkffn*), AO3 (fixed!) (*linkao3*), HPFanficArchive (*linkffa*), FictionPress (*linkfp*), AdultFanFiction (linkaff) (story ID only)\n\n"
 
 exponentiated = [
     "**New Features 7/19/15:** Download EPUB links for FFNet, FP, and AO3! ffnbot!parent call added!",
@@ -202,8 +202,8 @@ def handle_submission(submission, markers=frozenset()):
 
 def handle_comment(comment, extra_markers=frozenset()):
     logging.debug("Handling comment: " + comment.id)
-    if (str(comment.id) not in CHECKED_COMMENTS
-       ) or "force" in extra_markers:
+    if (str(comment.id) not in
+            CHECKED_COMMENTS) or "force" in extra_markers:
         logging.info("Found new comment: " + comment.id)
         markers = parse_context_markers(comment.body)
         markers |= extra_markers
