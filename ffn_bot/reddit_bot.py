@@ -22,7 +22,7 @@ DEFAULT_SUBREDDITS = ['HPFanfiction', 'fanfiction', 'HPMOR']
 SUBREDDIT_LIST = set()
 CHECKED_COMMENTS = None
 
-FOOTER = "\n\nRead usage tips and tricks  [**here**](https://github.com/tusing/reddit-ffn-bot/blob/master/README.md).\n\n" + "\n\nSupporting fanfiction.net (*linkffn*), AO3 (buggy) (*linkao3*), HPFanficArchive (*linkffa*), FictionPress (*linkfp*), AdultFanFiction (linkaff) (story ID only)"
+FOOTER = "\n\nRead usage tips and tricks  [**here**](https://github.com/tusing/reddit-ffn-bot/blob/master/README.md).\n\n" + "\n\nSupporting fanfiction.net (*linkffn*), AO3 (buggy) (*linkao3*), HPFanficArchive (*linkffa*), FictionPress (*linkfp*), AdultFanFiction (linkaff) (story ID only)\n\n"
 
 exponentiated = [
     "**New Features 7/19/15:** Download EPUB links for FFNet, FP, and AO3! ffnbot!parent call added!",
