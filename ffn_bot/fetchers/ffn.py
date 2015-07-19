@@ -13,10 +13,10 @@ LINK_REGEX = "http(s?)://((www|m)\\.)?%s/s/(?P<sid>\\d+).*"
 ID_LINK = "https://www.{0}/s/%s"
 
 FFN_GENRES = [
-    "Adventure", "Angst", "Crime", "Drama", "Family", "Fantasy", "Friendship",
-    "General", "Horror", "Humor", "Hurt-Comfort", "Mystery", "Parody",
-    "Poetry", "Romance", "Sci-Fi", "Spiritual", "Supernatural", "Suspense",
-    "Tragedy", "Western"
+    "Adventure", "Angst", "Crime", "Drama", "Family", "Fantasy",
+    "Friendship", "General", "Horror", "Humor", "Hurt-Comfort", "Mystery",
+    "Parody", "Poetry", "Romance", "Sci-Fi", "Spiritual", "Supernatural",
+    "Suspense", "Tragedy", "Western"
 ]
 
 DOMAIN_TO_ARCHIVE_NAME = {
@@ -41,8 +41,9 @@ class FanfictionParser(Metaparser):
     @classmethod
     def parse_category(cls, id, tree):
         return (
-            cls.CATEGORY_TYPE,
-            tree.xpath('//*[@id="pre_story_links"]/span/a[last()]/text()')[0])
+            cls.CATEGORY_TYPE, tree.xpath(
+                '//*[@id="pre_story_links"]/span/a[last()]/text()')[0]
+        )
 
     @parser
     @classmethod
@@ -68,7 +69,8 @@ class FanfictionParser(Metaparser):
                 yield "Language", subpart
             elif (
                 n_unnamed == 1 and sum(
-                    (g.strip() in FFN_GENRES) for g in subpart.split("/"))):
+                    (g.strip() in FFN_GENRES)
+                    for g in subpart.split("/"))):
                 yield "Genre", subpart
             else:
                 yield "Characters", subpart
@@ -77,7 +79,8 @@ class FanfictionParser(Metaparser):
     @classmethod
     def create_implementation(cls, category):
         return type(cls).__new__(
-            type(cls), "<FFNParser>", (cls, ), {"CATEGORY_TYPE": category})
+            type(cls), "<FFNParser>", (cls,),
+            {"CATEGORY_TYPE": category})
 
 
 class FanfictionBaseSite(site.Site):
@@ -141,6 +144,7 @@ class FanfictionBaseSite(site.Site):
 
 
 class Story(site.Story):
+
     def __init__(self, url, site, context, parser):
         super(Story, self).__init__(context)
         self.url = url
@@ -151,6 +155,8 @@ class Story(site.Story):
         self.author = ""
         self.authorlink = ""
         self.summary = ""
+        self.download_link = "http://ficsave.com/?story_url={0}&format=epub&auto_download=yes".format(
+            site)
 
         self.parser = parser
 
@@ -166,28 +172,31 @@ class Story(site.Story):
         tree = html.fromstring(page)
 
         self.title = (tree.xpath('//*[@id="profile_top"]/b/text()'))[0]
-        self.summary = (tree.xpath('//*[@id="profile_top"]/div/text()'))[0]
-        self.author += (tree.xpath('//*[@id="profile_top"]/a[1]/text()'))[0]
+        self.summary = (tree.xpath('//*[@id="profile_top"]/div/text()'))[0
+                                                                        ]
+        self.author += (tree.xpath('//*[@id="profile_top"]/a[1]/text()'))[
+            0
+        ]
         self.authorlink = 'https://www.' + self.site + tree.xpath(
             '//*[@id="profile_top"]/a[1]/@href')[0]
         self.image = tree.xpath('//*[@id="profile_top"]/span[1]/img')
         self.tree = tree
         self.stats = self.parser(None, tree)
+
     def get_site(self):
-        return (
-            DOMAIN_TO_ARCHIVE_NAME[self.site],
-            "http://www." + self.site + "/"
-        )
+        link = "http://www." + self.site + "/"
+        return (DOMAIN_TO_ARCHIVE_NAME[self.site], link)
 
 
 class FanfictionNetSite(FanfictionBaseSite):
+
     def __init__(self, command="linkffn", name=None):
         super(FanfictionNetSite, self).__init__(
             "fanfiction.net", "linkffn", name, "Fandom")
 
 
 class FictionPressSite(FanfictionBaseSite):
+
     def __init__(self, command="linkfp", name=None):
         super(FictionPressSite, self).__init__(
             "fictionpress.com", "linkfp", name, "Category")
-
