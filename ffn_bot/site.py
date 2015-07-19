@@ -130,7 +130,7 @@ class Story(object):
             stats["Site"] = site
 
         for k, v in self.get_stats().items():
-            stats[reddit_markdown.escape(k)] = reddit_markdown.escape(v)
+            stats[k] = v
 
         res = []
         for key, value in stats.items():
