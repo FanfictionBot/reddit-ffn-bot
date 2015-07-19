@@ -99,13 +99,13 @@ def parse_comment_requests(requests, context, additions):
         if not part:
             continue
 
-        if length + len(part) >= MAX_REPLY_LENGTH:
+        if length + len(str(part)) >= MAX_REPLY_LENGTH:
             yield "".join(str(p) for p in cur_part)
             cur_part = []
             length = 0
 
         cur_part.append(part)
-        length += len(part)
+        length += len(str(part))
 
     if len(cur_part) > 0:
         yield "".join(str(p) for p in cur_part)
