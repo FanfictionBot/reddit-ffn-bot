@@ -116,13 +116,9 @@ class Story(object):
                 reddit_markdown.escape(self.get_summary())).split("\n"))
         result.append("")
         result.append(reddit_markdown.exponentiate(self.format_stats()))
-        result.append("[" + str(id(self)) + "]: " + self._lnk)
-
-        download = self.get_download()
-        if download is not None:
-            result.append(reddit_markdown.link(
-                reddit_markdown.exponentiate(
-                    reddit_markdown.italics("Download EPUB")), download))
+        # result.append("[" + str(id(self)) + "]: " + self._lnk)
+        for name, link in self._lnk:
+            result.append("[%s:%s]: %s"%(str(id(self)), name, link))
 
         result.append("\n\n" + reddit_markdown.linebreak + "\n\n")
 
@@ -131,11 +127,11 @@ class Story(object):
     def format_stats(self):
         stats = OrderedDict()
         site = self.get_site()
-
+        self._lnk = []
         if site is not None:
             _site = iter(site)
-            site = "[" + next(_site) + "][" + str(id(self)) + "]"
-            self._lnk = next(_site)
+            site = "[" + next(_site) + "][" + str(id(self)) + ":site]"
+            self._lnk.append(("site", next(_site)))
             stats["Site"] = site
 
         for k, v in self.get_stats().items():
@@ -145,6 +141,10 @@ class Story(object):
         for key, value in stats.items():
             res.append(reddit_markdown.italics(key) + ": " + value)
 
+        download = self.get_download()
+        if download is not None:
+            res.append("*Download*: [EPUB][%s:epub]"%(str(id(self))))
+            self._lnk.append(("epub", download))
         return (" " + reddit_markdown.bold("|") + " ").join(res)
 
     def __hash__(self):
