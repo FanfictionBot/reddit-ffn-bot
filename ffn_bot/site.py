@@ -3,12 +3,10 @@ from collections import OrderedDict
 
 from ffn_bot import reddit_markdown
 
-
 WHITESPACE = re.compile("(|[ ]+(?!\Z))")
 
 
 class Site(object):
-
     """
     Base-Class for a supported fanfiction archive.
     """
@@ -27,6 +25,7 @@ class Site(object):
             name = self.__class__.__module__ + "." + self.__class__.__name__
         self.regex = re.compile(re.escape(fname) + r"\((.*?)\)")
         self.name = name
+
     def extract_direct_links(self, body, context):
         """
         Extracts all direct links
@@ -51,7 +50,6 @@ class Site(object):
 
 
 class Story(object):
-
     """
     Represents a single story.
     """
@@ -59,6 +57,7 @@ class Story(object):
     def __init__(self, context=None):
         self.context = set() if context is None else context
         self._loaded = False
+
     def get_title(self):
         """Returns the title of the story"""
         return self.title
@@ -66,6 +65,7 @@ class Story(object):
     def get_site(self):
         """Return the name of the site. (None means unknown)"""
         return None
+
     def get_summary(self):
         """Returns the summary of the story."""
         return self.summary
@@ -94,17 +94,12 @@ class Story(object):
             reddit_markdown.link(
                 reddit_markdown.bold(
                     reddit_markdown.italics(
-                        reddit_markdown.escape(self.get_title())
-                    )
-                ),
-                reddit_markdown.escape(self.get_url())
-            ) + " by " + reddit_markdown.link(
+                        reddit_markdown.escape(self.get_title()))),
+                reddit_markdown.escape(self.get_url())) + " by " +
+            reddit_markdown.link(
                 reddit_markdown.italics(
-                    reddit_markdown.escape(self.get_author())
-                ),
-                reddit_markdown.escape(self.get_author_link())
-            )
-        )
+                    reddit_markdown.escape(self.get_author())),
+                reddit_markdown.escape(self.get_author_link())))
         # result.append("\n\n[***%s***](%s) by [*%s*](%s)" %
         #     self.get_title(), self.get_url(),
         #     self.get_author(), self.get_author_link()
@@ -113,9 +108,7 @@ class Story(object):
         result.append("")
         result.extend(
             reddit_markdown.quote(
-                reddit_markdown.escape(self.get_summary())
-            ).split("\n")
-        )
+                reddit_markdown.escape(self.get_summary())).split("\n"))
         result.append("")
         result.append(reddit_markdown.exponentiate(self.format_stats()))
         result.append("[" + str(id(self)) + "]: " + self._lnk)
@@ -124,18 +117,24 @@ class Story(object):
     def format_stats(self):
         stats = OrderedDict()
         site = self.get_site()
+
         if site is not None:
             _site = iter(site)
             site = "[" + next(_site) + "][" + str(id(self)) + "]"
             self._lnk = next(_site)
             stats["Site"] = site
 
-        for k,v in self.get_stats().items():
+        for k, v in self.get_stats().items():
             stats[reddit_markdown.escape(k)] = reddit_markdown.escape(v)
 
         res = []
         for key, value in stats.items():
             res.append(reddit_markdown.italics(key) + ": " + value)
+
+        if self.download_link is not None:
+            res.append(reddit_markdown.link(reddit_markdown.bold(
+                "Download EPUB"), self.download_link))
+
         return (" " + reddit_markdown.bold("|") + " ").join(res)
 
     def __hash__(self):
@@ -146,9 +145,11 @@ class Story(object):
         if not isinstance(other, Story):
             return False
         return other.get_url() == self.get_url()
+
     def load(self):
         if not self._loaded:
             self.parse_html()
         self.loaded = True
+
     def parse_html(self):
         pass
