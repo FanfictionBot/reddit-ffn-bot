@@ -188,11 +188,11 @@ def load_subreddits(bot_parameters):
     print("LOADED SUBREDDITS: ", SUBREDDIT_LIST)
 
 
-def handle_submission(submission):
-    if not is_submission_checked(submission, markers=frozenset()):
+def handle_submission(submission, markers=frozenset()):
+    if not is_submission_checked(submission):
         logging.info("Found new submission: " + submission.id)
         try:
-            parse_submission_text(submission)
+            parse_submission_text(submission, markers)
         finally:
             check_submission(submission)
 
