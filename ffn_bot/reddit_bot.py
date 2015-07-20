@@ -13,7 +13,7 @@ from ffn_bot.streams import full_reddit_stream
 
 from ffn_bot import reddit_markdown
 from ffn_bot import bot_tools
-
+from ffn_bot import cache
 # For pretty text
 from ffn_bot.bot_tools import Fore, Back, Style
 
@@ -116,6 +116,9 @@ def init_global_flags(bot_parameters):
     if level == logging.DEBUG:
         DEBUG = True
 
+    cache.default_cache = cache.RequestCache()
+
+
 def get_bot_parameters():
     """Parse the command-line arguments."""
     # initialize parser and add options for username and password
@@ -155,7 +158,7 @@ def get_bot_parameters():
         default="INFO",
         help="The default log level. Using python level states.")
 
-    args = parser.parse_args()
+    args, unknown = parser.parse_known_args()
 
     return {
         'user': args.user,

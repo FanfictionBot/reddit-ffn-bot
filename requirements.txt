@@ -4,3 +4,4 @@ praw
 requests
 colorama
 cssselect
+python3-memcached
