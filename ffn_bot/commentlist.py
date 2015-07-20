@@ -4,6 +4,8 @@ This module stores the comment saving functionality.
 import contextlib
 import logging
 
+import praw.objects
+
 
 class CommentList(object):
     """
@@ -36,7 +38,17 @@ class CommentList(object):
         with contextlib.suppress(FileNotFoundError):
             with open(self.filename, "r") as f:
                 for line in f:
-                    self.clist.add(line.strip())
+                    data = line.strip()
+
+                    # Convert from old format into the new format.
+                    if data.startswith("SUBMISSION"):
+                        self.logger.debug("Converting %s into new format"%data)
+                        data = data.replace("SUBMISSION_", "t3_", 1)
+                    elif not data.startswith("t") and data[2] != "_":
+                        self.logger.debug("Converting %s into new format"%data)
+                        data = "t1_" + data
+
+                    self.clist.add(data)
 
     def _save(self):
         if not len(self._transaction_stack):
@@ -53,10 +65,13 @@ class CommentList(object):
 
     def __contains__(self, cid):
         self._init_clist()
+        cid = self._convert_object(cid)
+        self.logger.debug("Querying: " + cid)
         return cid in self.clist
 
     def add(self, cid):
         self._init_clist()
+        cid = self._convert_object(cid)
         self.logger.debug("Adding comment to list: " + cid)
         self.clist.add(cid)
         self._save()
@@ -72,6 +87,12 @@ class CommentList(object):
     def _init_clist(self):
         if self.clist is None:
             self._load()
+
+    @staticmethod
+    def _convert_object(cid):
+        if isinstance(cid, praw.objects.RedditContentObject):
+            cid = cid.fullname
+        return cid
 
     def __len__(self):
         self._init_clist()

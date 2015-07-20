@@ -205,19 +205,17 @@ def load_subreddits(bot_parameters):
 
 
 def handle_submission(submission, markers=frozenset()):
-    if not is_submission_checked(submission) or ("force" in markers):
+    if (submission not in CHECKED_COMMENTS) or ("force" in markers):
         logging.info("Found new submission: " + submission.id)
         try:
             parse_submission_text(submission, markers)
         finally:
-            check_submission(submission)
+            CHECKED_COMMENTS.add(submission)
 
 
 def handle_comment(comment, extra_markers=frozenset()):
     logging.debug("Handling comment: " + comment.id)
-    if (str(comment.id) not in CHECKED_COMMENTS
-       ) or ("force" in extra_markers):
-
+    if (comment not in CHECKED_COMMENTS) or ("force" in extra_markers):
         logging.info("Found new comment: " + comment.id)
         markers = parse_context_markers(comment.body)
         markers |= extra_markers
@@ -235,7 +233,7 @@ def handle_comment(comment, extra_markers=frozenset()):
         try:
             make_reply(comment.body, comment.id, comment.reply, markers)
         finally:
-            CHECKED_COMMENTS.add(str(comment.id))
+            CHECKED_COMMENTS.add(comment)
 
 
 def handle(obj, markers=frozenset()):
@@ -279,18 +277,6 @@ def single_pass():
     except Exception:
         bot_tools.print_exception()
     bot_tools.pause(1, 0)
-
-
-def check_submission(submission):
-    """Mark the submission as checked."""
-    global CHECKED_COMMENTS
-    CHECKED_COMMENTS.add("SUBMISSION_" + str(submission.id))
-
-
-def is_submission_checked(submission):
-    """Check if the submission was checked."""
-    global CHECKED_COMMENTS
-    return "SUBMISSION_" + str(submission.id) in CHECKED_COMMENTS
 
 
 def parse_submission_text(submission, extra_markers=frozenset()):
