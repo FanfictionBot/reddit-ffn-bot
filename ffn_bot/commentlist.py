@@ -73,8 +73,9 @@ class CommentList(object):
         self._init_clist()
         cid = self._convert_object(cid)
         self.logger.debug("Adding comment to list: " + cid)
-        self.clist.add(cid)
-        self._save()
+        if cid in self:
+            self.clist.add(cid)
+            self._save()
 
     def __del__(self):
         """
