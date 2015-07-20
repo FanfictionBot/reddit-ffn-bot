@@ -327,7 +327,7 @@ def make_reply(body, id, reply_func, markers=None, additions=()):
             for part in reply:
                 reply_func(part + FOOTER)
 
-        bot_tools.pause(1, 20)
+        # bot_tools.pause(1, 20)
         print('Continuing to parse submissions...')
     else:
         logging.info("No reply conditions met.")

@@ -135,6 +135,43 @@ class MemcachedCache(BaseCache):
         return string.encode("utf-7", "replace").decode("ascii")
 
 
+def _google_throttler(factor=1.1, minwait=2):
+    wait = minwait
+    lsearch = 0
+
+    resp = None
+    while True:
+        # Return the next response
+        # Get the next request
+        req = yield resp
+
+        if lsearch != 0:
+            # Determine how much wait time has passed.
+            wait = wait - (time.time()-lsearch)
+            if wait < 0:
+                wait = minwait
+
+            # Wait a little bit until we do the request.
+            time.sleep(wait)
+
+            # Grow the wait factor
+            wait*=factor
+
+        # Do the query
+        try:
+            resp = (next(search(req, num=1, stop=1), None),None)
+        except BaseException as e:
+            resp = (None, e)
+        # Write the time of query end.
+        lsearch = time.time()
+
+
+def google_throttler(factor=1.1, minwait=2):
+    res = _google_throttler(factor, minwait)
+    next(res)
+    return res
+
+
 class RequestCache(object):
 
     """
@@ -143,6 +180,7 @@ class RequestCache(object):
 
     def __init__(self, args=None):
         self.cache = BaseCache.by_arguments(args)
+        self.google = google_throttler()
 
     def hit_cache(self, type, query):
         """Check if the value is in the cache."""
@@ -174,9 +212,11 @@ class RequestCache(object):
         except KeyError:
             pass
 
-        time.sleep(random.randint(2000,5000)/1000.0)
+        result, error = self.google.send(query)
+        if not result and error:
+            raise error
 
-        result = next(search(query, num=1, stop=1), None)
+        print(result)
         self.push_cache("search", query, result)
         return result
 
