@@ -24,15 +24,8 @@ r = praw.Reddit(USER_AGENT)
 DEFAULT_SUBREDDITS = ['HPFanfiction']
 SUBREDDIT_LIST = set()
 CHECKED_COMMENTS = None
-FOOTER = "\n".join([
-    r"**Updated 7/19/15!** **|** \[[Usage][1]\] | \[[Changelog][2]\] | \[[Issues][3]\] | \[[GitHub][4]\]",
-    r'[1]: https://github.com/tusing/reddit-ffn-bot/wiki/Usage       "How to use the bot"',
-    r'[2]: https://github.com/tusing/reddit-ffn-bot/wiki/Changelog   "What changed until now"',
-    r'[3]: https://github.com/tusing/reddit-ffn-bot/issues/          "Bugs? Suggestions? Enter them here!"',
-    r'[4]: https://github.com/tusing/reddit-ffn-bot/                 "Fork me on GitHub"'
-])
 
-FOOTER += "\n^^^^^^^^^^^^^^^^^ffnbot!ignore"
+FOOTER = ""
 
 # For testing purposes
 DRY_RUN = False
@@ -94,7 +87,7 @@ def main():
 
 def init_global_flags(bot_parameters):
     global USE_GET_COMMENTS, DRY_RUN, CHECKED_COMMENTS, USE_STREAMS
-    global DEBUG
+    global DEBUG, FOOTER
 
     if bot_parameters["experimental"]["streams"]:
         print("You are using the stream approach.")
@@ -118,6 +111,11 @@ def init_global_flags(bot_parameters):
 
     cache.default_cache = cache.RequestCache()
 
+    with open(bot_parameters["footer"], "r") as f:
+        FOOTER = f.read()
+        print("==========================================")
+        print(FOOTER)
+        print("==========================================")
 
 def get_bot_parameters():
     """Parse the command-line arguments."""
@@ -158,6 +156,12 @@ def get_bot_parameters():
         default="INFO",
         help="The default log level. Using python level states.")
 
+    parser.add_argument(
+        "-f", "--footer",
+        default="FOOTER.txt",
+        help="The actual footer."
+    )
+
     args, unknown = parser.parse_known_args()
 
     return {
@@ -168,6 +172,8 @@ def get_bot_parameters():
         'dry': args.dry,
         'comments': args.comments,
         'verbosity': args.verbosity,
+        'footer': args.footer,
+
         # Switches for experimental features
         'experimental': {
             "streams": args.streams
