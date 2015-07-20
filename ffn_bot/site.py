@@ -23,7 +23,10 @@ class Site(object):
         if name is None:
             # Automatically assign a name for the site.
             name = self.__class__.__module__ + "." + self.__class__.__name__
-        self.regex = re.compile(re.escape(fname) + r"\((.*?)\)")
+        self.regex = re.compile(
+            re.escape(fname) + r"\((.*?)\)",
+            re.IGNORECASE
+        )
         self.name = name
 
     def extract_direct_links(self, body, context):
