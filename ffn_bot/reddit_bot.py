@@ -21,19 +21,13 @@ r = praw.Reddit(USER_AGENT)
 DEFAULT_SUBREDDITS = ['HPFanfiction', 'fanfiction', 'HPMOR']
 SUBREDDIT_LIST = set()
 CHECKED_COMMENTS = None
-
-FOOTER = "\n\nRead usage tips and tricks  [**here**](https://github.com/tusing/reddit-ffn-bot/blob/master/README.md).\n\n" + "\n\nSupporting fanfiction.net (*linkffn*), AO3 (fixed!) (*linkao3*), HPFanficArchive (*linkffa*), FictionPress (*linkfp*), AdultFanFiction (linkaff) (story ID only)\n\n"
-
-exponentiated = [
-    "**New Features 7/19/15:** Download EPUB links for FFNet, FP, and AO3! ffnbot!parent call added!",
-    "Parse multiple fics in a single call with;semicolons;like;this!",
-    "*Add the following tags to any comment:* ",
-    "- *ffnbot!parent*: create a reply for all links in a parent comment",
-    "- *ffnbot!directlinks*: auto parse fanfiction site links without having to call the bot"
-]
-
-for string in exponentiated:
-    FOOTER += reddit_markdown.exponentiate(string) + "\n\n"
+FOOTER = "\n".join([
+    r"\[[Usage][1]\] | \[[Changelog][2]\] | \[[Issues][3]\] | \[[GitHub][4]\]",
+    r'[1]: https://github.com/tusing/reddit-ffn-bot/wiki/Usage       "How to use the bot"',
+    r'[2]: https://github.com/tusing/reddit-ffn-bot/wiki/Changelog   "What changed until now"',
+    r'[3]: https://github.com/tusing/reddit-ffn-bot/issues/          "Bugs? Suggestions? Enter them here!"',
+    r'[4]: https://github.com/tusing/reddit-ffn-bot/                 "Fork me on GitHub"'
+])
 
 FOOTER += "^^^^^^^^^^^^^^^^^ffnbot!ignore"
 
