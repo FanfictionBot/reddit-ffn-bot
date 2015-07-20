@@ -1,3 +1,4 @@
+import os
 import sys
 import argparse
 import logging
@@ -8,6 +9,8 @@ from ffn_bot.commentlist import CommentList
 from ffn_bot.commentparser import formulate_reply, parse_context_markers
 from ffn_bot.commentparser import get_direct_links
 from ffn_bot.commentparser import StoryLimitExceeded
+from ffn_bot.streams import full_reddit_stream
+
 from ffn_bot import reddit_markdown
 from ffn_bot import bot_tools
 
@@ -44,6 +47,11 @@ DRY_RUN = False
 # Please use with caution
 USE_STREAMS = False
 
+# Initiates the debug mode
+# In stream mode it immediately jumps to
+# queue newest object mode.
+DEBUG = False
+
 
 def run_forever():
     sys.exit(_run_forever())
@@ -55,8 +63,12 @@ def _run_forever():
         try:
             main()
         # Exit on sys.exit and keyboard interrupts.
-        except KeyboardInterrupt:
-            raise
+        except KeyboardInterrupt as e:
+            # Exit the program unclean.
+            bot_tools.print_exception(e, level=logging.INFO)
+            if CHECKED_COMMENTS is not None:
+                CHECKED_COMMENTS.save()
+            os._exit(0)
         except SystemExit as e:
             return e.code
         except:
@@ -88,6 +100,7 @@ def main():
 
 def init_global_flags(bot_parameters):
     global USE_GET_COMMENTS, DRY_RUN, CHECKED_COMMENTS, USE_STREAMS
+    global DEBUG
 
     if bot_parameters["experimental"]["streams"]:
         print("You are using the stream approach.")
@@ -100,11 +113,14 @@ def init_global_flags(bot_parameters):
     if DRY_RUN:
         print("Dry run enabled. No comment will be sent.")
 
-    CHECKED_COMMENTS = CommentList(bot_parameters["comments"], DRY_RUN)
+    if CHECKED_COMMENTS is None or not DRY_RUN:
+        CHECKED_COMMENTS = CommentList(bot_parameters["comments"], DRY_RUN)
 
     level = getattr(logging, bot_parameters["verbosity"].upper())
     logging.getLogger().setLevel(level)
 
+    if level == logging.DEBUG:
+        DEBUG = True
 
 def get_bot_parameters():
     """Parse the command-line arguments."""
@@ -232,67 +248,22 @@ def handle(obj, markers=frozenset()):
         handle_comment(obj, markers)
 
 
-def stream_handler(queue, iterator, handler):
-
-    def _raise(exc):
-        raise exc
+def stream_strategy():
+    iterator = full_reddit_stream(
+        r,
+        "+".join(SUBREDDIT_LIST),
+        limit=1 if DEBUG else 100,
+        verbosity=0
+    )
 
     try:
         for post in iterator:
-            print("Queueing Post:", post.id)
-            queue.put_nowait((handler, post))
-    except BaseException as e:
-        # Send the actual exception to the main thread
-        queue.put_nowait((_raise, e))
+            handle(post)
 
-
-def post_receiver(queue):
-    while True:
-        handler, post = queue.get()
-        handler(post)
-
-
-def stream_strategy():
-    from queue import Queue
-    from threading import Thread
-    from praw.helpers import submission_stream, comment_stream
-
-    post_queue = Queue()
-
-    threads = []
-    threads.append(Thread(target=lambda: stream_handler(
-        post_queue,
-        comment_stream(
-            r,
-            "+".join(SUBREDDIT_LIST),
-            limit=100,
-            verbosity=0
-        ),
-        handle_comment
-    )))
-    threads.append(Thread(target=lambda: stream_handler(
-        post_queue,
-        submission_stream(
-            r,
-            "+".join(SUBREDDIT_LIST),
-            limit=100,
-            verbosity=0
-        ),
-        handle_submission
-    )))
-
-    for thread in threads:
-        thread.daemon = True
-        thread.start()
-
-    while True:
-        try:
-            post_receiver(post_queue)
-        except Exception as e:
-            for thread in threads:
-                if not thread.isAlive():
-                    raise KeyboardInterrupt from e
-            bot_tools.print_exception(e)
+    finally:
+        # Make sure the iterator will stop
+        # its internal executor sometime in the future.
+        iterator.close()
 
 
 def single_pass():
