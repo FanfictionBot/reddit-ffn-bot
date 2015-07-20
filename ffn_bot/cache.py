@@ -74,7 +74,7 @@ class LocalCache(BaseCache):
         )
         ns, _ = argument_parser.parse_known_args(args)
         self.expire = ns.cacheexpire
-        self.cache = LimitedSizeDict(max_size=ns.cachesize)
+        self.cache = LimitedSizeDict(size_limit=ns.cachesize)
 
     def get(self, key):
         result = self.cache.get(key, self.EMPTY_RESULT)
@@ -134,14 +134,12 @@ class MemcachedCache(BaseCache):
         # instead of base64 to have smaller keys.
         return string.encode("utf-7", "replace").decode("ascii")
 
+
 class RequestCache(object):
 
     """
     Cache for search requests and page-loads.
     """
-
-    # Marker for non cached objects.
-    EMPTY_RESULT = []
 
     def __init__(self, args=None):
         self.cache = BaseCache.by_arguments(args)
