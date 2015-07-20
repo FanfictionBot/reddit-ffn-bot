@@ -135,7 +135,7 @@ class MemcachedCache(BaseCache):
         return string.encode("utf-7", "replace").decode("ascii")
 
 
-def _google_throttler(factor=1.1, minwait=2):
+def _google_throttler(factor, minwait):
     wait = minwait
     lsearch = 0
 
@@ -148,7 +148,7 @@ def _google_throttler(factor=1.1, minwait=2):
         if lsearch != 0:
             # Determine how much wait time has passed.
             wait = wait - (time.time()-lsearch)
-            if wait < 0:
+            if wait < minwait:
                 wait = minwait
 
             # Wait a little bit until we do the request.
@@ -166,7 +166,7 @@ def _google_throttler(factor=1.1, minwait=2):
         lsearch = time.time()
 
 
-def google_throttler(factor=1.1, minwait=2):
+def google_throttler(factor=1.1, minwait=5):
     res = _google_throttler(factor, minwait)
     next(res)
     return res
