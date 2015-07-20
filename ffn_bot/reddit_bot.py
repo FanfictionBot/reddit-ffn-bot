@@ -22,8 +22,8 @@ DEFAULT_SUBREDDITS = ['HPFanfiction']
 SUBREDDIT_LIST = set()
 CHECKED_COMMENTS = None
 FOOTER = "\n".join([
-    r"**INFO:** **|** \[[Usage][1]\] | \[[Changelog][2]\] | \[[Issues][3]\] | \[[GitHub][4]\]",
-    r'[1]: https://github.com/tusing/reddit-ffn-bot/wiki/Usage       "How to use the bot"',
+    r"by **FanfictionBot:** **|** \[[Usage][1]\] | \[[Changelog][2]\] | \[[Issues][3]\] | \[[GitHub][4]\]",
+    r'[1]: htps://github.com/tusing/reddit-ffn-bot/wiki/Usage       "How to use the bot"',
     r'[2]: https://github.com/tusing/reddit-ffn-bot/wiki/Changelog   "What changed until now"',
     r'[3]: https://github.com/tusing/reddit-ffn-bot/issues/          "Bugs? Suggestions? Enter them here!"',
     r'[4]: https://github.com/tusing/reddit-ffn-bot/                 "Fork me on GitHub"'
