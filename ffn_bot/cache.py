@@ -5,6 +5,9 @@ from requests import get
 from collections import OrderedDict
 
 
+USER_AGENT = "Lynx/2.8.8dev.3 libwww-FM/2.14 SSL-MM/1.4.1"
+
+
 class LimitedSizeDict(OrderedDict):
 
     """The actual cache implementation."""
@@ -230,6 +233,13 @@ class RequestCache(object):
         # Throtle only if we don't have a version cached.
         if throttle:
             time.sleep(throttle)
+
+        # Set our own user-agent.
+        headers = kwargs.pop("headers", {})
+        if "User-Agent" not in headers:
+            headers["User-Agent"] = USER_AGENT
+        kwargs["headers"] = headers
+
         result = get(page, **kwargs).text
 
         self.push_cache("get", page, result)
