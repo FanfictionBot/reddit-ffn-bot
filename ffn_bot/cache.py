@@ -43,23 +43,42 @@ class BaseCache(object):
     def by_arguments(cls, args):
         import argparse
         argument_parser = argparse.ArgumentParser()
-        argument_parser.add_argument(
+        cls.prepare_parser(argument_parser)
+
+        ns, _ = argument_parser.parse_known_args(args)
+        ctype = cls.CACHE_TYPES[ns.cachetype]
+        return ctype(ns)
+
+    @classmethod
+    def prepare_parser(cls, argument_parser):
+        argument_parser_group = argument_parser.add_argument_group("caches")
+        argument_parser_group.conflict_handler = "resolve"
+
+        argument_parser_group.add_argument(
             "--cache-type",
             dest="cachetype",
             default="local",
             action="store",
             choices = cls.CACHE_TYPES.keys()
         )
-        ns, _ = argument_parser.parse_known_args(args)
-        ctype = cls.CACHE_TYPES[ns.cachetype]
-        return ctype(argument_parser, args)
+
+        part_group = argument_parser_group.add_mutually_exclusive_group()
+
+        for n, t in cls.CACHE_TYPES.items():
+            group = part_group.add_argument_group(n)
+            t.prepare_parser(group)
 
 
 @BaseCache.register_type("local")
 class LocalCache(BaseCache):
     EMPTY_RESULT = []
 
-    def __init__(self, argument_parser, args):
+    def __init__(self, ns):
+        self.expire = ns.cacheexpire
+        self.cache = LimitedSizeDict(size_limit=ns.cachesize)
+
+    @classmethod
+    def prepare_parser(cls, argument_parser):
         argument_parser.add_argument(
             "--cache-size",
             dest="cachesize",
@@ -72,9 +91,6 @@ class LocalCache(BaseCache):
             default=30*60,
             type=int
         )
-        ns, _ = argument_parser.parse_known_args(args)
-        self.expire = ns.cacheexpire
-        self.cache = LimitedSizeDict(size_limit=ns.cachesize)
 
     def get(self, key):
         result = self.cache.get(key, self.EMPTY_RESULT)
@@ -96,7 +112,13 @@ class LocalCache(BaseCache):
 
 @BaseCache.register_type("memcached")
 class MemcachedCache(BaseCache):
-    def __init__(self, argument_parser, args):
+    def __init__(self, ns):
+        import memcache
+        self.client = memcache.Client(ns.cachehosts)
+        self.expire = ns.cacheexpire
+
+    @classmethod
+    def prepare_parser(cls, argument_parser):
         argument_parser.add_argument(
             "--cache-host",
             dest="cachehosts",
@@ -110,10 +132,6 @@ class MemcachedCache(BaseCache):
             default=30*60,
             type=int
         )
-        ns, _ = argument_parser.parse_known_args(args)
-        import memcache
-        self.client = memcache.Client(ns.cachehosts)
-        self.expire = ns.cacheexpire
 
     def get(self, key):
         key = self.enforce_ascii(key)

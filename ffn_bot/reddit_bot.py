@@ -11,13 +11,14 @@ from ffn_bot.commentparser import get_direct_links
 from ffn_bot.commentparser import StoryLimitExceeded
 from ffn_bot.streams import full_reddit_stream
 
-from ffn_bot import reddit_markdown
 from ffn_bot import bot_tools
 from ffn_bot import cache
 # For pretty text
 from ffn_bot.bot_tools import Fore, Back, Style
 
-__author__ = 'tusing, MikroMan, StuxSoftware'
+__author__ = 'tusing'
+__authors__ = ['tusing', 'MikroMan', 'StuxSoftware']
+__version__ = "v0.5"
 
 USER_AGENT = "Python:FanfictionComment:v0.5 (by tusing, StuxSoftware, and MikroMan)"
 r = praw.Reddit(USER_AGENT)
@@ -72,7 +73,6 @@ def main():
     # moved call for agruments to avoid double calling
     bot_parameters = get_bot_parameters()
     login_to_reddit(bot_parameters)
-    load_subreddits(bot_parameters)
     init_global_flags(bot_parameters)
 
     if USE_STREAMS:
@@ -87,7 +87,7 @@ def main():
 
 def init_global_flags(bot_parameters):
     global USE_GET_COMMENTS, DRY_RUN, CHECKED_COMMENTS, USE_STREAMS
-    global DEBUG, FOOTER
+    global DEBUG, FOOTER, SUBREDDIT_LIST
 
     if bot_parameters["experimental"]["streams"]:
         print("You are using the stream approach.")
@@ -103,6 +103,8 @@ def init_global_flags(bot_parameters):
     if CHECKED_COMMENTS is None or not DRY_RUN:
         CHECKED_COMMENTS = CommentList(bot_parameters["comments"], DRY_RUN)
 
+    SUBREDDIT_LIST = bot_parameters['user_subreddits']
+
     level = getattr(logging, bot_parameters["verbosity"].upper())
     logging.getLogger().setLevel(level)
 
@@ -117,24 +119,23 @@ def init_global_flags(bot_parameters):
         print(FOOTER)
         print("==========================================")
 
+
 def get_bot_parameters():
     """Parse the command-line arguments."""
     # initialize parser and add options for username and password
     parser = argparse.ArgumentParser()
     parser.add_argument('-u', '--user',
                         help='define Reddit login username')
+
     parser.add_argument(
         '-p', '--password',
         help='define Reddit login password')
 
     parser.add_argument(
         '-s', '--subreddits',
-        help='define target subreddits; seperate with commas')
-
-    parser.add_argument(
-        '-d', '--default',
-        action='store_true',
-        help='add default subreddits, can be in addition to -s')
+        action="append",
+        default=DEFAULT_SUBREDDITS,
+        help='define target subreddit')
 
     parser.add_argument(
         '-c', '--comments',
@@ -162,13 +163,14 @@ def get_bot_parameters():
         help="The actual footer."
     )
 
-    args, unknown = parser.parse_known_args()
+    cache.BaseCache.prepare_parser(parser)
 
+    args = parser.parse_args()
+    print(repr(args))
     return {
         'user': args.user,
         'password': args.password,
         'user_subreddits': args.subreddits,
-        'default': args.default,
         'dry': args.dry,
         'comments': args.comments,
         'verbosity': args.verbosity,
@@ -186,28 +188,6 @@ def login_to_reddit(bot_parameters):
     print("Logging in...")
     r.login(bot_parameters['user'], bot_parameters['password'])
     print(Fore.GREEN, "Logged in.", Style.RESET_ALL)
-
-
-def load_subreddits(bot_parameters):
-    """Loads the subreddits this bot operates on."""
-    global SUBREDDIT_LIST
-    print("Loading subreddits...")
-
-    if bot_parameters['default'] is True:
-        print("Adding default subreddits: ", DEFAULT_SUBREDDITS)
-        for subreddit in DEFAULT_SUBREDDITS:
-            SUBREDDIT_LIST.add(subreddit)
-
-    if bot_parameters['user_subreddits'] is not None:
-        user_subreddits = bot_parameters['user_subreddits'].split(',')
-        print("Adding user subreddits: ", user_subreddits)
-        for subreddit in user_subreddits:
-            SUBREDDIT_LIST.add(subreddit)
-
-    if len(SUBREDDIT_LIST) == 0:
-        print("No subreddit specified. Adding test subreddit.")
-        SUBREDDIT_LIST.add('tusingtestfield')
-    print("LOADED SUBREDDITS: ", SUBREDDIT_LIST)
 
 
 def handle_submission(submission, markers=frozenset()):
