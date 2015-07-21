@@ -133,8 +133,9 @@ class FanfictionBaseSite(site.Site):
         if match is not None:
             return fic_name
 
-        search_request = 'site:www.{1}/s/ {0}'.format(fic_name, self.site)
-        return default_cache.search(search_request)
+        return default_cache.search(
+            fic_name, "http://" + self.name
+        )
 
     def extract_direct_links(self, body, context):
         return (

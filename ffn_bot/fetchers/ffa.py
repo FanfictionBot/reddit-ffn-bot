@@ -16,7 +16,7 @@ __all__ = ["HPFanfictionArchive"]
 FFA_LINK_REGEX = re.compile(
     r"http(?:s)?://www\.hpfanficarchive\.com/stories/viewstory\.php\?sid=(?P<sid>\d+)", re.IGNORECASE)
 FFA_FUNCTION = "linkffa"
-FFA_SEARCH_QUERY = "http://www.hpfanficarchive.com/stories/viewstory.php?sid= %s"
+FFA_SEARCH_SITE = "http://www.hpfanficarchive.com/stories/viewstory.php?sid="
 
 FFA_AUTHOR_NAME = '//*[@id="pagetitle"]/a[2]/text()'
 FFA_AUTHOR_URL = '//*[@id="pagetitle"]/a[2]/@href'
@@ -91,7 +91,7 @@ class HPFanfictionArchive(Site):
         if match is not None:
             return request
 
-        return default_cache.search(FFA_SEARCH_QUERY % request)
+        return default_cache.search(request, FFA_SEARCH_SITE)
 
     def generate_response(self, link, context):
         assert link is not None

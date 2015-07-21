@@ -1,10 +1,13 @@
 import time
 import random
-from google import search
 from requests import get
 from collections import OrderedDict
 
 
+from ffn_bot.searchengines import Searcher
+
+
+CACHED_SEARCHER = Searcher()
 USER_AGENT = "Lynx/2.8.8dev.3 libwww-FM/2.14 SSL-MM/1.4.1"
 
 
@@ -156,55 +159,6 @@ class MemcachedCache(BaseCache):
         return string.encode("utf-7", "replace").decode("ascii")
 
 
-def _google_throttler(factor, minwait, reset_time):
-    wait = reset_time
-    lsearch = 0
-
-    resp = None
-    while True:
-        # Return the next response
-        # Get the next request
-        req = yield resp
-
-        if lsearch != 0:
-            # Determine how much wait time has passed.
-            wait = wait - (time.time()-lsearch)
-            if wait < minwait:
-                wait = reset_time
-
-            # Wait a little bit until we do the request.
-            time.sleep(wait)
-
-            # Grow the wait factor
-            wait*=factor
-
-        # Do the query
-        try:
-            resp = (next(search(req, num=1, stop=1), None),None)
-        except BaseException as e:
-            resp = (None, e)
-        # Write the time of query end.
-        lsearch = time.time()
-
-
-def google_throttler(factor=1.1, minwait=10, reset_time=20):
-    """
-    An advanced throttler for google requests. It's like a sliding
-    timescale.
-
-    Multiple consecutive requests will take more time every request.
-    However you can serve this time also by not doing any request.
-
-    :param factor:     The factor the wait time increases.
-    :param minwait:    Do not drop below this time.
-    :param reset_time: If you drop below minwait seconds reset the wait
-                       time to this value.
-    """
-    res = _google_throttler(factor, minwait, reset_time)
-    next(res)
-    return res
-
-
 class RequestCache(object):
 
     """
@@ -213,7 +167,6 @@ class RequestCache(object):
 
     def __init__(self, args=None):
         self.cache = BaseCache.by_arguments(args)
-        self.google = google_throttler()
 
     def hit_cache(self, type, query):
         """Check if the value is in the cache."""
@@ -245,16 +198,14 @@ class RequestCache(object):
         self.push_cache("get", page, result)
         return result
 
-    def search(self, query):
+    def search(self, query, site=None, limit=1):
         print("SEARCHING: " + str(query))
         try:
             return self.hit_cache("search", query)
         except KeyError:
             pass
 
-        result, error = self.google.send(query)
-        if not result and error:
-            raise error
+        result = CACHED_SEARCHER.search(query, site, limit)
 
         print(result)
         self.push_cache("search", query, result)

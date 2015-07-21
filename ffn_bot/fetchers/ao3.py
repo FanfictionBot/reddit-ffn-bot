@@ -19,7 +19,6 @@ AO3_LINK_REGEX = re.compile(
     r"http(s)?://([^.]+\.)?archiveofourown.org/works/(?P<sid>\d+)[^ ]*",
     re.IGNORECASE)
 AO3_FUNCTION = "linkao3"
-AO3_SEARCH_QUERY = "site:archiveofourown.org/works/ %s"
 
 AO3_AUTHOR_NAME = '//a[@rel="author"]/text()'
 AO3_AUTHOR_URL = '//a[@rel="author"]/@href'
@@ -101,7 +100,10 @@ class ArchiveOfOurOwn(Site):
         if match is not None:
             return request
 
-        return default_cache.search(AO3_SEARCH_QUERY % request)
+        return default_cache.search(
+            request,
+            "http://archiveofourown.org/works"
+        )
 
     def generate_response(self, link, context):
         assert link is not None
