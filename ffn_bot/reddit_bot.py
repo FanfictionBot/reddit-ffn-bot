@@ -3,6 +3,7 @@ import sys
 import argparse
 import logging
 import praw
+import platform
 from praw.objects import Submission
 
 from ffn_bot.commentlist import CommentList
@@ -20,7 +21,24 @@ __author__ = 'tusing'
 __authors__ = ['tusing', 'MikroMan', 'StuxSoftware']
 __version__ = "v0.5"
 
-USER_AGENT = "Python:FanfictionComment:v0.5 (by tusing, StuxSoftware, and MikroMan)"
+# A nicer "standard" compliant user-agent for reddit.
+# The first part is the required user agent data in their preferred
+# format, then adding version information for the used software stack.
+USER_AGENT = "%s %s/%s PRAW/%s (by /u/tusing; Collaborators: %s)"%(
+    # e.g. bot:FanFictionBot:0.5
+    ":".join(["bot", "FanFictionBot", __version__]),
+
+    # e.g. CPython/3.4.0
+    platform.python_implementation(),
+    str(sys.version[:5]),
+
+    # e.g. PRAW/3.1.0
+    praw.__version__,
+
+    # e.g. (by /u/tusing; Collaborators:tusing, MikroMan, StuxSoftware)
+    ", ".join(__authors__)
+)
+
 r = praw.Reddit(USER_AGENT)
 DEFAULT_SUBREDDITS = ['HPFanfiction']
 SUBREDDIT_LIST = set()
