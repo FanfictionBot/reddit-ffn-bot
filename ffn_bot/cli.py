@@ -17,7 +17,7 @@ def get_bot_parameters():
     parser.add_argument(
         '-s', '--subreddits',
         action="append",
-        default=DEFAULT_SUBREDDITS,
+        default=[],
         help='define target subreddit')
 
     parser.add_argument(
@@ -48,7 +48,7 @@ def get_bot_parameters():
     return {
         'user': args.user,
         'password': args.password,
-        'user_subreddits': args.subreddits,
+        'user_subreddits': args.subreddits or DEFAULT_SUBREDDITS,
         'dry': args.dry,
         'comments': args.comments,
         'verbosity': args.verbosity,
