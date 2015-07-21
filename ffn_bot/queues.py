@@ -91,7 +91,11 @@ class QueueThread(Thread):
             self.logger.debug("Querying Reddit...")
             for fetcher in self.fetchers:
                 self._fetch(fetcher)
-            time.sleep(10)
+            for i in range(10):
+                if not self.running:
+                    break
+
+                time.sleep(1)
 
     def get(self):
         while True:
