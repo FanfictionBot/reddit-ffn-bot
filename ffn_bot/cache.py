@@ -208,7 +208,6 @@ class RequestCache(object):
         result = CACHED_SEARCHER.search(query, site, limit=1)
         if result:
             result = result[0]
-        print(result)
 
         self.push_cache("search", query, result)
         return result
