@@ -118,7 +118,7 @@ class QueueStrategy(object):
         self.handler = handler
         self.subreddit = subreddit
         self.count = 0
-        self.querylimit = limit
+        self.limit = limit
         self._get_submissions = self._stream(subreddit.get_new)
         self._get_comments = self._stream(subreddit.get_comments)
 

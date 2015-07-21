@@ -60,6 +60,6 @@ def get_bot_parameters():
         'comments': args.comments,
         'verbosity': args.verbosity,
         'footer': args.footer,
-        'limit', args.limit
+        'limit': args.limit
     }
 
