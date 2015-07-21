@@ -80,7 +80,8 @@ class QueueThread(Thread):
 
     def add(self, *items):
         items = list(filter((lambda i: i not in self), items))
-        self.logger.info("Adding %d items."%len(items))
+        if len(items)>0:
+            self.logger.info("Adding %d items."%len(items))
         for item in items:
             self.queue.put(item)
 
