@@ -9,7 +9,7 @@ from ffn_bot.searchengines.helpers import TagUsing
 class DuckDuckGoScraper(TagUsing, Throttled, Randomizing, SearchEngine):
 
     def __init__(self):
-        super(BingScraper, self).__init__(
+        super(DuckDuckGoScraper, self).__init__(
             requests=6,
             timeframe=Throttled.MINUTE
         )

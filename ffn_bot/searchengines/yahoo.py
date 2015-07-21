@@ -1,9 +1,14 @@
-from urllib.parse import urlencode
+import re
+from urllib.parse import urlencode, unquote
 from lxml.html import fromstring
 
 from ffn_bot.searchengines.base import register, SearchEngine
 from ffn_bot.searchengines.helpers import Throttled, Randomizing
 from ffn_bot.searchengines.helpers import TagUsing
+
+
+LINK_FINDER = re.compile("(?<=RU=).*?(?=/R.=)")
+
 
 @register
 class YahooScraper(TagUsing, Throttled, Randomizing, SearchEngine):
@@ -23,6 +28,6 @@ class YahooScraper(TagUsing, Throttled, Randomizing, SearchEngine):
         }))
 
         return list(
-            "http://" + tag.text_content()
-            for tag in page.cssselect("#web h3 + div span:first-child")
+            LINK_FINDER.findall(unquote(tag.get("href")))[0]
+            for tag in page.cssselect("#web h3 a")
         )[:limit]

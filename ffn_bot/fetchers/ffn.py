@@ -134,7 +134,7 @@ class FanfictionBaseSite(site.Site):
             return fic_name
 
         return default_cache.search(
-            fic_name, "http://" + self.name
+            fic_name, "http://www." + self.site + "/s/"
         )
 
     def extract_direct_links(self, body, context):

@@ -198,16 +198,18 @@ class RequestCache(object):
         self.push_cache("get", page, result)
         return result
 
-    def search(self, query, site=None, limit=1):
+    def search(self, query, site=None):
         print("SEARCHING: " + str(query))
         try:
             return self.hit_cache("search", query)
         except KeyError:
             pass
 
-        result = CACHED_SEARCHER.search(query, site, limit)
-
+        result = CACHED_SEARCHER.search(query, site, limit=1)
+        if result:
+            result = result[0]
         print(result)
+
         self.push_cache("search", query, result)
         return result
 

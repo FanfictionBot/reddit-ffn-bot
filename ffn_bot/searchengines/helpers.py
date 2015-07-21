@@ -16,6 +16,7 @@ class Throttled(SearchEngine):
     YEAR = 365*DAY
 
     def __init__(self, requests, timeframe=60*60):
+        super(Throttled, self).__init__()
         self.wait_time = timeframe/requests
         self.last_search = 0
 
@@ -61,3 +62,46 @@ class TagUsing(SearchEngine):
         if site is not None:
             query+=" "+self.TAG+site
         return super(TagUsing, self).search(query, None, limit)
+
+
+class BanHandling(SearchEngine):
+
+    BAN_TIME = Throttled.HOUR
+
+    def __init__(self, *args, **kwargs):
+        super(BanHandling, self).__init__(*args, **kwargs)
+        self.banned = 0
+
+    @property
+    def _ban_delta(self):
+        return time.time() - self.banned
+
+    @property
+    def working(self):
+        if self.banned:
+            if self._ban_delta < self.BAN_TIME:
+                return False
+        return super(BanHandling, self).working
+
+    @property
+    def is_serving_rate_limit(self):
+        if self.banned:
+            return not self.working
+        return super(BanHandling, self).is_serving_rate_limit
+
+    @property
+    def current_wait_time(self):
+        s_wait_time = super(BanHandling, self).current_wait_time
+        if self.banned:
+            return max(self.BAN_TIME - self._ban_delta, s_wait_time)
+        return s_wait_time
+
+    def search(self, *args, **kwargs):
+        if not self.working:
+            return None
+
+        self.banned = 0
+        return super(BanHandling, self).search(*args, **kwargs)
+
+    def was_banned(self):
+        self.banned = time.time()

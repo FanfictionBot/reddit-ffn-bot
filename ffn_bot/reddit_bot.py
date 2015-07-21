@@ -26,7 +26,7 @@ __version__ = "1.1.1"
 # format, then adding version information for the used software stack.
 USER_AGENT = "%s %s/%s PRAW/%s (by /u/tusing; Collaborators: %s)"%(
     # e.g. bot:FanFictionBot:1.1.1
-    ":".join(["bot", "FanFictionBot", __version__]),
+    ":".join(["reply", "FanFiction", __version__]),
 
     # e.g. CPython/3.4.0
     platform.python_implementation(),
