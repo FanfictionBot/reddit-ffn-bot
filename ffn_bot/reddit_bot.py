@@ -1,6 +1,5 @@
 import os
 import sys
-import argparse
 import logging
 import praw
 import platform
@@ -10,7 +9,7 @@ from ffn_bot.commentlist import CommentList
 from ffn_bot.commentparser import formulate_reply, parse_context_markers
 from ffn_bot.commentparser import get_direct_links
 from ffn_bot.commentparser import StoryLimitExceeded
-from ffn_bot.streams import full_reddit_stream
+from ffn_bot.cli import get_bot_parameters
 
 from ffn_bot import bot_tools
 from ffn_bot import cache
@@ -40,7 +39,6 @@ USER_AGENT = "%s %s/%s PRAW/%s (by /u/tusing; Collaborators: %s)"%(
 )
 
 r = praw.Reddit(USER_AGENT)
-DEFAULT_SUBREDDITS = ['HPFanfiction']
 SUBREDDIT_LIST = set()
 CHECKED_COMMENTS = None
 
@@ -122,59 +120,6 @@ def init_global_flags(bot_parameters):
         print("==========================================")
         print(FOOTER)
         print("==========================================")
-
-
-def get_bot_parameters():
-    """Parse the command-line arguments."""
-    # initialize parser and add options for username and password
-    parser = argparse.ArgumentParser()
-    parser.add_argument('-u', '--user',
-                        help='define Reddit login username')
-
-    parser.add_argument(
-        '-p', '--password',
-        help='define Reddit login password')
-
-    parser.add_argument(
-        '-s', '--subreddits',
-        action="append",
-        default=DEFAULT_SUBREDDITS,
-        help='define target subreddit')
-
-    parser.add_argument(
-        '-c', '--comments',
-        help="Filename where comments are stored",
-        default="CHECKED_COMMENTS.txt")
-
-    parser.add_argument(
-        '-l', '--dry',
-        action='store_true',
-        help="do not send comments.")
-
-    parser.add_argument(
-        "-v", "--verbosity",
-        default="INFO",
-        help="The default log level. Using python level states.")
-
-    parser.add_argument(
-        "-f", "--footer",
-        default="FOOTER.txt",
-        help="The actual footer."
-    )
-
-    cache.BaseCache.prepare_parser(parser)
-
-    args = parser.parse_args()
-    print(repr(args))
-    return {
-        'user': args.user,
-        'password': args.password,
-        'user_subreddits': args.subreddits,
-        'dry': args.dry,
-        'comments': args.comments,
-        'verbosity': args.verbosity,
-        'footer': args.footer,
-    }
 
 
 def login_to_reddit(bot_parameters):
