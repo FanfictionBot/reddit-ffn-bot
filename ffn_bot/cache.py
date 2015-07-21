@@ -1,5 +1,5 @@
 import time
-import random
+import logging
 from requests import get
 from collections import OrderedDict
 
@@ -167,17 +167,20 @@ class RequestCache(object):
 
     def __init__(self, args=None):
         self.cache = BaseCache.by_arguments(args)
+        self.logger = logging.getLogger("RequestCache")
 
     def hit_cache(self, type, query):
         """Check if the value is in the cache."""
+        self.logger.debug("Hitting cache: " + "%s:%s" % (type, query))
         return self.cache.get("%s:%s" % (type, query))
 
     def push_cache(self, type, query, data):
         """Push a value into the cache."""
+        self.logger.debug("Inserting cache: " + "%s:%s" % (type, query))
         return self.cache.set("%s:%s"%(type,query), data)
 
     def get_page(self, page, throttle=0, **kwargs):
-        print("LOADING: " + str(page))
+        self.logger.info("LOADING: " + str(page))
         try:
             return self.hit_cache("get", page)
         except KeyError:
@@ -199,7 +202,7 @@ class RequestCache(object):
         return result
 
     def search(self, query, site=None):
-        print("SEARCHING: " + str(query))
+        self.logger.info("SEARCHING: " + str(query))
         try:
             return self.hit_cache("search", query)
         except KeyError:
