@@ -184,8 +184,20 @@ def _google_throttler(factor, minwait):
         lsearch = time.time()
 
 
-def google_throttler(factor=1.1, minwait=5):
-    res = _google_throttler(factor, minwait)
+def google_throttler(factor=1.1, minwait=10, reset_time=20):
+    """
+    An advanced throttler for google requests. It's like a sliding
+    timescale.
+
+    Multiple consecutive requests will take more time every request.
+    However you can serve this time also by not doing any request.
+
+    :param factor:     The factor the wait time increases.
+    :param minwait:    Do not drop below this time.
+    :param reset_time: If you drop below minwait seconds reset the wait
+                       time to this value.
+    """
+    res = _google_throttler(factor, minwait, reset_time)
     next(res)
     return res
 
