@@ -24,19 +24,9 @@ __version__ = "1.1.1"
 # A nicer "standard" compliant user-agent for reddit.
 # The first part is the required user agent data in their preferred
 # format, then adding version information for the used software stack.
-USER_AGENT = "%s %s/%s PRAW/%s (by /u/tusing; Collaborators: %s)"%(
+USER_AGENT = "%s (by /u/tusing)"%(
     # e.g. bot:FanFictionBot:1.1.1
     ":".join(["reply", "FanFiction", __version__]),
-
-    # e.g. CPython/3.4.0
-    platform.python_implementation(),
-    str(sys.version[:5]),
-
-    # e.g. PRAW/3.1.0
-    praw.__version__,
-
-    # e.g. (by /u/tusing; Collaborators:tusing, MikroMan, StuxSoftware)
-    ", ".join(__authors__)
 )
 
 r = praw.Reddit(USER_AGENT)
@@ -117,6 +107,7 @@ def init_global_flags(bot_parameters):
 
     with open(bot_parameters["footer"], "r") as f:
         FOOTER = f.read()
+        FOOTER = FOOTER.format(version=__version__)
         print("==========================================")
         print(FOOTER)
         print("==========================================")
