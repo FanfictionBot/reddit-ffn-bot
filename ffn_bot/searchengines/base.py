@@ -1,3 +1,6 @@
+import warnings
+
+
 class SearchEngine(object):
     """
     This class abstracts the search engine away,
@@ -48,9 +51,32 @@ class _Searcher(object):
         return engines
 
     def search(self, query, site=None, limit=1):
-        engines = self._engine_order
-        for engine in engines:
-            res = engine.search(query, site, limit)
-            if res:
-                return res
+        blocked = set()
+        exceptions = []
+        while True:
+            # Always try to get the engine with the lowest
+            # wait time.
+            engine = None
+            for e in self._engine_order:
+                if e not in blocked:
+                    engine = e
+
+            # If there is no engine, return None
+            if engine is None:
+                break
+
+            # Perform the query.
+            try:
+                res = engine.search(query, site, limit)
+            except Exception as e:
+                warnings.warn(e, UserWarning)
+            else:
+                if res:
+                    return res
+
+            # Mark the engine as queried.
+            blocked.add(engine)
+
+        if len(exceptions) > 0:
+            raise
         return None
