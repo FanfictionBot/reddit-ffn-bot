@@ -19,7 +19,9 @@ you have the following dependencies installed on your machine:
 * Python 3.4 or newer
 
 Install bot as follows:
+
 Adapt the commands for your linux distribution
+
 We assume Ubuntu 14.04 and you are inside your desired installation
 directory.
 
@@ -36,10 +38,22 @@ Use the following command to start the bot
     $ python . -u <USERNAME> -p <PASSWORD> -s <SUBREDDIT/MULTIREDDIT>
 ```
 
+### Memcached
+Please note that we recommend using memcached for production
+purposes. Specify the following additional command line arguments
+to connect to memcached. Add --cache-host for ever additional
+memcached host you want to use.
+
+```
+    $ python . [...] --cache-type memcached --cache-host localhost:11211
+```
+
 ## Contributing
 We happily accept contributions. Please note, that we only accept pull
 requests into the [bleeding][github:bleeding]-branch.
+
 You can find our issue page here: [Issues][github:issues]
+
 You can find our pull request page here: [Pull Requests][github:pull-requests]
 
 
