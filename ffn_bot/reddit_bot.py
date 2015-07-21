@@ -129,23 +129,20 @@ def login_to_reddit(bot_parameters):
     print(Fore.GREEN, "Logged in.", Style.RESET_ALL)
 
 
-def handle_submission(submission, markers=frozenset()):
+def _handle_submission(submission, markers=frozenset()):
     if (submission not in CHECKED_COMMENTS) or ("force" in markers):
         logging.info("Found new submission: " + submission.id)
-        try:
-            parse_submission_text(submission, markers)
-        finally:
-            CHECKED_COMMENTS.add(submission)
+        parse_submission_text(submission, markers)
 
 
-def handle_comment(comment, extra_markers=frozenset()):
+def _handle_comment(comment, extra_markers=frozenset()):
     logging.debug("Handling comment: " + comment.id)
     if (comment not in CHECKED_COMMENTS) or ("force" in extra_markers):
         logging.info("Found new comment: " + comment.id)
         markers = parse_context_markers(comment.body)
         markers |= extra_markers
         if "ignore" in markers:
-            logging.info("Comment forcefully ignored: " + comment.id)
+            logging.debug("Comment forcefully ignored: " + comment.id)
             return
 
         if "parent" in markers:
@@ -155,17 +152,17 @@ def handle_comment(comment, extra_markers=frozenset()):
                 item = r.get_info(thing_id=comment.parent_id)
             handle(item, {"directlinks", "submissionlink", "force"})
 
-        try:
-            make_reply(comment.body, comment.id, comment.reply, markers)
-        finally:
-            CHECKED_COMMENTS.add(comment)
+        make_reply(comment.body, comment.id, comment.reply, markers)
 
 
 def handle(obj, markers=frozenset()):
-    if isinstance(obj, Submission):
-        handle_submission(obj, markers)
-    else:
-        handle_comment(obj, markers)
+    try:
+        if isinstance(obj, Submission):
+            _handle_submission(obj, markers)
+        else:
+            _handle_comment(obj, markers)
+    finally:
+        CHECKED_COMMENTS.add(obj)
 
 
 def parse_submission_text(submission, extra_markers=frozenset()):
