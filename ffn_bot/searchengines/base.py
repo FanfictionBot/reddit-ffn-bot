@@ -60,6 +60,7 @@ class _Searcher(object):
             for e in self._engine_order:
                 if e not in blocked:
                     engine = e
+                    break
 
             # If there is no engine, return None
             if engine is None:
