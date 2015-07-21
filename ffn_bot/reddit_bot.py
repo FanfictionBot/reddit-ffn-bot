@@ -5,6 +5,7 @@ import praw
 import platform
 from praw.objects import Submission
 
+from ffn_bot.queues import QueueStrategy
 from ffn_bot.commentlist import CommentList
 from ffn_bot.commentparser import formulate_reply, parse_context_markers
 from ffn_bot.commentparser import get_direct_links
@@ -87,7 +88,6 @@ def main():
     login_to_reddit(bot_parameters)
     init_global_flags(bot_parameters)
 
-    from ffn_bot.queues import QueueStrategy
     QueueStrategy(
         r.get_subreddit("+".join(SUBREDDIT_LIST)),
         CHECKED_COMMENTS,
