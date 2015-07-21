@@ -81,7 +81,8 @@ def main():
     QueueStrategy(
         r.get_subreddit("+".join(SUBREDDIT_LIST)),
         CHECKED_COMMENTS,
-        handle
+        handle,
+        bot_parameters['limit']
     ).run()
 
 
