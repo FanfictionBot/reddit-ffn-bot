@@ -113,6 +113,8 @@ def init_global_flags(bot_parameters):
         print(FOOTER)
         print("==========================================")
 
+    if not DEBUG:
+        logging.getLogger("requests").setLevel(logging.WARN)
 
 def login_to_reddit(bot_parameters):
     """Performs the login for reddit."""
