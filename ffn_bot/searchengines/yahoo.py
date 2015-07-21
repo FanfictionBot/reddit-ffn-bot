@@ -8,7 +8,7 @@ from ffn_bot.searchengines.helpers import TagUsing
 
 
 LINK_FINDER = re.compile("(?<=RU=).*?(?=/R.=)")
-
+IS_OUTBOUND_LINK = re.compile(r"^http(?:s?)://ri\.search\.yahoo\.com/")
 
 @register
 class YahooScraper(TagUsing, Throttled, Randomizing, SearchEngine):
@@ -23,11 +23,13 @@ class YahooScraper(TagUsing, Throttled, Randomizing, SearchEngine):
         return fromstring(cache.default_cache.get_page(request))
 
     def _search(self, query, site=None, limit=1):
-        page = self._get_page("http://search.yahoo.com/search?" + urlencode({
-            "p": query
-        }))
-
+        self._page = page = self._get_page(
+            "http://search.yahoo.com/search?" + urlencode({
+                "p": query
+            })
+        )
         return list(
-            LINK_FINDER.findall(unquote(tag.get("href")))[0]
+            unquote(LINK_FINDER.findall(tag.get("href"))[0])
             for tag in page.cssselect("#web h3 a")
+            if len(IS_OUTBOUND_LINK.findall(tag.get("href")))
         )[:limit]
