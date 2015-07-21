@@ -49,10 +49,6 @@ FOOTER = ""
 # For testing purposes
 DRY_RUN = False
 
-# This is a experimental feature of the program
-# Please use with caution
-USE_STREAMS = False
-
 # Initiates the debug mode
 # In stream mode it immediately jumps to
 # queue newest object mode.
@@ -93,27 +89,17 @@ def main():
     login_to_reddit(bot_parameters)
     init_global_flags(bot_parameters)
 
-    if USE_STREAMS:
-        print("========================================")
-        print("Stream Based, Will not gracefully restart.")
-        stream_strategy()
-        sys.exit()
-
-    while True:
-        single_pass()
+    from ffn_bot.queues import QueueStrategy
+    QueueStrategy(
+        r.get_subreddit("+".join(SUBREDDIT_LIST)),
+        CHECKED_COMMENTS,
+        handle
+    ).run()
 
 
 def init_global_flags(bot_parameters):
-    global USE_GET_COMMENTS, DRY_RUN, CHECKED_COMMENTS, USE_STREAMS
+    global USE_GET_COMMENTS, DRY_RUN, CHECKED_COMMENTS
     global DEBUG, FOOTER, SUBREDDIT_LIST
-
-    if bot_parameters["experimental"]["streams"]:
-        print("You are using the stream approach.")
-        print("Please note that the application will not propely")
-        print("restart on creashes due to limitations of the")
-        print("Python threading interface.")
-        USE_STREAMS = True
-
     DRY_RUN = bool(bot_parameters["dry"])
     if DRY_RUN:
         print("Dry run enabled. No comment will be sent.")
@@ -166,11 +152,6 @@ def get_bot_parameters():
         help="do not send comments.")
 
     parser.add_argument(
-        "--streams",
-        action="store_true",
-        help="Highly experimental feature. Handle posts as they come")
-
-    parser.add_argument(
         "-v", "--verbosity",
         default="INFO",
         help="The default log level. Using python level states.")
@@ -193,11 +174,6 @@ def get_bot_parameters():
         'comments': args.comments,
         'verbosity': args.verbosity,
         'footer': args.footer,
-
-        # Switches for experimental features
-        'experimental': {
-            "streams": args.streams
-        }
     }
 
 
@@ -245,42 +221,6 @@ def handle(obj, markers=frozenset()):
         handle_submission(obj, markers)
     else:
         handle_comment(obj, markers)
-
-
-def stream_strategy():
-    iterator = full_reddit_stream(
-        r,
-        "+".join(SUBREDDIT_LIST),
-        limit=1 if DEBUG else 100,
-        verbosity=0
-    )
-
-    try:
-        for post in iterator:
-            handle(post)
-
-    finally:
-        # Make sure the iterator will stop
-        # its internal executor sometime in the future.
-        iterator.close()
-
-
-def single_pass():
-    try:
-        # We actually use a multireddit to acieve our goal
-        # of watching multiple reddits.
-        subreddit = r.get_subreddit("+".join(SUBREDDIT_LIST))
-
-        logging.info("Parsing new submissions.")
-        for submission in subreddit.get_new(limit=50):
-            handle_submission(submission)
-
-        logging.info("Parsing new comments.")
-        for comment in subreddit.get_comments(limit=100):
-            handle_comment(comment)
-    except Exception:
-        bot_tools.print_exception()
-    bot_tools.pause(1, 0)
 
 
 def parse_submission_text(submission, extra_markers=frozenset()):
