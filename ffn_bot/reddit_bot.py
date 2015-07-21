@@ -19,13 +19,13 @@ from ffn_bot.bot_tools import Fore, Back, Style
 
 __author__ = 'tusing'
 __authors__ = ['tusing', 'MikroMan', 'StuxSoftware']
-__version__ = "v0.5"
+__version__ = "1.1.1"
 
 # A nicer "standard" compliant user-agent for reddit.
 # The first part is the required user agent data in their preferred
 # format, then adding version information for the used software stack.
 USER_AGENT = "%s %s/%s PRAW/%s (by /u/tusing; Collaborators: %s)"%(
-    # e.g. bot:FanFictionBot:0.5
+    # e.g. bot:FanFictionBot:1.1.1
     ":".join(["bot", "FanFictionBot", __version__]),
 
     # e.g. CPython/3.4.0
