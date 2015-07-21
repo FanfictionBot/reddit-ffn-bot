@@ -99,6 +99,13 @@ def parse_comment_requests(requests, context, additions):
         if not part:
             continue
 
+        if isinstance(part, site.Story):
+            try:
+                part.load()
+            except site.StoryDoesNotExist:
+                print("Found nonexistent story: " + part.get_url())
+                continue
+
         if length + len(str(part)) >= MAX_REPLY_LENGTH:
             yield "".join(str(p) for p in cur_part)
             cur_part = []

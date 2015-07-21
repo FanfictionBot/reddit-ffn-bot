@@ -79,7 +79,7 @@ class QueueThread(Thread):
         fetcher(self)
 
     def add(self, *items):
-        items = list(filter((lambda i: i not in self.comments), items))
+        items = list(filter((lambda i: i not in self), items))
         self.logger.info("Adding %d items."%len(items))
         for item in items:
             self.queue.put(item)

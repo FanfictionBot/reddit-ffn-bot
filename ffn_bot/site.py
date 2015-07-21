@@ -6,6 +6,10 @@ from ffn_bot import reddit_markdown
 WHITESPACE = re.compile("(|[ ]+(?!\Z))")
 
 
+class StoryDoesNotExist(Exception):
+    pass
+
+
 class Site(object):
     """
     Base-Class for a supported fanfiction archive.
