@@ -41,6 +41,13 @@ def get_bot_parameters():
         help="The actual footer."
     )
 
+    parser.add_argument(
+        "-q", "--limit",
+        default=100,
+        type=int,
+        help="How many items should we query at once?"
+    )
+
     cache.BaseCache.prepare_parser(parser)
 
     args = parser.parse_args()
@@ -53,5 +60,6 @@ def get_bot_parameters():
         'comments': args.comments,
         'verbosity': args.verbosity,
         'footer': args.footer,
+        'limit', args.limit
     }
 

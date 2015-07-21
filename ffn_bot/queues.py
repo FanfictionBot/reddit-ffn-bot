@@ -112,13 +112,13 @@ class QueueThread(Thread):
 
 class QueueStrategy(object):
 
-    def __init__(self, subreddit, comments, handler):
+    def __init__(self, subreddit, comments, handler, limit):
         self.logger = logging.getLogger("Queue")
         self.queue = QueueThread(comments, self.logger)
         self.handler = handler
         self.subreddit = subreddit
         self.count = 0
-
+        self.querylimit = limit
         self._get_submissions = self._stream(subreddit.get_new)
         self._get_comments = self._stream(subreddit.get_comments)
 
@@ -148,5 +148,5 @@ class QueueStrategy(object):
                 "count": self.count
             }
 
-            queue.add(*func(limit=100, params=params))
+            queue.add(*func(limit=self.limit, params=params))
         return _run
