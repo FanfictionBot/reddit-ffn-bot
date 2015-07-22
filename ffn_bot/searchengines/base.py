@@ -8,14 +8,21 @@ class SearchEngine(object):
     you raising the overall rate-limit for requests.
     """
 
-    def search(self, query, site=None, limit=1):
+    def search(self, *args, **kwargs):
         """
         Search the web.
 
         :param query:   The search query.
         :param site: Limit the search to the following site.
         """
-        pass
+        return self._search(*args, **kwargs)
+
+    def _search(self, query, site=None, limit=1):
+        """
+        This function does the actual search.
+        The public function is just for mixin purposes.
+        """
+        raise NotImplementedError
 
     @property
     def is_serving_rate_limit(self):

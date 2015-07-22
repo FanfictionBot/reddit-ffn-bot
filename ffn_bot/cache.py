@@ -1,8 +1,7 @@
 import time
 import logging
-from requests import get
+from requests import Session
 from collections import OrderedDict
-
 
 from ffn_bot.searchengines import Searcher
 
@@ -168,6 +167,7 @@ class RequestCache(object):
     def __init__(self, args=None):
         self.cache = BaseCache.by_arguments(args)
         self.logger = logging.getLogger("RequestCache")
+        self.session = Session()
 
     def hit_cache(self, type, query):
         """Check if the value is in the cache."""
@@ -196,7 +196,7 @@ class RequestCache(object):
             headers["User-Agent"] = USER_AGENT
         kwargs["headers"] = headers
 
-        result = get(page, **kwargs).text
+        result = self.session.get(page, **kwargs).text
 
         self.push_cache("get", page, result)
         return result

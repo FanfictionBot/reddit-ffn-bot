@@ -1,4 +1,3 @@
-import sys
 import time
 from ffn_bot.searchengines.base import SearchEngine
 
@@ -26,13 +25,9 @@ class Throttled(SearchEngine):
             time.sleep(self.wait_time - timedelta)
 
         try:
-            super(Throttled, self).search(*args, **kwargs)
-            return self._search(*args, **kwargs)
+            return super(Throttled, self).search(*args, **kwargs)
         finally:
             self.last_search = time.time()
-
-    def _search(self, *args, **kwargs):
-        pass
 
     @property
     def _timedelta(self):
@@ -60,7 +55,7 @@ class TagUsing(SearchEngine):
 
     def search(self, query, site=None, limit=1):
         if site is not None:
-            query+=" "+self.TAG+site
+            query += " " + self.TAG + site
         return super(TagUsing, self).search(query, None, limit)
 
 
