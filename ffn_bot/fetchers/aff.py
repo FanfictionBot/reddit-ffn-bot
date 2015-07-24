@@ -96,8 +96,8 @@ class AdultFanfiction(Site):
 
     def extract_direct_links(self, body, context):
         return (
-            self.get_story_by_id(context, *match)
-            for match in AFF_LINK_REGEX.findall(body)
+            (match.start(0), self.get_story_by_id(context, *match.groups()))
+            for match in AFF_LINK_REGEX.finditer(body)
         )
 
     def get_story(self, query):

@@ -38,6 +38,8 @@ class AO3Metadata(Metaparser):
         res = tree.xpath(AO3_FANDOM_TAGS)
         if len(res) > 1:
             yield "Fandoms", ", ".join(res)
+        elif len(res) == 0:
+            raise site.StoryDoesNotExist
         else:
             yield "Fandom", res[0]
 
@@ -116,8 +118,13 @@ class ArchiveOfOurOwn(Site):
         # for _,_,id in AO3_LINK_REGEX.findall(body):
         #     yield self.generate_response(self.id_to_link(id), context)
         return (
-            self.generate_response(self._id_to_link(id), context)
-            for _, _, id in AO3_LINK_REGEX.findall(body)
+            (
+                match.start(0),
+                self.generate_response(
+                    self._id_to_link(match.group(3)), context
+                )
+            )
+            for match in AO3_LINK_REGEX.finditer(body)
         )
 
 

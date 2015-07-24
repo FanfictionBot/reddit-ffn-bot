@@ -139,8 +139,11 @@ class FanfictionBaseSite(site.Site):
 
     def extract_direct_links(self, body, context):
         return (
-            self.generate_response(self.id_link % id, context)
-            for _, _, _, id in self.link_regex.findall(body)
+            (
+                match.start(0),
+                self.generate_response(self.id_link % match.group(4), context)
+            )
+            for match in self.link_regex.finditer(body)
         )
 
 

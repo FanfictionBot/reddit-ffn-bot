@@ -3,6 +3,7 @@ This file handles the comment parsing.
 """
 import re
 import itertools
+
 from ffn_bot import site
 from ffn_bot.fetchers import SITES, get_sites
 
@@ -20,6 +21,15 @@ MAX_STORIES_PER_POST = 30
 # ffnbot!directlinks         Also extract story requests from direct links
 # ffnbot!submissionlink      Direct-Links just for the submission-url
 CONTEXT_MARKER_REGEX = re.compile(r"ffnbot!([^ ]+)")
+
+
+def _unique(iterable, key=lambda i:i):
+    seen = set()
+    for item in iterable:
+        i = key(item)
+        if i not in seen:
+            seen.add(i)
+            yield item
 
 
 class StoryLimitExceeded(Exception):
@@ -42,6 +52,15 @@ def get_direct_links(string, markers):
         yield from site.extract_direct_links(string, markers)
 
 
+def parse_site_requests(comment_body, site):
+    for request in site.regex.finditer(comment_body):
+        cpos = request.start(1)
+        queries = request.group(1)
+        for query in re.split(r"(?<!\\);(?:\s*)", queries):
+            yield cpos, query
+            cpos += len(query)
+
+
 def formulate_reply(comment_body, markers=None, additions=()):
     """Creates the reply for the given comment."""
     if markers is None:
@@ -55,12 +74,7 @@ def formulate_reply(comment_body, markers=None, additions=()):
     requests = []
     # Just parse normally of nothing other turns up.
     for site in SITES:
-        tofind = site.regex.findall(comment_body)
-
-        # Split the request list using semicolons.
-        request_list = []
-        for item in tofind:
-            request_list.extend(item.split(";"))
+        request_list = list(parse_site_requests(comment_body, site))
 
         # Ensure we don't have empty request lists.
         if not request_list:
@@ -81,12 +95,8 @@ def parse_comment_requests(requests, context, additions):
     Executes the queries and return the
     generated story strings as a single string
     """
-    # Merge the story-list
-    results = itertools.chain(
-        _parse_comment_requests(requests, context), additions)
 
-    if "nodistinct" not in context:
-        results = set(results)
+    results = list(_sorted_comment_requests(requests, context, additions))
 
     if len(tuple(filter(
             lambda x:isinstance(x, site.Story), results
@@ -118,10 +128,28 @@ def parse_comment_requests(requests, context, additions):
         yield "".join(str(p) for p in cur_part)
 
 
+def _sorted_comment_requests(requests, context, additions):
+    # Merge the story-list
+    results = itertools.chain(
+        _parse_comment_requests(requests, context),
+        additions
+    )
+
+    # Sort the results
+    results = sorted(results, key=lambda i: i[0])
+    results = map(lambda i: i[-1], results)
+
+    if "nodistinct" not in context:
+        results = _unique(results)
+
+    yield from results
+
+
 def _parse_comment_requests(requests, context):
     for site, queries in requests:
         print("Requests for '%s': %r" % (site.name, queries))
-        for comment in site.from_requests(queries, context):
-            if comment is None:
-                continue
-            yield comment
+        for pos, query in queries:
+            for comment in site.from_requests((query,), context):
+                if comment is None:
+                    continue
+                yield (pos, query, comment)

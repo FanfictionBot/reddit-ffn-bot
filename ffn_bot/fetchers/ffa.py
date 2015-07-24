@@ -99,8 +99,11 @@ class HPFanfictionArchive(Site):
 
     def extract_direct_links(self, body, context):
         return (
-            self.generate_response(self.id_to_url(safe_int(id)), context)
-            for id in FFA_LINK_REGEX.findall(body)
+            (
+                match.start(0),
+                self.generate_response(self.id_to_url(safe_int(id)), context)
+            )
+            for match in FFA_LINK_REGEX.finditer(body)
         )
 
     def get_story(self, query):
