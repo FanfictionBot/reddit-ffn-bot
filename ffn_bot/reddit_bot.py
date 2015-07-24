@@ -29,7 +29,8 @@ FOOTER = "\n".join([
     r'[4]: https://github.com/tusing/reddit-ffn-bot/                 "Fork me on GitHub"'
 ])
 
-FOOTER += "\n^^^^^^^^^^^^^^^^^ffnbot!ignore"
+FOOTER += "\n\n**Update Notes:** *Direct EPUB downloads for all FF sites!*"
+FOOTER += "\n\n^^^^^^^^^^^^^^^^^ffnbot!ignore"
 
 # For testing purposes
 DRY_RUN = False

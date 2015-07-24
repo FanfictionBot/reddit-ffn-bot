@@ -186,8 +186,8 @@ class Story(site.Story):
         return (DOMAIN_TO_ARCHIVE_NAME[self.site], link)
 
     def get_download(self):
-        return "http://ficsave.com/?story_url={0}&format=epub&auto_download=yes".format(
-            self.url)
+        return "http://p0ody-files.com/ff_to_ebook/download.php?id={0}&isSplit=0&filetype=epub".format(
+            re.findall(r'\d+', self.url)[0])
 
 
 class FanfictionNetSite(FanfictionBaseSite):
