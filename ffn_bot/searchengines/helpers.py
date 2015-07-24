@@ -47,7 +47,7 @@ class Randomizing(SearchEngine):
         if self.working:
             import random
             time.sleep(random.randint(0, 3000)/3000.0)
-        super(Randomizing, self).search(*args, **kwargs)
+            return super(Randomizing, self).search(*args, **kwargs)
 
 
 class TagUsing(SearchEngine):
