@@ -86,5 +86,5 @@ class _Searcher(object):
             blocked.add(engine)
 
         if len(exceptions) > 0:
-            raise
+            raise IOError(exceptions)
         return None
