@@ -2,7 +2,6 @@ import os
 import sys
 import logging
 import praw
-import platform
 from praw.objects import Submission
 
 from ffn_bot.queues import QueueStrategy
@@ -19,16 +18,9 @@ from ffn_bot.bot_tools import Fore, Back, Style
 
 __author__ = 'tusing'
 __authors__ = ['tusing', 'MikroMan', 'StuxSoftware']
-__version__ = "1.1.1"
+__version__ = "1.1.2"
 
-# A nicer "standard" compliant user-agent for reddit.
-# The first part is the required user agent data in their preferred
-# format, then adding version information for the used software stack.
-USER_AGENT = "%s (by /u/tusing)"%(
-    # e.g. bot:FanFictionBot:1.1.1
-    ":".join(["reply", "FanFiction", __version__]),
-)
-
+USER_AGENT = "Python:FanfictionComment:" + __version__ + " (by tusing, StuxSoftware, and MikroMan)"
 r = praw.Reddit(USER_AGENT)
 SUBREDDIT_LIST = set()
 CHECKED_COMMENTS = None
