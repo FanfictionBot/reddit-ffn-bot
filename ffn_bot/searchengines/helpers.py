@@ -43,10 +43,23 @@ class Throttled(SearchEngine):
 
 
 class Randomizing(SearchEngine):
-    def search(self, *args, **kwargs):
+
+    CHAR_FACTOR = 0.2
+    OFFSET_RANGE = (-1, +1)
+    MIN_RANDOMIZING_TIME = 1
+
+    def search(self, query, *args, **kwargs):
         if self.working:
             import random
-            time.sleep(random.randint(0, 3000)/3000.0)
+            time.sleep(
+                max(
+                    len(query)*self.CHAR_FACTOR + (random.randint(
+                        self.OFFSET_RANGE[0]*1000,
+                        self.OFFSET_RANGE[1]*1000
+                    )/1000),
+                    self.MIN_RANDOMIZING_TIME
+                )
+            )
             return super(Randomizing, self).search(*args, **kwargs)
 
 
