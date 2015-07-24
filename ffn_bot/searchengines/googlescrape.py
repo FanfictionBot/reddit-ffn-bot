@@ -5,10 +5,10 @@ import google
 
 from ffn_bot.searchengines.base import SearchEngine, register
 from ffn_bot.searchengines.helpers import TagUsing, Throttled, BanHandling
-
+from ffn_bot.searchengines.helpers import Randomizing
 
 @register
-class GoogleScraper(TagUsing, BanHandling, Throttled, SearchEngine):
+class GoogleScraper(TagUsing, BanHandling, Throttled, Randomizing, SearchEngine):
 
     # We're trying 3 hours ban time
     BAN_TIME = 3*Throttled.HOUR
