@@ -63,10 +63,11 @@ class CommentList(object):
 
     COMMENT_STORAGE = 10
 
-    def __init__(self, filename, dry=False):
+    def __init__(self, filename, dry=False, age=4):
         self.clist = None
 
         self.save_rotation = 0
+        self.age = 4
 
         self.filename = filename
         self.dry = dry
@@ -75,7 +76,7 @@ class CommentList(object):
 
     def _load(self):
         with self.lock:
-            self.clist = CommentSet()
+            self.clist = CommentSet(max_age=self.age)
             self.logger.info("Loading comment list...")
             with contextlib.suppress(FileNotFoundError):
                 with open(self.filename, "r") as f:

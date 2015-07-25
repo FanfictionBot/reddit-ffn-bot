@@ -48,6 +48,14 @@ def get_bot_parameters():
         help="How many items should we query at once?"
     )
 
+    parser.add_argument(
+        "--max-age",
+        dest="itemage",
+        type=int,
+        default=4,
+        help="How many starts should a comment/submission item survive?"
+    )
+
     cache.BaseCache.prepare_parser(parser)
 
     args = parser.parse_args()
@@ -60,6 +68,7 @@ def get_bot_parameters():
         'comments': args.comments,
         'verbosity': args.verbosity,
         'footer': args.footer,
-        'limit': args.limit
+        'limit': args.limit,
+        'age': args.itemage
     }
 
