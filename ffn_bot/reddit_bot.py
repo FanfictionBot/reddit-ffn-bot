@@ -182,6 +182,7 @@ def make_reply(body, id, reply_func, markers=None, additions=()):
                        "\nWe allow a maximum of 30 stories")
         bot_tools.print_exception(level=logging.DEBUG)
         print("Too many fics...")
+        bot_tools.pause(2, 0)
         return
 
     raw_reply = "".join(reply)
@@ -193,7 +194,7 @@ def make_reply(body, id, reply_func, markers=None, additions=()):
         if not DRY_RUN:
             for part in reply:
                 reply_func(part + FOOTER)
-
+        bot_tools.pause(0, 30)
         # bot_tools.pause(1, 20)
         print('Continuing to parse submissions...')
     else:
