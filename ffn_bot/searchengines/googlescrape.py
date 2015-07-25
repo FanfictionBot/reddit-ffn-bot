@@ -19,7 +19,7 @@ class GoogleScraper(TagUsing, BanHandling, Throttled, Randomizing, SearchEngine)
         )
     def _search(self, query, site=None, limit=1):
         try:
-            search = google.search("".join(query), num=limit, stop=limit)
+            search = google.search(query, num=limit, stop=limit)
             return list(search)
         except HTTPError as e:
             # We don't expect this error.

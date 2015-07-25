@@ -1,4 +1,6 @@
-import warnings
+import logging
+
+from ffn_bot import bot_tools
 
 
 class SearchEngine(object):
@@ -77,7 +79,7 @@ class _Searcher(object):
             try:
                 res = engine.search(query, site, limit)
             except Exception as e:
-                warnings.warn(e, UserWarning)
+                bot_tools.print_exception(e, level=logging.WARN)
             else:
                 if res:
                     return res
