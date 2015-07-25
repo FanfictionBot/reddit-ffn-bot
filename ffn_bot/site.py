@@ -142,7 +142,7 @@ class Story(object):
             stats["Site"] = site
 
         for k, v in self.get_stats().items():
-            stats[k] = v
+            stats[self.super_escape(k)] = self.super_escape(v)
 
         res = []
         for key, value in stats.items():
@@ -154,6 +154,13 @@ class Story(object):
             self._lnk.append(("epub", download))
         return (" " + reddit_markdown.bold("|") + " ").join(res)
 
+    @staticmethod
+    def super_escape(string):
+        for c in "([{":
+            string = string.replace(c, "<")
+        for c in ")]}":
+            string = string.replace(c, ">")
+        return string
     def __hash__(self):
         # We will use the URL for a hash.
         return hash(self.get_url())
