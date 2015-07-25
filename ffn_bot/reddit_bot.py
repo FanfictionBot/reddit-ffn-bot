@@ -86,7 +86,11 @@ def init_global_flags(bot_parameters):
         print("Dry run enabled. No comment will be sent.")
 
     if CHECKED_COMMENTS is None or not DRY_RUN:
-        CHECKED_COMMENTS = CommentList(bot_parameters["comments"], DRY_RUN)
+        CHECKED_COMMENTS = CommentList(
+            bot_parameters["comments"],
+            DRY_RUN,
+            bot_parameters["age"]
+        )
 
     SUBREDDIT_LIST = bot_parameters['user_subreddits']
 
