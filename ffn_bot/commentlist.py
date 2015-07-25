@@ -22,24 +22,22 @@ class CommentSet(object):
         elif genid > len(self.last_generations):
             return
         else:
-            generation = self.last_generations[-genid]
+            generation = self.last_generations[genid-1]
 
         generation.add(item)
         self._stored_items.add(item)
 
-    def get_generation_of(self, item):
-        if item not in self:
-            return -1
+    def clean_up(self):
+        seen = self.current_generation.copy()
+        for generation in self.last_generations:
+            # Remove seen objects from the current generation.
+            generation -= seen
 
-        if item in self.current_generation:
-            return 0
-        for genid, generation in enumerate(reversed(self.last_generations),1):
-            if item in generation:
-                return genid
+            # Add current generation to seen objects.
+            seen |= generation
 
     def __contains__(self, item):
         return item in self._stored_items
-
 
     def __iter__(self):
         def _generation_iterator():
@@ -47,7 +45,7 @@ class CommentSet(object):
             for item in self.current_generation:
                 yield 0, item
                 seen.add(item)
-            for genid, generation in enumerate(reversed(self.last_generations),1):
+            for genid, generation in enumerate(self.last_generations,1):
                 for item in generation:
                     if item in seen:
                         continue
@@ -116,6 +114,8 @@ class CommentList(object):
         with self.lock:
             if self.dry or self.clist is None:
                 return
+
+            self.clist.clean_up()
 
             self.logger.info("Saving comment list...")
             with open(self.filename, "w") as f:
