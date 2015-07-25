@@ -1,4 +1,5 @@
 import time
+import logging
 from ffn_bot.searchengines.base import SearchEngine
 
 
@@ -60,7 +61,7 @@ class Randomizing(SearchEngine):
                     self.MIN_RANDOMIZING_TIME
                 )
             )
-            return super(Randomizing, self).search(*args, **kwargs)
+            return super(Randomizing, self).search(query, *args, **kwargs)
 
 
 class TagUsing(SearchEngine):
@@ -112,4 +113,7 @@ class BanHandling(SearchEngine):
         return super(BanHandling, self).search(*args, **kwargs)
 
     def was_banned(self):
+        logging.getLogger("searchengines." + self.__class__.__name__).warning(
+            "Detected a ban."
+        )
         self.banned = time.time()

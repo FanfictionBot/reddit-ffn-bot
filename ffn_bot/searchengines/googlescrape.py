@@ -15,7 +15,7 @@ class GoogleScraper(TagUsing, BanHandling, Throttled, Randomizing, SearchEngine)
 
     def __init__(self):
         super(GoogleScraper, self).__init__(
-            requests=3, timeframe=Throttled.MINUTE
+            requests=1, timeframe=Throttled.MINUTE
         )
     def _search(self, query, site=None, limit=1):
         try:
