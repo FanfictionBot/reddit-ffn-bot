@@ -186,8 +186,12 @@ class Story(site.Story):
         return (DOMAIN_TO_ARCHIVE_NAME[self.site], link)
 
     def get_download(self):
-        return "http://www.p0ody-files.com/ff_to_ebook/mobile/makeEpub.php?id={0}".format(
-        re.findall(r'\d+', self.url)[0])
+        if "fictionpress" in self.url:
+            return "http://ficsave.com/?story_url={0}&format=epub&auto_download=yes".format(self.url)
+        else:
+            return "http://www.p0ody-files.com/ff_to_ebook/mobile/makeEpub.php?id={0}".format(
+            re.findall(r'\d+', self.url)[0])
+
 
 class FanfictionNetSite(FanfictionBaseSite):
 

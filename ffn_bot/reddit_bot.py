@@ -16,20 +16,20 @@ from ffn_bot.bot_tools import Fore, Back, Style
 
 __author__ = 'tusing, MikroMan, StuxSoftware'
 
-USER_AGENT = "Python:FanfictionComment:v1.1.1 (by tusing, StuxSoftware, and MikroMan)"
+USER_AGENT = "Python:FanfictionComment:v1.1.2 (by tusing, StuxSoftware, and MikroMan)"
 r = praw.Reddit(USER_AGENT)
 DEFAULT_SUBREDDITS = ['HPFanfiction']
 SUBREDDIT_LIST = set()
 CHECKED_COMMENTS = None
 FOOTER = "\n".join([
-    r"**Bot updated 7/28/15!** **|** \[[Usage][1]\] | \[[Changelog][2]\] | \[[Issues][3]\] | \[[GitHub][4]\]",
+    r"**Bot v1.1.2 - 7/28/15** **|** \[[Usage][1]\] | \[[Changelog][2]\] | \[[Issues][3]\] | \[[GitHub][4]\]",
     r'[1]: https://github.com/tusing/reddit-ffn-bot/wiki/Usage       "How to use the bot"',
     r'[2]: https://github.com/tusing/reddit-ffn-bot/wiki/Changelog   "What changed until now"',
     r'[3]: https://github.com/tusing/reddit-ffn-bot/issues/          "Bugs? Suggestions? Enter them here!"',
     r'[4]: https://github.com/tusing/reddit-ffn-bot/                 "Fork me on GitHub"'
 ])
 
-FOOTER += "\n\n**Update Notes:** *Direct EPUB downloads for all FF sites!*"
+FOOTER += "\n\n**Update Notes:** *Direct EPUB downloads for FFnet!*"
 FOOTER += "\n\n^^^^^^^^^^^^^^^^^ffnbot!ignore"
 
 # For testing purposes
