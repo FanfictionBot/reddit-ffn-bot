@@ -22,15 +22,14 @@ DEFAULT_SUBREDDITS = ['HPFanfiction']
 SUBREDDIT_LIST = set()
 CHECKED_COMMENTS = None
 FOOTER = "\n".join([
-    r"**Bot v1.1.2 - 7/28/15** **|** \[[Usage][1]\] | \[[Changelog][2]\] | \[[Issues][3]\] | \[[GitHub][4]\]",
+    r"**Bot v1.2.0 - 9/6/15** **|** \[[Usage][1]\] | \[[Changelog][2]\] | \[[Issues][3]\] | \[[GitHub][4]\]",
     r'[1]: https://github.com/tusing/reddit-ffn-bot/wiki/Usage       "How to use the bot"',
     r'[2]: https://github.com/tusing/reddit-ffn-bot/wiki/Changelog   "What changed until now"',
     r'[3]: https://github.com/tusing/reddit-ffn-bot/issues/          "Bugs? Suggestions? Enter them here!"',
     r'[4]: https://github.com/tusing/reddit-ffn-bot/                 "Fork me on GitHub"'
 ])
-
-FOOTER += "\n\n**Update Notes:** *Direct EPUB downloads for FFnet!*"
 FOOTER += "\n\n^^^^^^^^^^^^^^^^^ffnbot!ignore"
+FOOTER += "\n\n**Update Notes:** *Delete a comment with *ffnbot!delete*.*"
 
 # For testing purposes
 DRY_RUN = False
@@ -377,7 +376,7 @@ def make_reply(body, id, reply_func, markers=None, additions=()):
             for part in reply:
                 reply_func(part + FOOTER)
 
-        bot_tools.pause(1, 20)
+        bot_tools.pause(0, 30)
         print('Continuing to parse submissions...')
     else:
         logging.info("No reply conditions met.")
