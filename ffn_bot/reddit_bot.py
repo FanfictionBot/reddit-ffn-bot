@@ -29,7 +29,7 @@ FOOTER = "\n".join([
     r'[4]: https://github.com/tusing/reddit-ffn-bot/                 "Fork me on GitHub"'
 ])
 FOOTER += "\n\n^^^^^^^^^^^^^^^^^ffnbot!ignore"
-FOOTER += "\n\n**Update Notes:** *Delete a comment with *ffnbot!delete*.*"
+FOOTER += "\n\n**Update Notes:** *Use *ffnbot!delete* to delete a comment!*"
 
 # For testing purposes
 DRY_RUN = False
