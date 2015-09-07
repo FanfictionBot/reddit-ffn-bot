@@ -207,24 +207,27 @@ def handle_comment(comment, extra_markers=frozenset()):
             logging.info("Comment forcefully ignored: " + comment.id)
             return
 
-        if "delete" in markers:
-            logging.info("Delete requested by " + comment.id)
-            if not (comment.is_root):
-                parent_comment = r.get_info(thing_id=comment.parent_id)
-                if (parent_comment.author.name == "FanfictionBot"):
-                    logging.info("Deleting comment " + parent_comment.id)
-                    parent_comment.delete()
-                else:
-                    logging.error("Delete requested on non-bot comment!")
-            else:
-                logging.error("Delete requested by invalid comment!")
-
         if "parent" in markers:
             if comment.is_root:
                 item = comment.submission
             else:
                 item = r.get_info(thing_id=comment.parent_id)
             handle(item, {"directlinks", "submissionlink", "force"})
+
+        if "delete" in markers:
+            logging.info("Delete requested by " + comment.id)
+            if not (comment.is_root):
+                parent_comment = r.get_info(thing_id=comment.parent_id)
+                if parent_comment is not None:
+                    if (parent_comment.author.name == "FanfictionBot"):
+                        logging.info("Deleting comment " + parent_comment.id)
+                        parent_comment.delete()
+                    else:
+                        logging.error("Delete requested on non-bot comment!")
+                else:
+                    logging.error("Delete requested on null comment.")
+            else:
+                logging.error("Delete requested by invalid comment!")
 
         try:
             make_reply(comment.body, comment.id, comment.reply, markers)
