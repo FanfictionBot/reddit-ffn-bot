@@ -218,7 +218,7 @@ def handle_comment(comment, extra_markers=frozenset()):
             logging.info("Delete requested by " + comment.id)
             if not (comment.is_root):
                 parent_comment = r.get_info(thing_id=comment.parent_id)
-                if parent_comment is not None:
+                if parent_comment.author.name is not None:
                     if (parent_comment.author.name == "FanfictionBot"):
                         logging.info("Deleting comment " + parent_comment.id)
                         parent_comment.delete()
