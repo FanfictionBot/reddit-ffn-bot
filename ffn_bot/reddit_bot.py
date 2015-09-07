@@ -197,7 +197,7 @@ def handle_submission(submission, markers=frozenset()):
 def handle_comment(comment, extra_markers=frozenset()):
     logging.debug("Handling comment: " + comment.id)
     if (str(comment.id) not in CHECKED_COMMENTS
-       ) or ("force" in extra_markers):
+        ) or ("force" in extra_markers):
 
         logging.info("Found new comment: " + comment.id)
         markers = parse_context_markers(comment.body)
@@ -227,6 +227,30 @@ def handle_comment(comment, extra_markers=frozenset()):
                     logging.error("Delete requested on null comment.")
             else:
                 logging.error("Delete requested by invalid comment!")
+
+        if "refresh" in markers:
+            logging.info("Refresh requested by " + comment.id)
+            comment_with_requests = r.get_info(thing_id=comment.parent_id)
+            if comment_with_requests.author is None:
+                logging.info(
+                    "(Refresh) Original comment with requests is invalid.")
+                return
+            reply_list = comment_with_requests.replies
+
+            if reply_list is not None:
+                logging.info("(Refresh) Finding replies to delete.")
+                for reply in reply_list:
+                    if reply.author is not None:
+                        if (reply.author == "FanfictionBot"):
+                            logging.error(
+                                "(Refresh) Deleting bot comment " + reply.id)
+                            reply.delete()
+            else:
+                logging.info(
+                    "(Refresh) No bot replies have been made. Continuing...")
+            CHECKED_COMMENTS.add(str(comment.id))
+            handle_comment(comment_with_requests, frozenset(["force"]))
+            return
 
         try:
             make_reply(comment.body, comment.id, comment.reply, markers)
