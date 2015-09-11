@@ -43,6 +43,21 @@ Use the following command to start the bot.
     $ python . 
 ```
 
+### OAuth
+Please use OAuth for production purposes.
+
+Change to the following configuration in `settings.yml`
+```yaml
+    credentials:
+        type: oauth2
+        config: oauth2.ini
+```
+
+And change the appropriate values in `oauth2.ini`
+More information under
+* https://github.com/reddit/reddit/wiki/OAuth2-Quick-Start-Example
+* http://stackoverflow.com/a/24848076
+
 ### Memcached
 Please note that we recommend using memcached for production
 purposes. Set the configuration values in the `cache` section:
