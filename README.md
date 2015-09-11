@@ -46,9 +46,9 @@ Use the following command to start the bot.
 ### Memcached
 Please note that we recommend using memcached for production
 purposes. Set the configuration values in the `cache` section:
-```
+```yaml
     cache:
-        # The host that should be used.
+        # The hosts the bot should connect to (host:port)
         hosts:
         - localhost:11211
         - 123.123.123.123:11211
