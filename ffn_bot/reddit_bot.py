@@ -9,7 +9,7 @@ from ffn_bot.commentlist import CommentList
 from ffn_bot.commentparser import formulate_reply, parse_context_markers
 from ffn_bot.commentparser import get_direct_links
 from ffn_bot.commentparser import StoryLimitExceeded
-from ffn_bot.cli import get_bot_parameters
+from ffn_bot.config import get_bot_parameters
 from ffn_bot.moderation import ModerativeCommands
 
 from ffn_bot import bot_tools
@@ -36,7 +36,6 @@ DRY_RUN = False
 # In stream mode it immediately jumps to
 # queue newest object mode.
 DEBUG = False
-
 
 MOD_COMMANDS = None
 
@@ -87,7 +86,7 @@ def init_global_flags(bot_parameters):
     global DEBUG, FOOTER, SUBREDDIT_LIST, MOD_COMMANDS
     DRY_RUN = bool(bot_parameters["dry"])
     if DRY_RUN:
-        print("Dry run enabled. No comment will be sent.")
+        logging.warning("Dry run enabled. No comment will be sent.")
 
     if CHECKED_COMMENTS is None or not DRY_RUN:
         CHECKED_COMMENTS = CommentList(
@@ -97,24 +96,15 @@ def init_global_flags(bot_parameters):
         )
 
     SUBREDDIT_LIST = bot_parameters['user_subreddits']
-
-    level = getattr(logging, bot_parameters["verbosity"].upper())
-    logging.getLogger().setLevel(level)
-
-    if level == logging.DEBUG:
-        DEBUG = True
-
     cache.default_cache = cache.RequestCache()
 
     with open(bot_parameters["footer"], "r") as f:
         FOOTER = f.read()
         FOOTER = FOOTER.format(version=__version__)
-        print("==========================================")
-        print(FOOTER)
-        print("==========================================")
-
-    if not DEBUG:
-        logging.getLogger("requests").setLevel(logging.WARN)
+        logging.info("==========================================")
+        for line in FOOTER.split("\n"):
+            logging.info(line)
+        logging.info("==========================================")
 
     MOD_COMMANDS = ModerativeCommands(r, CHECKED_COMMENTS, reply, handle)
 

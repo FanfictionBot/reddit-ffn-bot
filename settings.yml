@@ -12,6 +12,9 @@ credentials:
 subreddits:
 - HPFanfiction
 
+# Which file should be user for the footer?
+footer: FOOTER.txt
+
 # How should the comments be stored?
 comments:
     # The file where comments should be stored.
@@ -45,3 +48,39 @@ cache:
 
     # Cache Entry Expire Time in seconds
     # expire: 10000
+
+
+logging:
+    version: 1
+    formatters:
+        brief:
+            format: "[%(asctime)s][%(name)s] %(levelname)-8s | %(message)s"
+            datefmt: "%H:%M:%S"
+        detailed:
+            format: "[%(asctime)s][%(name)s][%(levelname)s] %(message)s"
+            datefmt: "%Y-%m-%d %H:%M:%S"
+    handlers:
+        console:
+            class: logging.StreamHandler
+            formatter: brief
+            level: INFO
+            stream: ext://sys.stdout
+
+        file:
+            class: logging.TimedRotatingFileHandler
+            formatter: detailed
+            level: DEBUG
+            filename: ffnbot.log
+            when: midnight
+            backupCount: 7
+            encoding: UTF-8
+            utc: true
+
+    loggers:
+        requests:
+            level: WARNING
+    root:
+        handlers:
+        - console
+        - file
+        level: DEBUG

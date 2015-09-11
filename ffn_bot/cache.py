@@ -4,7 +4,7 @@ from requests import Session
 from collections import OrderedDict
 
 from ffn_bot.searchengines import Searcher
-
+from ffn_bot import config
 
 CACHED_SEARCHER = Searcher()
 USER_AGENT = "Lynx/2.8.8dev.3 libwww-FM/2.14 SSL-MM/1.4.1"
@@ -45,30 +45,10 @@ class BaseCache(object):
         return _decorator
 
     @classmethod
-    def by_arguments(cls, args):
+    def by_arguments(cls, settings):
         import argparse
-        argument_parser = argparse.ArgumentParser()
-        cls.prepare_parser(argument_parser)
-
-        ns, _ = argument_parser.parse_known_args(args)
-        ctype = cls.CACHE_TYPES[ns.cachetype]
-        return ctype(ns)
-
-    @classmethod
-    def prepare_parser(cls, argument_parser):
-        argument_parser_group = argument_parser.add_argument_group("caches")
-        argument_parser_group.conflict_handler = "resolve"
-
-        argument_parser_group.add_argument(
-            "--cache-type",
-            dest="cachetype",
-            default="local",
-            action="store",
-            choices = cls.CACHE_TYPES.keys()
-        )
-
-        for n, t in cls.CACHE_TYPES.items():
-            t.prepare_parser(argument_parser_group)
+        ctype = cls.CACHE_TYPES[settings["type"]]
+        return ctype(settings)
 
 
 @BaseCache.register_type("local")
@@ -76,23 +56,8 @@ class LocalCache(BaseCache):
     EMPTY_RESULT = []
 
     def __init__(self, ns):
-        self.expire = ns.cacheexpire
-        self.cache = LimitedSizeDict(size_limit=ns.cachesize)
-
-    @classmethod
-    def prepare_parser(cls, argument_parser):
-        argument_parser.add_argument(
-            "--cache-size",
-            dest="cachesize",
-            default=10000,
-            type=int
-        )
-        argument_parser.add_argument(
-            "--cache-expire",
-            dest="cacheexpire",
-            default=30*60,
-            type=int
-        )
+        self.expire = ns.get("expire", 30*60)
+        self.cache = LimitedSizeDict(size_limit=ns.get("size", 10000))
 
     def get(self, key):
         result = self.cache.get(key, self.EMPTY_RESULT)
@@ -116,24 +81,8 @@ class LocalCache(BaseCache):
 class MemcachedCache(BaseCache):
     def __init__(self, ns):
         import memcache
-        self.client = memcache.Client(ns.cachehosts)
-        self.expire = ns.cacheexpire
-
-    @classmethod
-    def prepare_parser(cls, argument_parser):
-        argument_parser.add_argument(
-            "--cache-host",
-            dest="cachehosts",
-            default=["127.0.0.1:11211"],
-            action="append"
-        )
-
-        argument_parser.add_argument(
-            "--cache-expire",
-            dest="cacheexpire",
-            default=30*60,
-            type=int
-        )
+        self.client = memcache.Client(ns["hosts"])
+        self.expire = ns["expire"]
 
     def get(self, key):
         key = self.enforce_ascii(key)
@@ -162,6 +111,9 @@ class RequestCache(object):
     """
 
     def __init__(self, args=None):
+        if args is None:
+            args = config.get_settings()["cache"]
+
         self.cache = BaseCache.by_arguments(args)
         self.logger = logging.getLogger("RequestCache")
         self.session = Session()
@@ -212,4 +164,5 @@ class RequestCache(object):
         self.push_cache("search", query, result)
         return result
 
-default_cache = RequestCache(["--cache-type", "local"])
+
+default_cache = RequestCache({"type": "local"})
