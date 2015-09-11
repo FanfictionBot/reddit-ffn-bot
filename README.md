@@ -25,7 +25,7 @@ Adapt the commands for your linux distribution
 We assume Ubuntu 14.04 and you are inside your desired installation
 directory.
 
-```
+```bash
     $ sudo apt-get install git python3.4 lxml libxml2-dev python3.4-dev
     $ sudo apt-get install python-pip
     $ git clone https://github.com/tusing/reddit-ffn-bot .
@@ -39,7 +39,7 @@ Change the following setting keys in `settings.yml`:
 
 ## Starting the bot
 Use the following command to start the bot.
-```
+```bash
     $ python . 
 ```
 
@@ -48,6 +48,8 @@ Please note that we recommend using memcached for production
 purposes. Set the configuration values in the `cache` section:
 ```yaml
     cache:
+        type: memcached
+
         # The hosts the bot should connect to (host:port)
         hosts:
         - localhost:11211
