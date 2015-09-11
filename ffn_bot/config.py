@@ -16,9 +16,6 @@ def get_settings():
 def get_old_dict():
     settings = get_settings()
     return {
-        "user": settings["credentials"]["username"],
-        "password": settings["credentials"]["password"],
-
         "user_subreddits": settings["subreddits"],
         "comments": settings["comments"]["file"],
         "age": settings["comments"]["max-age"],

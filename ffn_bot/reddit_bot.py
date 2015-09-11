@@ -71,7 +71,7 @@ def main():
     """Basic main function."""
     # moved call for agruments to avoid double calling
     bot_parameters = get_bot_parameters()
-    if not login_to_reddit(r, get_settings()):
+    if not login_to_reddit(r, get_settings()["credentials"]):
         logging.critical("Failed to login. Stopping bot.")
         return 1
 

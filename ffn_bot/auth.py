@@ -16,7 +16,7 @@ class Authenticator(object):
         self.logger.info("Authenticating with method: " + settings["type"])
         self._previous_method = getattr(
             self, "login_" + settings["type"], self._unknown
-        )(self, settings)
+        )(settings)
 
     def stop(self):
         if self._previous_method:
