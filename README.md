@@ -55,6 +55,7 @@ Change to the following configuration in `settings.yml`
 
 And change the appropriate values in `oauth2.ini`
 More information under
+* https://github.com/SmBe19/praw-OAuth2Util/blob/master/OAuth2Util/README.md#config
 * https://github.com/reddit/reddit/wiki/OAuth2-Quick-Start-Example
 * http://stackoverflow.com/a/24848076
 
