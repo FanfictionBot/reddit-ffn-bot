@@ -10,11 +10,13 @@ from ffn_bot.commentparser import formulate_reply, parse_context_markers
 from ffn_bot.commentparser import get_direct_links
 from ffn_bot.commentparser import StoryLimitExceeded
 from ffn_bot.cli import get_bot_parameters
+from ffn_bot.moderation import ModerativeCommands
 
 from ffn_bot import bot_tools
 from ffn_bot import cache
 # For pretty text
 from ffn_bot.bot_tools import Fore, Back, Style
+from ffn_bot.bot_tools import get_parent, get_full, valid_comment
 
 __author__ = 'tusing'
 __authors__ = ['tusing', 'MikroMan', 'StuxSoftware']
@@ -35,6 +37,8 @@ DRY_RUN = False
 # queue newest object mode.
 DEBUG = False
 
+
+MOD_COMMANDS = None
 
 def run_forever():
     sys.exit(_run_forever())
@@ -80,7 +84,7 @@ def main():
 
 def init_global_flags(bot_parameters):
     global USE_GET_COMMENTS, DRY_RUN, CHECKED_COMMENTS
-    global DEBUG, FOOTER, SUBREDDIT_LIST
+    global DEBUG, FOOTER, SUBREDDIT_LIST, MOD_COMMANDS
     DRY_RUN = bool(bot_parameters["dry"])
     if DRY_RUN:
         print("Dry run enabled. No comment will be sent.")
@@ -112,6 +116,8 @@ def init_global_flags(bot_parameters):
     if not DEBUG:
         logging.getLogger("requests").setLevel(logging.WARN)
 
+    MOD_COMMANDS = ModerativeCommands(r, CHECKED_COMMENTS, reply, handle)
+
 
 def login_to_reddit(bot_parameters):
     """Performs the login for reddit."""
@@ -137,19 +143,6 @@ def reply(post, message, reply_func=None):
 send_reply = reply
 
 
-def get_parent(post, allow_submission=False):
-    if not isinstance(post, Comment):
-        raise ValueError("Comment required.")
-
-    if post.is_root:
-        if not allow_submission:
-            return None
-
-        return post.submission
-    else:
-        return r.get_info(thing_id=post.parent_id)
-
-
 def _handle_submission(submission, markers=frozenset()):
     if (submission not in CHECKED_COMMENTS) or ("force" in markers):
         logging.info("Found new submission: " + submission.id)
@@ -167,131 +160,8 @@ def _handle_comment(comment, extra_markers=frozenset()):
         else:
             logging.info("Found new comment: " + comment.id)
 
-        if "parent" in markers:
-            item = get_parent(comment, allow_submission=True)
-            handle(item, {"directlinks", "submissionlink", "force"})
-
-        if "delete" in markers and (comment.id not in CHECKED_COMMENTS):
-            logging.info("Delete requested by " + comment.id)
-            if not comment.is_root:
-                parent_comment = get_parent(comment)
-
-                # Make sure we don't delete submissions.
-                if not valid_comment(parent_comment):
-                    logging.info("Cannot delete deleted comments :)")
-                    return
-
-                # Make sure the delete comment is actually authorized
-                # We will inform the user that we ignored the comment
-                # if we think he was not authorized to use the function.
-                #
-                # Make sure that the users know that they still have the
-                # option of contacting a mod to remove the post.
-                grand_parent = get_parent(parent_comment, True)
-                if not valid_comment(grand_parent):
-                    logging.info("Cannot verify authorization.")
-                    send_reply(comment, "Cannot verify authorization.  \n\
-Please contact a moderator to perform your request.")
-                    return
-
-                if grand_parent.author.name != comment.author.name:
-                    logging.info("Comment not authorized.")
-                    send_reply(comment, "Only the original comment author may request\
-removing the bot reply.  \nIf you still think the comment should be\
-removed contact a moderator or ask the comment author to remove\
-the comment.")
-                    return
-
-                # Make sure we don't try to delete foreign posts.
-                if parent_comment.author.name != r.user.name:
-                    logging.error("Delete requested on non-bot comment.")
-                    return
-
-                # And only then, we will try to delete the comment.
-                logging.info("Deleting comment " + parent_comment.id)
-                parent_comment.delete()
-
-        if "refresh" in markers and (comment not in CHECKED_COMMENTS):
-            logging.info("(Refresh) Refresh requested by " + comment.id)
-
-            # Get the full comment or submission
-            comment_with_requests = get_full(get_parent(comment, True))
-            logging.info("(Refresh) Refreshing on " + comment_with_requests.fullname)
-
-            if comment_with_requests.author.name == r.user.name:
-                logging.info(
-                    "(Refresh) Refresh requested on a bot comment (" + comment_with_requests.id + ").")
-                # Retrieve the requesting parent submission or comment
-                comment_with_requests = get_full(
-                    get_parent(comment_with_requests, True)
-                )
-
-                # If the requesting comment has been deleted, abort
-                if not valid_comment(comment_with_requests):
-                    logging.error("(Refresh) Parent of bot comment is invalid.")
-                    return
-
-                logging.info("Refresh request pushed to parent " + comment_with_requests.fullname)
-
-            logging.info("(Refresh) Running refresh on:" + comment_with_requests.fullname)
-            if isinstance(comment_with_requests, praw.objects.Comment):
-                delete_list = comment_with_requests.replies
-            elif isinstance(comment_with_requests, praw.objects.Submission):
-                delete_list = comment_with_requests.comments
-            else:
-                logging.warning("Unsupported message type: " + comment_with_requests.fullname)
-                return
-
-            if delete_list:
-                logging.info("(Refresh) Finding replies to delete.")
-                for reply in delete_list:
-                    if valid_comment(reply) and reply.author.name == r.user.name:
-                        logging.error("(Refresh) Deleting bot comment " + reply.id)
-                        reply.delete()
-            else:
-                logging.info(
-                    "(Refresh) No bot replies have been deleted. Continuing...")
-            handle(comment_with_requests, frozenset(["force"]))
-
-        make_reply(comment.body, comment.id, comment.reply, markers)
-
-
-def get_full(comment_id):
-    """
-    Will return a full comment or submission.
-    """
-    if isinstance(comment_id, str):
-        requested_comment = r.get_info(thing_id=comment_id)
-    else:
-        requested_comment = comment_id
-
-    if isinstance(requested_comment, praw.objects.Comment):
-        # To make this faster, we check if we already get a list of
-        # a replies before we go off to reddit refreshing this comment
-        # object.
-        if not requested_comment.replies:
-            requested_comment.refresh()
-    elif isinstance(requested_comment, praw.objects.Submission):
-        requested_comment.refresh()
-        requested_comment.replace_more_comments(limit=None, threshold=0)
-    else:
-        logging.error(
-            "(URGENT) WAS NOT ABLE TO DETERMINE COMMENT VS SUBMISSION!")
-        requested_comment = r.get_submission(requested_comment.permalink)
-    return requested_comment
-
-
-def valid_comment(comment):
-    """
-    Checks if valid comment.
-    """
-    if comment is None:
-        logging.debug("Found comment resolving to None.")
-        return False
-    if comment.author is None:
-        logging.debug("Found invalid comment " + comment.id)
-        return False
-    return True
+        if MOD_COMMANDS.handle_moderation(comment, markers):
+            make_reply(comment.body, comment.id, comment.reply, markers)
 
 
 def handle(obj, markers=frozenset()):
