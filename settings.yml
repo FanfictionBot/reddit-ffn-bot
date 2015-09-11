@@ -4,8 +4,15 @@
 
 # How should the bot authenticate itself?
 credentials:
+    type: password
     username: ENTER USERNAME HERE
     password: ENTER PASSWORD HERE
+
+    # Uncomment this section and comment out the section above
+    # if you wanna use oauth.
+    #
+    # type: oauth2
+    # config: oauth2.ini
 
 # A list of all subreddits that this bot supports.
 # Use "all" to extend support to all subreddits.

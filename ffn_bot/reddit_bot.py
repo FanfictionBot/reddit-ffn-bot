@@ -9,8 +9,9 @@ from ffn_bot.commentlist import CommentList
 from ffn_bot.commentparser import formulate_reply, parse_context_markers
 from ffn_bot.commentparser import get_direct_links
 from ffn_bot.commentparser import StoryLimitExceeded
-from ffn_bot.config import get_bot_parameters
+from ffn_bot.config import get_bot_parameters, get_settings
 from ffn_bot.moderation import ModerativeCommands
+from ffn_bot.auth import login_to_reddit
 
 from ffn_bot import bot_tools
 from ffn_bot import cache
@@ -47,7 +48,7 @@ def _run_forever():
     """Run-Forever"""
     while True:
         try:
-            main()
+            return main()
         # Exit on sys.exit and keyboard interrupts.
         except KeyboardInterrupt as e:
             # Exit the program unclean.
@@ -70,7 +71,10 @@ def main():
     """Basic main function."""
     # moved call for agruments to avoid double calling
     bot_parameters = get_bot_parameters()
-    login_to_reddit(bot_parameters)
+    if not login_to_reddit(r, get_settings()):
+        logging.critical("Failed to login. Stopping bot.")
+        return 1
+
     init_global_flags(bot_parameters)
 
     QueueStrategy(
@@ -107,13 +111,6 @@ def init_global_flags(bot_parameters):
         logging.info("==========================================")
 
     MOD_COMMANDS = ModerativeCommands(r, CHECKED_COMMENTS, reply, handle)
-
-
-def login_to_reddit(bot_parameters):
-    """Performs the login for reddit."""
-    print("Logging in...")
-    r.login(bot_parameters['user'], bot_parameters['password'])
-    print(Fore.GREEN, "Logged in.", Style.RESET_ALL)
 
 
 def reply(post, message, reply_func=None):

@@ -107,4 +107,5 @@ target/
 # Project-Specific
 CHECKED_COMMENTS.txt
 test-settings.yml
+test-oauth2.ini
 *.log.*
