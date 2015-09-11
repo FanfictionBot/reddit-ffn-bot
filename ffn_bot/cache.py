@@ -67,11 +67,8 @@ class BaseCache(object):
             choices = cls.CACHE_TYPES.keys()
         )
 
-        part_group = argument_parser_group.add_mutually_exclusive_group()
-
         for n, t in cls.CACHE_TYPES.items():
-            group = part_group.add_argument_group(n)
-            t.prepare_parser(group)
+            t.prepare_parser(argument_parser_group)
 
 
 @BaseCache.register_type("local")
