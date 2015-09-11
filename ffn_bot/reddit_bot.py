@@ -18,7 +18,7 @@ from ffn_bot.bot_tools import Fore, Back, Style
 
 __author__ = 'tusing'
 __authors__ = ['tusing', 'MikroMan', 'StuxSoftware']
-__version__ = "1.1.2"
+__version__ = "1.3.0"
 
 USER_AGENT = "Python:FanfictionComment:" + __version__ + " (by tusing, StuxSoftware, and MikroMan)"
 r = praw.Reddit(USER_AGENT)
@@ -128,13 +128,16 @@ def _handle_submission(submission, markers=frozenset()):
 
 def _handle_comment(comment, extra_markers=frozenset()):
     logging.debug("Handling comment: " + comment.id)
-    if (comment not in CHECKED_COMMENTS) or ("force" in extra_markers):
-        logging.info("Found new comment: " + comment.id)
+    if (str(comment.id) not in CHECKED_COMMENTS
+            ) or ("force" in extra_markers):
+
         markers = parse_context_markers(comment.body)
         markers |= extra_markers
         if "ignore" in markers:
-            logging.debug("Comment forcefully ignored: " + comment.id)
+            # logging.info("Comment forcefully ignored: " + comment.id)
             return
+        else:
+            logging.info("Found new comment: " + comment.id)
 
         if "parent" in markers:
             if comment.is_root:
@@ -143,7 +146,132 @@ def _handle_comment(comment, extra_markers=frozenset()):
                 item = r.get_info(thing_id=comment.parent_id)
             handle(item, {"directlinks", "submissionlink", "force"})
 
-        make_reply(comment.body, comment.id, comment.reply, markers)
+        if "delete" in markers and (comment.id not in CHECKED_COMMENTS):
+            CHECKED_COMMENTS.add(str(comment.id))
+            logging.info("Delete requested by " + comment.id)
+            if not (comment.is_root):
+                parent_comment = r.get_info(thing_id=comment.parent_id)
+                if parent_comment.author is not None:
+                    if (parent_comment.author.name == "FanfictionBot"):
+                        logging.info("Deleting comment " + parent_comment.id)
+                        parent_comment.delete()
+                    else:
+                        logging.error("Delete requested on non-bot comment!")
+                else:
+                    logging.error("Delete requested on null comment.")
+            else:
+                logging.error("Delete requested by invalid comment!")
+
+        if "refresh" in markers and (str(comment.id) not in CHECKED_COMMENTS):
+            CHECKED_COMMENTS.add(str(comment.id))
+            logging.info("(Refresh) Refresh requested by " + comment.id)
+
+            # Get the full comment or submission
+            comment_with_requests = get_full(comment.parent_id)
+            logging.info("(Refresh) Refreshing on " + type(
+                comment_with_requests).__name__ + " with id " + comment_with_requests.id)
+
+            # TODO: Make it so FanfictionBot does not have to be hardcoded
+            # If ffnbot!refresh is called on an actual bot reply, then go up
+            # one level to find the requesting comment
+            if comment_with_requests.author.name == "FanfictionBot":
+                logging.info(
+                    "(Refresh) Refresh requested on a bot comment (" + comment_with_requests.id + ").")
+                # Retrieve the requesting parent submission or comment
+                comment_with_requests = get_full(
+                    comment_with_requests.parent_id)
+
+                # If the requesting comment has been deleted, abort
+                if not valid_comment(comment_with_requests):
+                    logging.error(
+                        "(Refresh) Parent of bot comment is invalid.")
+                    return
+
+                logging.info(
+                    "          Refresh request being pushed to parent " + comment_with_requests.id)
+
+            if isinstance(comment_with_requests, praw.objects.Comment):
+                logging.info(
+                    "(Refresh) Running refresh on COMMENT " + str(comment_with_requests.id))
+                logging.info("(Refresh) Appending replies to deletion check list: " +
+                             ", ".join(str(c.id) for c in comment_with_requests.replies))
+                delete_list = comment_with_requests.replies
+
+            elif isinstance(comment_with_requests, praw.objects.Submission):
+                logging.info(
+                    "(Refresh) Running refresh on SUBMISSION " + str(comment_with_requests.id))
+
+                unfiltered_delete_list = comment_with_requests.comments
+                delete_list = []
+                for comment in unfiltered_delete_list:
+                    if comment.author is not None:
+                        if (comment.author.name == "FanfictionBot"):
+                            delete_list.append(comment)
+                            print("(Refresh) Found root-level bot comment " + comment.id)
+            else:
+                logging.error("(Refresh) Can't refresh " + comment_with_requests.type(
+                ).__name__ + " with ID " + comment_with_requests.id)
+                bot_tools.pause(5, 0)
+                return
+
+            if delete_list is not None:
+                logging.info("(Refresh) Finding replies to delete.")
+                for reply in delete_list:
+                    if valid_comment(reply):
+                        if (reply.author.name == "FanfictionBot"):
+                            logging.error(
+                                "(Refresh) Deleting bot comment " + reply.id)
+                            reply.delete()
+            else:
+                logging.info(
+                    "(Refresh) No bot replies have been made. Continuing...")
+            CHECKED_COMMENTS.add(str(comment.id))
+
+            if isinstance(comment_with_requests, praw.objects.Comment):
+                logging.info(
+                    "(Refresh) Re-handling comment " + comment_with_requests.id)
+                handle_comment(comment_with_requests, frozenset(["force"]))
+            elif isinstance(comment_with_requests, praw.objects.Submission):
+                logging.info(
+                    "(Refresh) Re-handling submission " + comment_with_requests.id)
+                handle_submission(comment_with_requests, frozenset(["force"]))
+            return
+
+        try:
+            make_reply(comment.body, comment.id, comment.reply, markers)
+        finally:
+            CHECKED_COMMENTS.add(str(comment.id))
+
+
+def get_full(comment_id):
+    """
+    Will return a full comment or submission.
+    Very heavy on time.
+    """
+    requested_comment = r.get_info(thing_id=comment_id)
+    if isinstance(requested_comment, praw.objects.Comment):
+        # PRAW doesn't return replies in a comment object retrieved with
+        # get_info; we must do this:
+        requested_comment = r.get_submission(
+            requested_comment.permalink).comments[0]
+    elif isinstance(requested_comment, praw.objects.Submission):
+        requested_comment = r.get_submission(requested_comment.permalink)
+        requested_comment.replace_more_comments(limit=None, threshold=0)
+    else:
+        logging.error(
+            "(URGENT) WAS NOT ABLE TO DETERMINE COMMENT VS SUBMISSION!")
+        requested_comment = r.get_submission(requested_comment.permalink)
+    return requested_comment
+
+
+def valid_comment(comment):
+    """
+    Checks if valid comment.
+    """
+    if comment.author is None:
+        logging.error("Found invalid comment " + comment.id)
+        return False
+    return True
 
 
 def handle(obj, markers=frozenset()):
@@ -199,7 +327,6 @@ def make_reply(body, id, reply_func, markers=None, additions=()):
             for part in reply:
                 reply_func(part + FOOTER)
         bot_tools.pause(0, 30)
-        # bot_tools.pause(1, 20)
         print('Continuing to parse submissions...')
     else:
         logging.info("No reply conditions met.")
