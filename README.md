@@ -32,20 +32,29 @@ directory.
     $ pip install -r requirements.txt
 ```
 
+## Set-Up
+Change the following setting keys in `settings.yml`:
+* `credentials.username`
+* `credentials.password`
+
 ## Starting the bot
-Use the following command to start the bot
+Use the following command to start the bot.
 ```
-    $ python . -u <USERNAME> -p <PASSWORD> -s <SUBREDDIT/MULTIREDDIT>
+    $ python . 
 ```
 
 ### Memcached
 Please note that we recommend using memcached for production
-purposes. Specify the following additional command line arguments
-to connect to memcached. Add --cache-host for ever additional
-memcached host you want to use.
-
+purposes. Set the configuration values in the `cache` section:
 ```
-    $ python . [...] --cache-type memcached --cache-host localhost:11211
+    cache:
+        # The host that should be used.
+        hosts:
+        - localhost:11211
+        - 123.123.123.123:11211
+
+        # The time in seconds a cache entry should be valid (max)
+        expire: 10000
 ```
 
 ## Contributing
