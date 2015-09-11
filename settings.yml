@@ -42,7 +42,7 @@ cache:
     ############################################
     # Comment out this when type: memcached
 
-    # Hosts: host:port
+    # Hosts in this form host:port
     # hosts:
     # - 127.0.0.1:11211
 
