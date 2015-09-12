@@ -177,3 +177,36 @@ class Story(object):
 
     def parse_html(self):
         pass
+
+
+class Group(object):
+    """
+    Represents a group of stories.
+    The stories are queried lazily.
+    """
+
+    def __init__(self, header=""):
+        self.header = header
+        self.stories = []
+
+    def add(self, story):
+        self.stories.append(story)
+
+    def __rsub__(self, other):
+        if isinstance(other, (set, frozenset)):
+            return other - set(self.stories)
+        raise NotImplemented
+
+    def __contains__(self, obj):
+        return obj in self.stories
+
+    def __getitem__(self, item):
+        if isinstance(item, slice):
+            result = Group(self.header)
+            result.stories = self.stories[item]
+            return result
+        return self.stories[item]
+
+    def __len__(self):
+        return len(self.stories)
+

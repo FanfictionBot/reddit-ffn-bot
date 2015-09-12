@@ -2,21 +2,31 @@
 This file handles the comment parsing.
 """
 import re
+import logging
 import itertools
 
 from ffn_bot import site
 from ffn_bot.fetchers import SITES, get_sites
-
+from ffn_bot.site import Group
 
 MAX_REPLY_LENGTH = 8000
 MAX_STORIES_PER_POST = 30
+
+MAX_GROUP_COUNT = 5
+MAX_GROUP_LENGTH = 5
+
+LOGGER = None
+def get_logger():
+    global LOGGER
+    if not LOGGER:
+        LOGGER = logging.getLogger("Parser")
+    return LOGGER
 
 # Allow to modify the behaviour of the comments
 # by adding a special function into the system
 #
 # Currently the following markers are supported:
 # ffnbot!ignore              Ignore the comment entirely
-# ffnbot!noreformat          Fix FFN formatting by not reformatting.
 # ffnbot!nodistinct          Don't make sure that we get distinct requests
 # ffnbot!directlinks         Also extract story requests from direct links
 # ffnbot!submissionlink      Direct-Links just for the submission-url
@@ -24,7 +34,18 @@ CONTEXT_MARKER_REGEX = re.compile(r"ffnbot!([^ ]+)")
 
 
 def _unique(iterable, key=lambda i:i):
+    def _push_unique_and_yield(item):
+        i = key(item)
+        if i not in seen:
+            yield item
     seen = set()
+    for item in iterable:
+        if not isinstance(item, Group):
+            continue
+        # Make sure stories inside groups will be purged
+        # from non-group list.
+        seen |= {key(story) for story in item}
+
     for item in iterable:
         i = key(item)
         if i not in seen:
@@ -33,6 +54,10 @@ def _unique(iterable, key=lambda i:i):
 
 
 class StoryLimitExceeded(Exception):
+    pass
+
+
+class GroupLimitExceeded(Exception):
     pass
 
 
@@ -90,33 +115,33 @@ def formulate_reply(comment_body, markers=None, additions=()):
     yield from parse_comment_requests(requests, markers, direct_links)
 
 
-def parse_comment_requests(requests, context, additions):
-    """
-    Executes the queries and return the
-    generated story strings as a single string
-    """
+def create_story(story):
+    if isinstance(part, site.Story):
+        try:
+            part.load()
+        except site.StoryDoesNotExist:
+            get_logger().info("Found nonexistent story: " + part.get_url())
+            return ""
+    return str(part)
 
-    results = list(_sorted_comment_requests(requests, context, additions))
 
-    if len(tuple(filter(
-            lambda x:isinstance(x, site.Story), results
-    ))) > MAX_STORIES_PER_POST:
-        raise StoryLimitExceeded("Maximum exceeded.")
+def expel_stories(stories):
+    # Filter stories.
+    stories = list(story for story in stories if isinstance(story, site.Story))
+    if len(stories) > MAX_STORIES_PER_POST:
+        raise StoryLimitExceeded("Too many stories.")
 
+    # Just push out story objects.
     cur_part = []
     length = 0
-    for part in results:
+    for part in stories:
         if not part:
             continue
 
-        if isinstance(part, site.Story):
-            try:
-                part.load()
-            except site.StoryDoesNotExist:
-                print("Found nonexistent story: " + part.get_url())
-                continue
+        part = create_story(part)
 
         if length + len(str(part)) >= MAX_REPLY_LENGTH:
+            get_logger().debug("Reached maximal reply length. Evicting.")
             yield "".join(str(p) for p in cur_part)
             cur_part = []
             length = 0
@@ -126,6 +151,45 @@ def parse_comment_requests(requests, context, additions):
 
     if len(cur_part) > 0:
         yield "".join(str(p) for p in cur_part)
+
+
+def expel_groups(groups):
+    groups = list(group for group in groups if isinstance(group, Group))
+    if len(groups) > MAX_GROUP_COUNT:
+        raise GroupLimitExceeded("Max group count.")
+
+    for group in groups:
+        cur_part = []
+        length = 0
+
+        cur_part.append(group.header)
+        cur_part.append("\n-----\n")
+        length += len(group.header+7)
+
+        # Try loading the next story in the group until we
+        # exhausted our list.
+        for i, story in enumerate(group):
+            if i >= MAX_GROUP_LENGTH:
+                break
+
+            string = create_story(story)
+            if length+len(string) > MAX_REPLY_LENGTH:
+                break
+            cur_part.append(string)
+
+        get_logger().info("Evicting group reply.")
+        # Evict post.
+        yield "".join(str(p) for p in cur_part)
+
+
+def parse_comment_requests(requests, context, additions):
+    """
+    Executes the queries and return the
+    generated story strings as a single string
+    """
+    results = list(_sorted_comment_requests(requests, context, additions))
+    yield from expel_stories(results)
+    yield from expel_groups(results)
 
 
 def _sorted_comment_requests(requests, context, additions):
@@ -147,7 +211,7 @@ def _sorted_comment_requests(requests, context, additions):
 
 def _parse_comment_requests(requests, context):
     for site, queries in requests:
-        print("Requests for '%s': %r" % (site.name, queries))
+        get_logger().info("Requests for '%s': %r" % (site.name, queries))
         for pos, query in queries:
             for comment in site.from_requests((query,), context):
                 if comment is None:
