@@ -34,10 +34,6 @@ CONTEXT_MARKER_REGEX = re.compile(r"ffnbot!([^ ]+)")
 
 
 def _unique(iterable, key=lambda i:i):
-    def _push_unique_and_yield(item):
-        i = key(item)
-        if i not in seen:
-            yield item
     seen = set()
     for item in iterable:
         if not isinstance(item, Group):
