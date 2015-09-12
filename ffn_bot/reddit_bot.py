@@ -136,14 +136,21 @@ def _handle_submission(submission, markers=frozenset()):
 
 def _handle_comment(comment, extra_markers=frozenset()):
     logging.debug("Handling comment: " + comment.id)
+
     if (comment not in CHECKED_COMMENTS) or ("force" in extra_markers):
         markers = parse_context_markers(comment.body)
         markers |= extra_markers
         if "ignore" in markers:
-            # logging.info("Comment forcefully ignored: " + comment.id)
             return
         else:
             logging.info("Found new comment: " + comment.id)
+
+        submission = comment.submission
+        submission.refresh()
+        submission_markers = parse_context_markers(submission.text)
+        if "disable" in submission_markers:
+            return
+
 
         if MOD_COMMANDS.handle_moderation(comment, markers):
             make_reply(comment.body, comment.id, comment.reply, markers)
