@@ -114,7 +114,7 @@ def init_global_flags(bot_parameters):
 def reply(post, message, reply_func=None):
     if DRY_RUN:
         logging.info("Not sending reply...")
-        print(message)
+        logging.info("\n" + message)
         return
 
     logging.debug("Sending reply...")
@@ -211,7 +211,7 @@ def make_reply(body, id, reply_func, markers=None, additions=()):
             ),
             reply_func
         )
-        logging.info("User requests too many groups..."(
+        logging.info("User requests too many groups...")
         bot_tools.pause(4,0)
         return
 

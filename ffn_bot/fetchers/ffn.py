@@ -128,7 +128,7 @@ class FanfictionBaseSite(site.Site):
         if sid is not None:
             return self.id_link % sid
 
-# Yield links directly without googling.
+        # Yield links directly without googling.
         match = self.link_regex.match(fic_name)
         if match is not None:
             return fic_name

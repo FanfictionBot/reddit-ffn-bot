@@ -5,12 +5,12 @@ from ffn_bot.searchengines.base import register, SearchEngine
 from ffn_bot.searchengines.helpers import Throttled, Randomizing
 from ffn_bot.searchengines.helpers import TagUsing
 
-@register
+# @register
 class BingScraper(TagUsing, Throttled, Randomizing, SearchEngine):
 
     def __init__(self):
         super(BingScraper, self).__init__(
-            requests=6,
+            requests=2,
             timeframe=Throttled.MINUTE
         )
 

@@ -35,14 +35,20 @@ CONTEXT_MARKER_REGEX = re.compile(r"ffnbot!([^ ]+)")
 
 def _unique(iterable, key=lambda i:i):
     seen = set()
+    iterable = tuple(iterable)
+
     for item in iterable:
         if not isinstance(item, Group):
             continue
+
         # Make sure stories inside groups will be purged
         # from non-group list.
         seen |= {key(story) for story in item}
 
     for item in iterable:
+        if isinstance(item, Group):
+            continue
+
         i = key(item)
         if i not in seen:
             seen.add(i)
@@ -111,7 +117,7 @@ def formulate_reply(comment_body, markers=None, additions=()):
     yield from parse_comment_requests(requests, markers, direct_links)
 
 
-def create_story(story):
+def create_story(part):
     if isinstance(part, site.Story):
         try:
             part.load()
@@ -126,7 +132,6 @@ def expel_stories(stories):
     stories = list(story for story in stories if isinstance(story, site.Story))
     if len(stories) > MAX_STORIES_PER_POST:
         raise StoryLimitExceeded("Too many stories.")
-
     # Just push out story objects.
     cur_part = []
     length = 0
