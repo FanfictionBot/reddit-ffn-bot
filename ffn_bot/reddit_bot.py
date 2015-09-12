@@ -4,20 +4,18 @@ import logging
 import praw
 from praw.objects import Submission, Comment
 
-from ffn_bot.queues import QueueStrategy
-from ffn_bot.commentlist import CommentList
-from ffn_bot.commentparser import formulate_reply, parse_context_markers
-from ffn_bot.commentparser import get_direct_links
-from ffn_bot.commentparser import StoryLimitExceeded
-from ffn_bot.config import get_bot_parameters, get_settings
-from ffn_bot.moderation import ModerativeCommands
-from ffn_bot.auth import login_to_reddit
-
-from ffn_bot import bot_tools
 from ffn_bot import cache
-# For pretty text
-from ffn_bot.bot_tools import Fore, Back, Style
+from ffn_bot import bot_tools
+from ffn_bot.auth import login_to_reddit
+from ffn_bot.config import get_bot_parameters, get_settings
+from ffn_bot.queues import QueueStrategy
+from ffn_bot.bot_tools import Fore, Style
 from ffn_bot.bot_tools import get_parent, get_full, valid_comment
+from ffn_bot.moderation import ModerativeCommands
+from ffn_bot.commentlist import CommentList
+from ffn_bot.commentparser import get_direct_links
+from ffn_bot.commentparser import StoryLimitExceeded, GroupLimitExceeded
+from ffn_bot.commentparser import formulate_reply, parse_context_markers
 
 __author__ = 'tusing'
 __authors__ = ['tusing', 'MikroMan', 'StuxSoftware']
@@ -190,13 +188,31 @@ def make_reply(body, id, reply_func, markers=None, additions=()):
         # happened).
         send_reply(
             None,
-            ("You requested too many fics.\n"
-                "\nWe allow a maximum of 30 stories"),
+            (
+                "*You requested too many fics.*\n\n"
+                "We allow a maximum of 30 stories to prevet abuse.\n\n"
+                "Please remove some requests and use **ffnbot!refresh** "
+                "to retry parsing."
+            ),
             reply_func
         )
-        bot_tools.print_exception(level=logging.DEBUG)
-        print("Too many fics...")
+        logging.info("User requested too many fics...")
         bot_tools.pause(2, 0)
+        return
+    except GroupLimitExceeded:
+        send_reply(
+            None,
+            (
+                "*You requested too many groupings.*\n\n"
+                "We allow up to five groups to ensure the bot doesn't "
+                "disrupt the current conversation.\n\n"
+                "Please remove some requests and use **ffnbot!refresh** "
+                "to retry parsing."
+            ),
+            reply_func
+        )
+        logging.info("User requests too many groups..."(
+        bot_tools.pause(4,0)
         return
 
     raw_reply = "".join(_reply)
