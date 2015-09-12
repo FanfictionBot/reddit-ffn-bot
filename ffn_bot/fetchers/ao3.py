@@ -8,7 +8,7 @@ from lxml import html
 from lxml.cssselect import CSSSelector
 
 from ffn_bot.metaparse import Metaparser, parser
-from ffn_bot.cache import default_cache
+from ffn_bot.cache import get_default_cache
 from ffn_bot.bot_tools import safe_int
 from ffn_bot.site import Site
 from ffn_bot import site
@@ -102,7 +102,7 @@ class ArchiveOfOurOwn(Site):
         if match is not None:
             return request
 
-        return default_cache.search(
+        return get_default_cache().search(
             request,
             "http://archiveofourown.org/works"
         )
@@ -153,7 +153,7 @@ class Story(site.Story):
         return sep.join(self.tree.xpath(xpath)).strip()
 
     def parse_html(self):
-        page = default_cache.get_page(self.get_real_url())
+        page = get_default_cache().get_page(self.get_real_url())
         self.tree = html.fromstring(page)
 
         self.summary = self.get_value_from_tree(AO3_SUMMARY_FINDER)

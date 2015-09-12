@@ -1,5 +1,7 @@
 import time
+import string
 import logging
+import hashlib
 from requests import Session
 from collections import OrderedDict
 
@@ -98,10 +100,10 @@ class MemcachedCache(BaseCache):
         self.client.set(key, value, time=expire)
 
     @staticmethod
-    def enforce_ascii(string):
-        # We expect humanreadable keys, so we use utf-7
-        # instead of base64 to have smaller keys.
-        return string.encode("utf-7", "replace").decode("ascii")
+    def enforce_ascii(stri):
+        if len(stri)>250 or not stri.isalnum():
+            return hashlib.sha256(stri.encode("utf-8")).hexdigest()
+        return stri.encode("utf-7")
 
 
 class RequestCache(object):
@@ -165,4 +167,6 @@ class RequestCache(object):
         return result
 
 
-default_cache = RequestCache({"type": "local"})
+default_cache = None
+def get_default_cache():
+    return default_cache

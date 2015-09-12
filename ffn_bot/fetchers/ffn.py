@@ -1,7 +1,7 @@
 import re
 from ffn_bot import bot_tools
 from ffn_bot import site
-from ffn_bot.cache import default_cache
+from ffn_bot.cache import get_default_cache
 from ffn_bot.metaparse import Metaparser, parser
 
 from random import randint
@@ -133,7 +133,7 @@ class FanfictionBaseSite(site.Site):
         if match is not None:
             return fic_name
 
-        return default_cache.search(
+        return get_default_cache().search(
             fic_name, "http://www." + self.site + "/s/"
         )
 
@@ -168,7 +168,7 @@ class Story(site.Story):
             re.match(LINK_REGEX % self.site, self.url).groupdict()["sid"])
 
     def parse_html(self):
-        page = default_cache.get_page(
+        page = get_default_cache().get_page(
             self.get_url(),
             throttle=randint(1000, 4000) / 1000)
         tree = html.fromstring(page)

@@ -5,7 +5,7 @@ import logging
 
 from lxml import html
 
-from ffn_bot.cache import default_cache
+from ffn_bot.cache import get_default_cache
 from ffn_bot.bot_tools import safe_int
 from ffn_bot.site import Site
 from ffn_bot import site
@@ -91,7 +91,7 @@ class HPFanfictionArchive(Site):
         if match is not None:
             return request
 
-        return default_cache.search(request, FFA_SEARCH_SITE)
+        return get_default_cache().search(request, FFA_SEARCH_SITE)
 
     def generate_response(self, link, context):
         assert link is not None
@@ -130,7 +130,7 @@ class Story(site.Story):
         )
 
     def parse_html(self):
-        self.tree = tree = html.fromstring(default_cache.get_page(self.url))
+        self.tree = tree = html.fromstring(get_default_cache().get_page(self.url))
 
         self.summary_and_meta = ' '.join(tree.xpath(FFA_SUMMARY_AND_META))
         self.summary = ''.join(
