@@ -71,7 +71,7 @@ class CommentList(object):
 
         self.filename = filename
         self.dry = dry
-        self.logger = logging.getLogger("CommmentList")
+        self.logger = logging.getLogger("CommentList")
         self.lock = RLock()
 
     def _load(self):
