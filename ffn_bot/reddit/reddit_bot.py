@@ -7,15 +7,15 @@ from praw.objects import Submission, Comment
 from ffn_bot import cache
 from ffn_bot import bot_tools
 from ffn_bot.auth import login_to_reddit
+from ffn_bot.stats import FicCounter
 from ffn_bot.config import get_bot_parameters, get_settings
 from ffn_bot.queues import QueueStrategy
-from ffn_bot.bot_tools import Fore, Style
-from ffn_bot.bot_tools import get_parent, get_full, valid_comment
 from ffn_bot.moderation import ModerativeCommands
 from ffn_bot.commentlist import CommentList
 from ffn_bot.commentparser import get_direct_links
 from ffn_bot.commentparser import StoryLimitExceeded, GroupLimitExceeded
 from ffn_bot.commentparser import formulate_reply, parse_context_markers
+from ffn_bot.reddit.reddit_environment import RedditBotEnvironment
 
 __author__ = 'tusing'
 __authors__ = ['tusing', 'MikroMan', 'StuxSoftware']
@@ -36,6 +36,8 @@ DRY_RUN = False
 # queue newest object mode.
 DEBUG = False
 
+TRACKER = None
+ENVIRONMENT = None
 MOD_COMMANDS = None
 
 def run_forever():
@@ -86,6 +88,7 @@ def main():
 def init_global_flags(bot_parameters):
     global USE_GET_COMMENTS, DRY_RUN, CHECKED_COMMENTS
     global DEBUG, FOOTER, SUBREDDIT_LIST, MOD_COMMANDS
+    global ENVIRONMENT, TRACKER
     DRY_RUN = bool(bot_parameters["dry"])
     if DRY_RUN:
         logging.warning("Dry run enabled. No comment will be sent.")
@@ -109,6 +112,14 @@ def init_global_flags(bot_parameters):
         logging.info("==========================================")
 
     MOD_COMMANDS = ModerativeCommands(r, CHECKED_COMMENTS, reply, handle)
+
+    settings = get_settings()
+    tracker_settings = settings.get("tracker", {
+        "filename":"tracker.json", "autosave_interval":100
+    })
+
+    TRACKER = FicCounter(**tracker_settings)
+    ENVIRONMENT = RedditBotEnvironment(TRACKER)
 
 
 def reply(post, message, reply_func=None):
@@ -189,7 +200,7 @@ def parse_submission_text(submission, extra_markers=frozenset()):
 def make_reply(body, id, reply_func, markers=None, additions=()):
     """Makes a reply for the given comment."""
     try:
-        _reply = list(formulate_reply(body, markers, additions))
+        _reply = list(formulate_reply(body, ENVIRONMENT, markers, additions))
     except StoryLimitExceeded:
         # The user requested to many stories. (Which has never ever
         # happened).
