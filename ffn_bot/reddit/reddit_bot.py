@@ -65,6 +65,8 @@ def _run_forever():
         finally:
             if CHECKED_COMMENTS is not None:
                 CHECKED_COMMENTS.save()
+            if TRACKER is not None:
+                TRACKER.save()
 
 
 def main():

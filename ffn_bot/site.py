@@ -1,8 +1,6 @@
 import re
 from collections import OrderedDict
 
-from ffn_bot import reddit_markdown
-
 WHITESPACE = re.compile("(|[ ]+(?!\Z))")
 
 

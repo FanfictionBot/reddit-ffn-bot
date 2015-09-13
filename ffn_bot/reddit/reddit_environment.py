@@ -8,8 +8,11 @@ class RedditBotEnvironment(BotEnvironment):
     def __init__(self, tracker):
         self.tracker = tracker
 
-    def stats(self, story):
-        self.tracker.count(story)
+    def stats(self, story, markers):
+        if "nostats" in markers or "force" in markers:
+            return
+
+        self.tracker.update_stats(story)
 
     def to_string(self, story, markers):
         """Generates the response string."""

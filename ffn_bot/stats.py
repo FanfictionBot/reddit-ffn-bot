@@ -10,19 +10,22 @@ class FicCounter(Counter):
     """
 
     def __init__(self, filename, autosave_interval=100):
-        super(FicCounter, self).__init__(self._load(self.filename))
+        super(FicCounter, self).__init__(self._load(filename))
         self.filename = filename
         self.interval = autosave_interval
         self.count = 0
 
     @staticmethod
     def _load(filename):
-        yield from json.load(open(filename, "r"))
+        try:
+            yield from json.load(open(filename, "r"))
+        except FileNotFoundError:
+            yield from ()
 
     def save(self):
-        json.dump(self.items(), open(filename, "w"))
+        json.dump(tuple(self.items()), open(self.filename, "w"))
 
-    def count(self, story):
+    def update_stats(self, story):
         self[story.get_url()] += 1
         self._autosave()
 
