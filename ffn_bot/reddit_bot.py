@@ -147,7 +147,7 @@ def _handle_comment(comment, extra_markers=frozenset()):
 
         submission = comment.submission
         submission.refresh()
-        submission_markers = parse_context_markers(submission.text)
+        submission_markers = parse_context_markers(submission.selftext)
         if "disable" in submission_markers:
             return
 
