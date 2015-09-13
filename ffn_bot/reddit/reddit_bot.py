@@ -40,6 +40,13 @@ TRACKER = None
 ENVIRONMENT = None
 MOD_COMMANDS = None
 
+def save_things():
+    if CHECKED_COMMENTS is not None:
+        CHECKED_COMMENTS.save()
+    if TRACKER is not None:
+        TRACKER.save()
+
+
 def run_forever():
     sys.exit(_run_forever())
 
@@ -53,8 +60,7 @@ def _run_forever():
         except KeyboardInterrupt as e:
             # Exit the program unclean.
             bot_tools.print_exception(e, level=logging.INFO)
-            if CHECKED_COMMENTS is not None:
-                CHECKED_COMMENTS.save()
+            save_things()
             os._exit(0)
         except SystemExit as e:
             return e.code
@@ -63,10 +69,7 @@ def _run_forever():
             bot_tools.print_exception()
             bot_tools.pause(1, 0)
         finally:
-            if CHECKED_COMMENTS is not None:
-                CHECKED_COMMENTS.save()
-            if TRACKER is not None:
-                TRACKER.save()
+            save_things()
 
 
 def main():

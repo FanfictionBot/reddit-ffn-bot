@@ -18,12 +18,17 @@ class FicCounter(Counter):
     @staticmethod
     def _load(filename):
         try:
-            yield from json.load(open(filename, "r"))
+            with open(filename, "r") as f:
+                values = json.load(f)
         except FileNotFoundError:
-            yield from ()
+            return {}
+
+        return dict(values["tracker"])
 
     def save(self):
-        json.dump(tuple(self.items()), open(self.filename, "w"))
+        values = {"version":1, "tracker":self}
+        with open(self.filename, "w") as f:
+            json.dump(values, f)
 
     def update_stats(self, story):
         self[story.get_url()] += 1
