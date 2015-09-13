@@ -1,4 +1,4 @@
-from ffn_bot import reddit_bot
+from ffn_bot.reddit import reddit_bot
 
 
 if __name__ == '__main__':
