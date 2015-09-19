@@ -19,10 +19,6 @@ def quote(string):
     return "> " + string.replace("\n", "\n> ")
 
 
-def blockquote(string):
-    return '    ' + string.replace("\n", "\n    ")
-
-
 def escape(string):
     return re.sub(r"([\\\[\]\-(){}+_!.#`^>*])", r"\\\1", string)
 
