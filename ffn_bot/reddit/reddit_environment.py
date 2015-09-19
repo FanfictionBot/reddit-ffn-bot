@@ -21,16 +21,24 @@ class RedditBotEnvironment(BotEnvironment):
             reddit_markdown.link(
                 reddit_markdown.bold(
                     reddit_markdown.italics(
-                        reddit_markdown.escape(story.get_title()))),
-                reddit_markdown.escape(story.get_url())) + " by " +
+                        reddit_markdown.escape(story.get_title())
+                    )
+                ), reddit_markdown.escape(story.get_url())
+            ) + " by " +
             reddit_markdown.link(
                 reddit_markdown.italics(
-                    reddit_markdown.escape(story.get_author())),
-                reddit_markdown.escape(story.get_author_link())))
+                    reddit_markdown.escape(story.get_author())
+                ), reddit_markdown.escape(story.get_author_link())
+            )
+        )
+
         result.append("\n\n")
         result.extend(
             reddit_markdown.quote(
-                reddit_markdown.escape(story.get_summary())).split("\n"))
+                reddit_markdown.escape(story.get_summary())
+            ).split("\n")
+        )
+
         result.append("")
         _lnks = []
         result.append(

@@ -24,7 +24,7 @@ AO3_AUTHOR_NAME = '//a[@rel="author"]/text()'
 AO3_AUTHOR_URL = '//a[@rel="author"]/@href'
 AO3_META_PARTS = '//dl[@class="stats"]//text()'
 AO3_TITLE = '//h2/text()'
-AO3_SUMMARY_FINDER = '//*[@id="workskin"]//*[@role="complementary"]//blockquote//text()'
+AO3_SUMMARY_FINDER = '//*[@id="workskin"]//*[@class="summary module" and @role="complementary"]/blockquote//text()'
 AO3_DOWNLOAD = '//*[@id="main"]/div[2]/ul/li[5]/ul/li[2]/a/@href'
 
 AO3_FANDOM_TAGS = CSSSelector("dd.fandom ul li").path + "//text()"
@@ -149,7 +149,7 @@ class Story(site.Story):
         return "http://archiveofourown.org/works/%s" % AO3_LINK_REGEX.match(
             self.url).groupdict()["sid"]
 
-    def get_value_from_tree(self, xpath, sep=""):
+    def get_value_from_tree(self, xpath, sep=" "):
         return sep.join(self.tree.xpath(xpath)).strip()
 
     def parse_html(self):

@@ -74,7 +74,7 @@ logging:
             stream: ext://sys.stdout
 
         file:
-            class: logging.TimedRotatingFileHandler
+            class: logging.handlers.TimedRotatingFileHandler
             formatter: detailed
             level: DEBUG
             filename: ffnbot.log
