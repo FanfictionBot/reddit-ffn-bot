@@ -25,7 +25,6 @@ AO3_AUTHOR_URL = '//a[@rel="author"]/@href'
 AO3_META_PARTS = '//dl[@class="stats"]//text()'
 AO3_TITLE = '//h2/text()'
 AO3_SUMMARY_FINDER = '//*[@id="workskin"]//*[@class="summary module" and @role="complementary"]/blockquote//text()'
-AO3_NOTES_FINDER = '//*[@id="workskin"]//*[@class="notes module" and @role="complementary"]/blockquote//text()'
 AO3_DOWNLOAD = '//*[@id="main"]/div[2]/ul/li[5]/ul/li[2]/a/@href'
 
 AO3_FANDOM_TAGS = CSSSelector("dd.fandom ul li").path + "//text()"
@@ -158,7 +157,6 @@ class Story(site.Story):
         self.tree = html.fromstring(page)
 
         self.summary = self.get_value_from_tree(AO3_SUMMARY_FINDER)
-        self.notes = self.get_value_from_tree(AO3_NOTES_FINDER)
         self.title = self.get_value_from_tree(AO3_TITLE)
         self.author = self.get_value_from_tree(AO3_AUTHOR_NAME)
         self.authorlink = self.get_value_from_tree(AO3_AUTHOR_URL)
