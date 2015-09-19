@@ -79,6 +79,10 @@ class Story(object):
         """Returns the summary of the story."""
         return self.summary
 
+    def get_notes(self):
+        """Return the notes for the story (currently used only by ao3)"""
+        return self.notes if hasattr(self, 'notes') else None
+
     def get_author(self):
         """Returns the author of the story."""
         return self.author
