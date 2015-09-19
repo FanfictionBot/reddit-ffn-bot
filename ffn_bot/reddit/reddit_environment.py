@@ -39,14 +39,6 @@ class RedditBotEnvironment(BotEnvironment):
             ).split("\n")
         )
 
-        if story.get_notes():
-            result.append("\n\n")
-            result.extend(
-                reddit_markdown.quote(
-                    reddit_markdown.blockquote(story.get_notes())
-                ).split("\n")
-            )
-
         result.append("")
         _lnks = []
         result.append(
