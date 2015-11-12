@@ -30,6 +30,20 @@ class Site(object):
             re.IGNORECASE
         )
         self.name = name
+        self._disabled = False
+
+    def _update_settings(self, settings):
+        """
+        Update the internal site settings.
+        """
+        self._disabled = settings.get("disabled", False)
+        self.update_settings(settings)
+
+    def update_settings(self, settings):
+        """
+        Update the settings of the actual site implementation.
+        """
+        pass
 
     def extract_direct_links(self, body, context):
         """

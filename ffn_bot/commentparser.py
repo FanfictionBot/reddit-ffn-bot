@@ -42,8 +42,15 @@ def update_settings():
     get_logger().info("Updating settings before parsing the first post.")
     MAX_REPLY_LENGTH = settings["parser"].get("reply-length", MAX_REPLY_LENGTH)
     MAX_STORIES_PER_POST = settings["parser"].get("stories-per-post", MAX_STORIES_PER_POST)
-    MAX_GROUP_COUNT = settings["parser"].get("max-group-size", MAX_GROUP_COUNT)
-    MAX_GROUP_LENGTH = settings["parser"].get("group-length", MAX_GROUP_LENGTH)
+    MAX_GROUP_COUNT = settings["parser"].get("groups-per-post", MAX_GROUP_COUNT)
+    MAX_GROUP_LENGTH = settings["parser"].get("stories-per-group", MAX_GROUP_LENGTH)
+
+    get_logger().info("Initializing Fetchers before parsing the first post.")
+    # Update the settings for the individual sites.
+    site_settings = settings["parser"].get("sites", {})
+    for site in SITES:
+        site._update_settings(site_settings.get(site.name, {}))
+
 
 # Allow to modify the behaviour of the comments
 # by adding a special function into the system
@@ -243,17 +250,13 @@ def _sorted_comment_requests(requests, context, additions):
 
 
 def _parse_comment_requests(requests, context):
-    active_sites = get_settings()["parser"].get("sites", [])
-
     for site, queries in requests:
-        # Do a little bit of logging.
-        get_logger().info("Requests for '%s': %r" % (site.name, queries))
-        
-        # We now support disabling certain sites if needed.
-        if active_sites and site.name not in active_sites:
-            get_logger().debug("Ignoring queries from " + site.name)
+        # Ignore disabled sites.
+        if site._disabled:
             continue
 
+        # Do a little bit of logging.
+        get_logger().info("Requests for '%s': %r" % (site.name, queries))
         # Begin processing the requests.
         for pos, query in queries:
             for comment in site.from_requests((query,), context):

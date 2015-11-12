@@ -35,14 +35,25 @@ bot:
 
 # Change this settings to determine maximal post size.
 parser:
+    # What's the maximal amount of characters for the reply.
     reply-length: 10000
-    stories-per-post: 30
-    max-group-size: 5
-    group-length: 5
 
-    # List of all supported sites. Leave empty to automatically
-    # discover all.
-    sites: []
+    # How many stories can a user request per post?
+    stories-per-post: 30
+
+    # What is the maximal amount of stories in a group?
+    groups-per-post: 5
+
+    # Maximal amount of stories per group.
+    stories-per-group: 5
+
+    # Configuration for sites.
+    # Format:
+    # site-name: {}
+    #
+    # Every site has a setting disable which you can set to true
+    # to disable resolution of the given sites.
+    sites: {}
 
 # The settings for the cache.
 cache:
@@ -50,10 +61,10 @@ cache:
     # - local: Use a local cache that is reset every program restart
     # - memcached: Use memcached to cache things.
     type: local
-    
+
     ############################################
     # Comment out this when type: local
-    
+
     # Cache Entry Expire Time in seconds.
     # expire: 10000
 
