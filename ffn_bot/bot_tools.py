@@ -1,5 +1,4 @@
 import sys
-import praw.objects
 import logging
 import platform
 import traceback
