@@ -8,13 +8,13 @@ from ffn_bot import cache
 from ffn_bot import bot_tools
 
 from ffn_bot.stats import FicCounter
-from ffn_bot.config import get_bot_parameters, get_settings
 from ffn_bot.commentparser import get_direct_links
 from ffn_bot.commentparser import StoryLimitExceeded, GroupLimitExceeded
 from ffn_bot.commentparser import formulate_reply, parse_context_markers
 
 from ffn_bot.reddit.auth import login_to_reddit
 from ffn_bot.reddit.queues import QueueStrategy
+from ffn_bot.reddit.settings import get_bot_parameters, get_settings
 from ffn_bot.reddit.moderation import ModerativeCommands
 from ffn_bot.reddit.commentlist import CommentList
 from ffn_bot.reddit.reddit_environment import RedditBotEnvironment
@@ -49,15 +49,15 @@ def save_things():
         TRACKER.save()
 
 
-def run_forever():
-    sys.exit(_run_forever())
+def run_forever(argv):
+    sys.exit(_run_forever(argv))
 
 
-def _run_forever():
+def _run_forever(argv):
     """Run-Forever"""
     while True:
         try:
-            return main()
+            return main(argv)
         # Exit on sys.exit and keyboard interrupts.
         except KeyboardInterrupt as e:
             # Exit the program unclean.
@@ -74,11 +74,11 @@ def _run_forever():
             save_things()
 
 
-def main():
+def main(argv):
     """Basic main function."""
     # moved call for agruments to avoid double calling
-    bot_parameters = get_bot_parameters()
-    if not login_to_reddit(r, get_settings()["credentials"]):
+    bot_parameters = get_bot_parameters(argv)
+    if not login_to_reddit(r, get_settings()["bot"]["credentials"]):
         logging.critical("Failed to login. Stopping bot.")
         return 1
 
@@ -121,7 +121,7 @@ def init_global_flags(bot_parameters):
     MOD_COMMANDS = ModerativeCommands(r, CHECKED_COMMENTS, reply, handle)
 
     settings = get_settings()
-    tracker_settings = settings.get("tracker", {
+    tracker_settings = settings["bot"].get("tracker", {
         "filename":"tracker.json", "autosave_interval":100
     })
 

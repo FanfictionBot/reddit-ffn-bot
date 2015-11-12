@@ -1,34 +1,37 @@
 # This is the settings file of FanfictionBot.
 # We are an extremely configuration heavy bot so we use yaml to parse our
 # settings.
+bot:
+    # The main function of your desired bot.
+    main: ffn_bot.reddit.reddit_bot.run_forever
 
-# How should the bot authenticate itself?
-credentials:
-    type: password
-    username: ENTER USERNAME HERE
-    password: ENTER PASSWORD HERE
+    # How should the bot authenticate itself?
+    credentials:
+        type: password
+        username: ENTER USERNAME HERE
+        password: ENTER PASSWORD HERE
 
-    # Uncomment this section and comment out the section above
-    # if you wanna use oauth.
-    #
-    # type: oauth2
-    # config: oauth2.ini
+        # Uncomment this section and comment out the section above
+        # if you wanna use oauth.
+        #
+        # type: oauth2
+        # config: oauth2.ini
 
-# A list of all subreddits that this bot supports.
-# Use "all" to extend support to all subreddits.
-subreddits:
-- HPFanfiction
+    # A list of all subreddits that this bot supports.
+    # Use "all" to extend support to all subreddits.
+    subreddits:
+    - HPFanfiction
 
-# Which file should be user for the footer?
-footer: FOOTER.txt
+    # Which file should be user for the footer?
+    footer: FOOTER.txt
 
-# How should the comments be stored?
-comments:
-    # The file where comments should be stored.
-    file: CHECKED_COMMENTS.txt
+    # How should the comments be stored?
+    comments:
+        # The file where comments should be stored.
+        file: CHECKED_COMMENTS.txt
 
-    # The maximal age an entry might have.
-    max-age: 4
+        # The maximal age an entry might have.
+        max-age: 4
 
 # The settings for the cache.
 cache:
