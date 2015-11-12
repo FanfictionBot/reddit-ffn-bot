@@ -1,6 +1,6 @@
 import collections
 import logging
-from ffn_bot.bot_tools import get_full, get_parent, valid_comment
+from ffn_bot.reddit.utils import get_full, get_parent, valid_comment
 
 
 MESSAGES = {
