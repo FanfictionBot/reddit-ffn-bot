@@ -6,15 +6,17 @@ from praw.objects import Submission, Comment
 
 from ffn_bot import cache
 from ffn_bot import bot_tools
-from ffn_bot.auth import login_to_reddit
+
 from ffn_bot.stats import FicCounter
 from ffn_bot.config import get_bot_parameters, get_settings
-from ffn_bot.queues import QueueStrategy
-from ffn_bot.moderation import ModerativeCommands
-from ffn_bot.commentlist import CommentList
 from ffn_bot.commentparser import get_direct_links
 from ffn_bot.commentparser import StoryLimitExceeded, GroupLimitExceeded
 from ffn_bot.commentparser import formulate_reply, parse_context_markers
+
+from ffn_bot.reddit.auth import login_to_reddit
+from ffn_bot.reddit.queues import QueueStrategy
+from ffn_bot.reddit.moderation import ModerativeCommands
+from ffn_bot.reddit.commentlist import CommentList
 from ffn_bot.reddit.reddit_environment import RedditBotEnvironment
 
 __author__ = 'tusing'
