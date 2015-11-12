@@ -1,0 +1,93 @@
+# This is the settings file of FanfictionBot.
+# We are an extremely configuration heavy bot so we use yaml to parse our
+# settings.
+
+# How should the bot authenticate itself?
+credentials:
+    type: password
+    username: ENTER USERNAME HERE
+    password: ENTER PASSWORD HERE
+
+    # Uncomment this section and comment out the section above
+    # if you wanna use oauth.
+    #
+    # type: oauth2
+    # config: oauth2.ini
+
+# A list of all subreddits that this bot supports.
+# Use "all" to extend support to all subreddits.
+subreddits:
+- HPFanfiction
+
+# Which file should be user for the footer?
+footer: FOOTER.txt
+
+# How should the comments be stored?
+comments:
+    # The file where comments should be stored.
+    file: CHECKED_COMMENTS.txt
+
+    # The maximal age an entry might have.
+    max-age: 4
+
+# The settings for the cache.
+cache:
+    # Supported Cache Types:
+    # - local: Use a local cache that is reset every program restart
+    # - memcached: Use memcached to cache things.
+    type: local
+    
+    ############################################
+    # Comment out this when type: local
+    
+    # Cache Entry Expire Time in seconds.
+    # expire: 10000
+
+    # Cache Size
+    # size: 10000
+
+    ############################################
+    # Comment out this when type: memcached
+
+    # Hosts in this form host:port
+    # hosts:
+    # - 127.0.0.1:11211
+
+    # Cache Entry Expire Time in seconds
+    # expire: 10000
+
+
+logging:
+    version: 1
+    formatters:
+        brief:
+            format: "[%(asctime)s][%(name)s] %(levelname)-8s | %(message)s"
+            datefmt: "%H:%M:%S"
+        detailed:
+            format: "[%(asctime)s][%(name)s][%(levelname)s] %(message)s"
+            datefmt: "%Y-%m-%d %H:%M:%S"
+    handlers:
+        console:
+            class: logging.StreamHandler
+            formatter: brief
+            level: INFO
+            stream: ext://sys.stdout
+
+        file:
+            class: logging.handlers.TimedRotatingFileHandler
+            formatter: detailed
+            level: DEBUG
+            filename: ffnbot.log
+            when: midnight
+            backupCount: 7
+            encoding: UTF-8
+            utc: true
+
+    loggers:
+        requests:
+            level: WARNING
+    root:
+        handlers:
+        - console
+        - file
+        level: DEBUG

@@ -1,7 +1,7 @@
 import re
 from ffn_bot import bot_tools
 from ffn_bot import site
-from ffn_bot.cache import default_cache
+from ffn_bot.cache import get_default_cache
 from ffn_bot.metaparse import Metaparser, parser
 
 from random import randint
@@ -128,18 +128,22 @@ class FanfictionBaseSite(site.Site):
         if sid is not None:
             return self.id_link % sid
 
-# Yield links directly without googling.
+        # Yield links directly without googling.
         match = self.link_regex.match(fic_name)
         if match is not None:
             return fic_name
 
-        search_request = 'site:www.{1}/s/ {0}'.format(fic_name, self.site)
-        return default_cache.search(search_request)
+        return get_default_cache().search(
+            fic_name, "http://www." + self.site + "/s/"
+        )
 
     def extract_direct_links(self, body, context):
         return (
-            self.generate_response(self.id_link % id, context)
-            for _, _, _, id in self.link_regex.findall(body)
+            (
+                match.start(0),
+                self.generate_response(self.id_link % match.group(4), context)
+            )
+            for match in self.link_regex.finditer(body)
         )
 
 
@@ -164,12 +168,16 @@ class Story(site.Story):
             re.match(LINK_REGEX % self.site, self.url).groupdict()["sid"])
 
     def parse_html(self):
-        page = default_cache.get_page(
+        page = get_default_cache().get_page(
             self.get_url(),
             throttle=randint(1000, 4000) / 1000)
         tree = html.fromstring(page)
 
-        self.title = (tree.xpath('//*[@id="profile_top"]/b/text()'))[0]
+        self.title = (tree.xpath('//*[@id="profile_top"]/b/text()'))
+        if not len(self.title):
+            raise site.StoryDoesNotExist
+        self.title = self.title[0]
+
         self.summary = (tree.xpath('//*[@id="profile_top"]/div/text()'))[0
                                                                         ]
         self.author += (tree.xpath('//*[@id="profile_top"]/a[1]/text()'))[

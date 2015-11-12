@@ -5,7 +5,7 @@ import logging
 
 from lxml import html
 
-from ffn_bot.cache import default_cache
+from ffn_bot.cache import get_default_cache
 from ffn_bot.bot_tools import safe_int
 from ffn_bot.site import Site
 from ffn_bot import site
@@ -16,7 +16,7 @@ __all__ = ["HPFanfictionArchive"]
 FFA_LINK_REGEX = re.compile(
     r"http(?:s)?://www\.hpfanficarchive\.com/stories/viewstory\.php\?sid=(?P<sid>\d+)", re.IGNORECASE)
 FFA_FUNCTION = "linkffa"
-FFA_SEARCH_QUERY = "http://www.hpfanficarchive.com/stories/viewstory.php?sid= %s"
+FFA_SEARCH_SITE = "http://www.hpfanficarchive.com/stories/viewstory.php?sid="
 
 FFA_AUTHOR_NAME = '//*[@id="pagetitle"]/a[2]/text()'
 FFA_AUTHOR_URL = '//*[@id="pagetitle"]/a[2]/@href'
@@ -91,7 +91,7 @@ class HPFanfictionArchive(Site):
         if match is not None:
             return request
 
-        return default_cache.search(FFA_SEARCH_QUERY % request)
+        return get_default_cache().search(request, FFA_SEARCH_SITE)
 
     def generate_response(self, link, context):
         assert link is not None
@@ -99,8 +99,11 @@ class HPFanfictionArchive(Site):
 
     def extract_direct_links(self, body, context):
         return (
-            self.generate_response(self.id_to_url(safe_int(id)), context)
-            for id in FFA_LINK_REGEX.findall(body)
+            (
+                match.start(0),
+                self.generate_response(self.id_to_url(safe_int(id)), context)
+            )
+            for match in FFA_LINK_REGEX.finditer(body)
         )
 
     def get_story(self, query):
@@ -127,7 +130,7 @@ class Story(site.Story):
         )
 
     def parse_html(self):
-        self.tree = tree = html.fromstring(default_cache.get_page(self.url))
+        self.tree = tree = html.fromstring(get_default_cache().get_page(self.url))
 
         self.summary_and_meta = ' '.join(tree.xpath(FFA_SUMMARY_AND_META))
         self.summary = ''.join(

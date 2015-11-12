@@ -3,7 +3,7 @@ import re
 from lxml import html
 
 from ffn_bot.metaparse import MetadataItem, Metaparser, parser
-from ffn_bot.cache import default_cache
+from ffn_bot.cache import get_default_cache
 from ffn_bot.site import Site
 from ffn_bot import site
 
@@ -96,8 +96,8 @@ class AdultFanfiction(Site):
 
     def extract_direct_links(self, body, context):
         return (
-            self.get_story_by_id(context, *match)
-            for match in AFF_LINK_REGEX.findall(body)
+            (match.start(0), self.get_story_by_id(context, *match.groups()))
+            for match in AFF_LINK_REGEX.finditer(body)
         )
 
     def get_story(self, query):
@@ -115,7 +115,7 @@ class Story(site.Story):
         self.id = id
 
     def parse_html(self):
-        tree = html.fromstring(default_cache.get_page(
+        tree = html.fromstring(get_default_cache().get_page(
             self.get_url(),  # Got this header from the ficsave codebase
             headers={
                 "Cookie": AFF_BYPASS_COOKIE

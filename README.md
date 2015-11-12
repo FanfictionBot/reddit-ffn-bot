@@ -19,27 +19,68 @@ you have the following dependencies installed on your machine:
 * Python 3.4 or newer
 
 Install bot as follows:
+
 Adapt the commands for your linux distribution
+
 We assume Ubuntu 14.04 and you are inside your desired installation
 directory.
 
-```
+```bash
     $ sudo apt-get install git python3.4 libxslt-dev libxml2-dev python3.4-dev
     $ sudo apt-get install python-pip
     $ git clone https://github.com/tusing/reddit-ffn-bot .
     $ pip install -r requirements.txt
 ```
 
+## Set-Up
+Change the following setting keys in `settings.yml`:
+* `credentials.username`
+* `credentials.password`
+
 ## Starting the bot
-Use the following command to start the bot
+Use the following command to start the bot.
+```bash
+    $ python . 
 ```
-    $ python . -u <USERNAME> -p <PASSWORD> -s <SUBREDDIT/MULTIREDDIT>
+
+### OAuth
+Please use OAuth for production purposes.
+
+Change to the following configuration in `settings.yml`
+```yaml
+    credentials:
+        type: oauth2
+        config: oauth2.ini
+```
+
+And change the appropriate values in `oauth2.ini`
+More information under
+* https://github.com/SmBe19/praw-OAuth2Util/blob/master/OAuth2Util/README.md#config
+* https://github.com/reddit/reddit/wiki/OAuth2-Quick-Start-Example
+* http://stackoverflow.com/a/24848076
+
+### Memcached
+Please note that we recommend using memcached for production
+purposes. Set the configuration values in the `cache` section:
+```yaml
+    cache:
+        type: memcached
+
+        # The hosts the bot should connect to (host:port)
+        hosts:
+        - localhost:11211
+        - 123.123.123.123:11211
+
+        # The time in seconds a cache entry should be valid (max)
+        expire: 10000
 ```
 
 ## Contributing
 We happily accept contributions. Please note, that we only accept pull
 requests into the [bleeding][github:bleeding]-branch.
+
 You can find our issue page here: [Issues][github:issues]
+
 You can find our pull request page here: [Pull Requests][github:pull-requests]
 
 

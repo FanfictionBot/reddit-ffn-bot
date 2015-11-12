@@ -1,8 +1,15 @@
 import time
-import random
-from google import search
-from requests import get
+import string
+import logging
+import hashlib
+from requests import Session
 from collections import OrderedDict
+
+from ffn_bot.searchengines import Searcher
+from ffn_bot import config
+
+CACHED_SEARCHER = Searcher()
+USER_AGENT = "Lynx/2.8.8dev.3 libwww-FM/2.14 SSL-MM/1.4.1"
 
 
 class LimitedSizeDict(OrderedDict):
@@ -24,41 +31,107 @@ class LimitedSizeDict(OrderedDict):
                 self.popitem(last=False)
 
 
+class BaseCache(object):
+    CACHE_TYPES = {}
+
+    def get(self, key):
+        return 0
+    def set(self, key, value, expire=0):
+        pass
+
+    @classmethod
+    def register_type(cls, name):
+        def _decorator(subcls):
+            cls.CACHE_TYPES[name] = subcls
+            return subcls
+        return _decorator
+
+    @classmethod
+    def by_arguments(cls, settings):
+        import argparse
+        ctype = cls.CACHE_TYPES[settings["type"]]
+        return ctype(settings)
+
+
+@BaseCache.register_type("local")
+class LocalCache(BaseCache):
+    EMPTY_RESULT = []
+
+    def __init__(self, ns):
+        self.expire = ns.get("expire", 30*60)
+        self.cache = LimitedSizeDict(size_limit=ns.get("size", 10000))
+
+    def get(self, key):
+        result = self.cache.get(key, self.EMPTY_RESULT)
+        if result is not self.EMPTY_RESULT:
+            if result[2] == 0 or time.time() - result[1] <= result[2]:
+                self._push_cache(key, *result)
+                return result[0]
+            del self.cache[key]
+        raise KeyError("Not cached")
+
+    def set(self, key, value, expire=-1):
+        if expire == -1:
+            expire = self.expire
+        self._push_cache(key, value, time.time(), expire)
+
+    def _push_cache(self, key, value, insert, expire):
+        self.cache[key] = (value, insert, expire*1000)
+
+
+@BaseCache.register_type("memcached")
+class MemcachedCache(BaseCache):
+    def __init__(self, ns):
+        import memcache
+        self.client = memcache.Client(ns["hosts"])
+        self.expire = ns["expire"]
+
+    def get(self, key):
+        key = self.enforce_ascii(key)
+        result = self.client.get(key)
+        if result is None:
+            raise KeyError
+        return result
+
+    def set(self, key, value, expire=-1):
+        key = self.enforce_ascii(key)
+        if expire == -1:
+            expire = self.expire
+        self.client.set(key, value, time=expire)
+
+    @staticmethod
+    def enforce_ascii(stri):
+        if len(stri)>250 or not stri.isalnum():
+            return hashlib.sha256(stri.encode("utf-8")).hexdigest()
+        return stri.encode("utf-7")
+
+
 class RequestCache(object):
 
     """
     Cache for search requests and page-loads.
     """
 
-    # Marker for non cached objects.
-    EMPTY_RESULT = []
+    def __init__(self, args=None):
+        if args is None:
+            args = config.get_settings()["cache"]
 
-    def __init__(self, max_size=10000, expire_time=30 * 60 * 1000):
-        self.cache = LimitedSizeDict(size_limit=max_size)
-        self.expire_time = expire_time
+        self.cache = BaseCache.by_arguments(args)
+        self.logger = logging.getLogger("RequestCache")
+        self.session = Session()
 
     def hit_cache(self, type, query):
         """Check if the value is in the cache."""
+        self.logger.debug("Hitting cache: " + "%s:%s" % (type, query))
+        return self.cache.get("%s:%s" % (type, query))
 
-        result = self.cache.get("%s:%s" % (type, query), self.EMPTY_RESULT)
-        if result is not self.EMPTY_RESULT:
-            # Let values expire.
-            if time.time() - result[1] <= self.expire_time:
-                self.push_cache(type, query, result[0], result[1])
-                return result[0]
-        raise KeyError("Not cached")
-
-    def push_cache(self, type, query, data, t=None):
+    def push_cache(self, type, query, data):
         """Push a value into the cache."""
-        cache_id = "%s:%s" % (type, query)
-        if cache_id in self.cache:
-            del self.cache[cache_id]
-        if t is None:
-            t = time.time()
-        self.cache[cache_id] = (data, t)
+        self.logger.debug("Inserting cache: " + "%s:%s" % (type, query))
+        return self.cache.set("%s:%s"%(type,query), data)
 
     def get_page(self, page, throttle=0, **kwargs):
-        print("LOADING: " + str(page))
+        self.logger.info("LOADING: " + str(page))
         try:
             return self.hit_cache("get", page)
         except KeyError:
@@ -67,22 +140,33 @@ class RequestCache(object):
         # Throtle only if we don't have a version cached.
         if throttle:
             time.sleep(throttle)
-        result = get(page, **kwargs).text
+
+        # Set our own user-agent.
+        headers = kwargs.pop("headers", {})
+        if "User-Agent" not in headers:
+            headers["User-Agent"] = USER_AGENT
+        kwargs["headers"] = headers
+
+        result = self.session.get(page, **kwargs).text
 
         self.push_cache("get", page, result)
         return result
 
-    def search(self, query):
-        print("SEARCHING: " + str(query))
+    def search(self, query, site=None):
+        self.logger.info("SEARCHING: " + str(query))
         try:
             return self.hit_cache("search", query)
         except KeyError:
             pass
 
-        time.sleep(random.randint(2000,5000)/1000.0)
+        result = CACHED_SEARCHER.search(query, site, limit=1)
+        if result:
+            result = result[0]
 
-        result = next(search(query, num=1, stop=1), None)
         self.push_cache("search", query, result)
         return result
 
-default_cache = RequestCache()
+
+default_cache = None
+def get_default_cache():
+    return default_cache
