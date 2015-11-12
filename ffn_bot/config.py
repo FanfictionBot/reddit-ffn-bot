@@ -51,7 +51,6 @@ def get_bot_parameters():
 
     with open(args.settings, "r") as f:
         SETTINGS = yaml.safe_load(f.read())
-        print(SETTINGS)
 
     dictConfig(SETTINGS["logging"])
 
