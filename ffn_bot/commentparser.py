@@ -6,8 +6,9 @@ import logging
 import itertools
 
 from ffn_bot import site
-from ffn_bot.fetchers import SITES, get_sites
 from ffn_bot.site import Group
+from ffn_bot.config import get_settings
+from ffn_bot.fetchers import SITES, get_sites
 
 MAX_REPLY_LENGTH = 8000
 MAX_STORIES_PER_POST = 30
@@ -15,12 +16,34 @@ MAX_STORIES_PER_POST = 30
 MAX_GROUP_COUNT = 5
 MAX_GROUP_LENGTH = 5
 
+_UPDATED_SETTINGS = False
+
 LOGGER = None
 def get_logger():
     global LOGGER
     if not LOGGER:
         LOGGER = logging.getLogger("Parser")
     return LOGGER
+
+def update_settings():
+    global MAX_REPLY_LENGTH
+    global MAX_STORIES_PER_POST
+    global MAX_GROUP_COUNT
+    global MAX_GROUP_LENGTH
+
+    # Make sure we don't update the settings twice.
+    global _UPDATED_SETTINGS
+    if _UPDATED_SETTINGS:
+        return
+    _UPDATED_SETTINGS = True
+
+    settings = get_settings()
+
+    get_logger().info("Updating settings before parsing the first post.")
+    MAX_REPLY_LENGTH = settings["parser"].get("reply-length", MAX_REPLY_LENGTH)
+    MAX_STORIES_PER_POST = settings["parser"].get("stories-per-post", MAX_STORIES_PER_POST)
+    MAX_GROUP_COUNT = settings["parser"].get("max-group-size", MAX_GROUP_COUNT)
+    MAX_GROUP_LENGTH = settings["parser"].get("group-length", MAX_GROUP_LENGTH)
 
 # Allow to modify the behaviour of the comments
 # by adding a special function into the system
@@ -90,6 +113,8 @@ def parse_site_requests(comment_body, site):
 
 def formulate_reply(comment_body, env, markers=None, additions=()):
     """Creates the reply for the given comment."""
+    update_settings()
+
     if markers is None:
         # Parse the context markers as some may be required here
         markers = parse_context_markers(comment_body)
@@ -190,31 +215,46 @@ def parse_comment_requests(requests, env, context, additions):
     Executes the queries and return the
     generated story strings as a single string
     """
+    # Get the stories.
     results = list(_sorted_comment_requests(requests, context, additions))
+    
+    # Return single stories first, then groups.
     yield from expel_stories(results, env, context)
     yield from expel_groups(results, env, context)
 
 
 def _sorted_comment_requests(requests, context, additions):
-    # Merge the story-list
+    # Requests and pre-determined additions.
     results = itertools.chain(
         _parse_comment_requests(requests, context),
         additions
     )
 
-    # Sort the results
+    # Sort the reqults its position and only return the story item itself.
     results = sorted(results, key=lambda i: i[0])
     results = map(lambda i: i[-1], results)
 
+    # Create a unique list out of the stories.
     if "nodistinct" not in context:
         results = _unique(results)
 
+    # Return all results.
     yield from results
 
 
 def _parse_comment_requests(requests, context):
+    active_sites = get_settings()["parser"].get("sites", [])
+
     for site, queries in requests:
+        # Do a little bit of logging.
         get_logger().info("Requests for '%s': %r" % (site.name, queries))
+        
+        # We now support disabling certain sites if needed.
+        if active_sites and site.name not in active_sites:
+            get_logger().debug("Ignoring queries from " + site.name)
+            continue
+
+        # Begin processing the requests.
         for pos, query in queries:
             for comment in site.from_requests((query,), context):
                 if comment is None:

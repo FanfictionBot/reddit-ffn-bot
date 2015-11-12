@@ -33,6 +33,17 @@ bot:
         # The maximal age an entry might have.
         max-age: 4
 
+# Change this settings to determine maximal post size.
+parser:
+    reply-length: 10000
+    stories-per-post: 30
+    max-group-size: 5
+    group-length: 5
+
+    # List of all supported sites. Leave empty to automatically
+    # discover all.
+    sites: []
+
 # The settings for the cache.
 cache:
     # Supported Cache Types:
