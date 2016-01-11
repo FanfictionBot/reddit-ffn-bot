@@ -176,7 +176,7 @@ def expel_stories(stories, env, markers):
         part = create_story(part, env, markers)
 
         if length + len(str(part)) >= MAX_REPLY_LENGTH:
-            get_logger().debug("Reached maximal reply length. Evicting.")
+            get_logger().info("Reached maximal reply length. Evicting.")
             yield "".join(str(p) for p in cur_part)
             cur_part = []
             length = 0

@@ -3,6 +3,7 @@ from collections import OrderedDict
 from ffn_bot.environment import BotEnvironment
 from ffn_bot.reddit import reddit_markdown
 
+
 class RedditBotEnvironment(BotEnvironment):
 
     def __init__(self, tracker):
@@ -45,7 +46,7 @@ class RedditBotEnvironment(BotEnvironment):
             reddit_markdown.exponentiate(self.format_stats(story, _lnks))
         )
         for name, link in _lnks:
-            result.append("[%s:%s]: %s"%(str(id(story)), name, link))
+            result.append("[%s:%s]: %s" % (str(id(story)), name, link))
 
         result.append("\n\n" + reddit_markdown.linebreak + "\n\n")
 
@@ -69,15 +70,16 @@ class RedditBotEnvironment(BotEnvironment):
 
         download = story.get_download()
         if download is not None:
-            res.append("*Download*: [EPUB][%s:epub]"%(str(id(story))))
+            res.append("*Download*: [EPUB][%s:epub]" % (str(id(story))))
             links.append(("epub", download))
         return (" " + reddit_markdown.bold("|") + " ").join(res)
 
     @staticmethod
     def super_escape(string):
+        string = str(string)
         for c in "([{":
-            string = string.replace(str(c), "<")
+            string = string.replace(c, "<")
         for c in ")]}":
-            string = string.replace(str(c), ">")
+            string = string.replace(c, ">")
         return string
         pass

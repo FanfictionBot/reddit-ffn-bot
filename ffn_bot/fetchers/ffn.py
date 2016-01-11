@@ -179,7 +179,7 @@ class Story(site.Story):
         self.title = self.title[0]
 
         self.summary = (tree.xpath('//*[@id="profile_top"]/div/text()'))[0
-                                                                        ]
+                                                                         ]
         self.author += (tree.xpath('//*[@id="profile_top"]/a[1]/text()'))[
             0
         ]
@@ -198,7 +198,7 @@ class Story(site.Story):
             return "http://ficsave.com/?story_url={0}&format=epub&auto_download=yes".format(self.url)
         else:
             return "http://www.p0ody-files.com/ff_to_ebook/mobile/makeEpub.php?id={0}".format(
-            re.findall(r'\d+', self.url)[0])
+                re.findall(r'\d+', self.url)[0])
 
 
 class FanfictionNetSite(FanfictionBaseSite):

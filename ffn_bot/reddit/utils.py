@@ -32,11 +32,11 @@ def valid_comment(comment):
     Checks if valid comment.
     """
     if comment is None:
-        logging.debug("Found comment resolving to None.")
+        logging.info("Found comment resolving to None.")
         return False
 
     if comment.author is None:
-        logging.debug("Found invalid comment " + comment.id)
+        logging.info("Found invalid comment " + comment.id)
         return False
     return True
 

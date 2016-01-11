@@ -58,8 +58,9 @@ class ThreadsafeUniqueQueue(object):
 
 class QueueThread(Thread):
 
-    def __init__(self, comments, logger):
+    def __init__(self, r, comments, logger):
         super(QueueThread, self).__init__()
+        self.r = r
         self.daemon = True
         self.queue = ThreadsafeUniqueQueue()
         self.running = False
@@ -88,8 +89,9 @@ class QueueThread(Thread):
     def run(self):
         self.running = True
         while self.running:
-            self.logger.debug("Querying Reddit...")
+            self.logger.info("Querying Reddit...")
             for fetcher in self.fetchers:
+                self.r._use_oauth = False
                 self._fetch(fetcher)
             for i in range(10):
                 if not self.running:
@@ -117,9 +119,10 @@ class QueueThread(Thread):
 
 class QueueStrategy(object):
 
-    def __init__(self, subreddit, comments, handler, limit):
+    def __init__(self, r, subreddit, comments, handler, limit):
+        self.r = r
         self.logger = logging.getLogger("Queue")
-        self.queue = QueueThread(comments, self.logger)
+        self.queue = QueueThread(r, comments, self.logger)
         self.handler = handler
         self.subreddit = subreddit
         self.count = 0
@@ -153,5 +156,7 @@ class QueueStrategy(object):
                 "count": self.count
             }
 
+            self.r._use_oauth = False
             queue.add(*func(limit=self.limit, params=params))
+
         return _run

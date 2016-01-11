@@ -85,7 +85,7 @@ class ModerativeCommands(object, metaclass=ModerativeCommandsMeta):
                 if not func._on_force and forced:
                     continue
 
-                self.logger.debug("Moderation: " + repr(func))
+                self.logger.info("Moderation: " + repr(func))
                 logger = logging.getLogger("moderation." + str(key))
 
                 # Make sure we have a list.
@@ -112,12 +112,8 @@ class ModerativeCommands(object, metaclass=ModerativeCommandsMeta):
 
     @command("parent", allow_on_force=True)
     def on_parent(self, comment, markers):
-        item = get_parent(self.reddit, comment, allow_submission)
-        self.on_refresh(
-            command,
-            markers,
-            {"directlinks", "submissionlink"}
-        )
+        self.on_refresh(comment, markers,
+                        {"directlinks", "submissionlink"})
 
     @command("refresh")
     def on_refresh(self, comment, markers, additional=frozenset()):

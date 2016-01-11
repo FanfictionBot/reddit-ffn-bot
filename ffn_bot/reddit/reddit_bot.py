@@ -3,6 +3,7 @@ import sys
 import logging
 import praw
 from praw.objects import Submission, Comment
+from praw.handlers import MultiprocessHandler
 
 from ffn_bot import cache
 from ffn_bot import bot_tools
@@ -21,10 +22,16 @@ from ffn_bot.reddit.reddit_environment import RedditBotEnvironment
 
 __author__ = 'tusing'
 __authors__ = ['tusing', 'MikroMan', 'StuxSoftware']
-__version__ = "1.3.0"
+__version__ = "1.4.0"
 
-USER_AGENT = "Python:FanfictionComment:" + __version__ + " (by tusing, StuxSoftware, and MikroMan)"
-r = praw.Reddit(USER_AGENT)
+USER_AGENT = "Python:FanfictionComment:" + __version__ + \
+    " (by tusing, StuxSoftware, and MikroMan)"
+
+# Start PRAW Multiprocess by running "praw-multiprocess"
+handler = MultiprocessHandler()
+r = praw.Reddit(USER_AGENT, handler=handler)
+r._use_oauth = False  # A temporary band-aid.
+
 SUBREDDIT_LIST = set()
 CHECKED_COMMENTS = None
 
@@ -41,6 +48,7 @@ DEBUG = False
 TRACKER = None
 ENVIRONMENT = None
 MOD_COMMANDS = None
+
 
 def save_things():
     if CHECKED_COMMENTS is not None:
@@ -61,7 +69,7 @@ def _run_forever(argv):
         # Exit on sys.exit and keyboard interrupts.
         except KeyboardInterrupt as e:
             # Exit the program unclean.
-            bot_tools.print_exception(e, level=logging.INFO)
+            bot_tools.print_exception(e, level=logging.debug)
             save_things()
             os._exit(0)
         except SystemExit as e:
@@ -85,6 +93,7 @@ def main(argv):
     init_global_flags(bot_parameters)
 
     QueueStrategy(
+        r,
         r.get_subreddit("+".join(SUBREDDIT_LIST)),
         CHECKED_COMMENTS,
         handle,
@@ -113,16 +122,16 @@ def init_global_flags(bot_parameters):
     with open(bot_parameters["footer"], "r") as f:
         FOOTER = f.read()
         FOOTER = FOOTER.format(version=__version__)
-        logging.info("==========================================")
+        logging.debug("==========================================")
         for line in FOOTER.split("\n"):
-            logging.info(line)
-        logging.info("==========================================")
+            logging.debug(line)
+        logging.debug("==========================================")
 
     MOD_COMMANDS = ModerativeCommands(r, CHECKED_COMMENTS, reply, handle)
 
     settings = get_settings()
     tracker_settings = settings["bot"].get("tracker", {
-        "filename":"tracker.json", "autosave_interval":100
+        "filename": "tracker.json", "autosave_interval": 100
     })
 
     TRACKER = FicCounter(**tracker_settings)
@@ -135,7 +144,7 @@ def reply(post, message, reply_func=None):
         logging.info("\n" + message)
         return
 
-    logging.debug("Sending reply...")
+    logging.info("Sending reply...")
     if reply_func is None:
         if isinstance(post, Comment):
             reply_func = post.reply
@@ -153,7 +162,7 @@ def _handle_submission(submission, markers=frozenset()):
 
 
 def _handle_comment(comment, extra_markers=frozenset()):
-    logging.debug("Handling comment: " + comment.id)
+    logging.info("Handling comment " + comment.id)
 
     if (comment not in CHECKED_COMMENTS) or ("force" in extra_markers):
         markers = parse_context_markers(comment.body)
@@ -162,13 +171,12 @@ def _handle_comment(comment, extra_markers=frozenset()):
             return
         else:
             logging.info("Found new comment: " + comment.id)
-
+        r.use_oauth = False
         submission = comment.submission
         submission.refresh()
         submission_markers = parse_context_markers(submission.selftext)
         if "disable" in submission_markers:
             return
-
 
         if MOD_COMMANDS.handle_moderation(comment, markers):
             make_reply(comment.body, comment.id, comment.reply, markers)
@@ -206,6 +214,9 @@ def parse_submission_text(submission, extra_markers=frozenset()):
 
 def make_reply(body, id, reply_func, markers=None, additions=()):
     """Makes a reply for the given comment."""
+    logging.debug("Attempting a reply to: ")
+    logging.debug(body)
+
     try:
         _reply = list(formulate_reply(body, ENVIRONMENT, markers, additions))
     except StoryLimitExceeded:
@@ -237,7 +248,7 @@ def make_reply(body, id, reply_func, markers=None, additions=()):
             reply_func
         )
         logging.info("User requests too many groups...")
-        bot_tools.pause(4,0)
+        bot_tools.pause(4, 0)
         return
 
     raw_reply = "".join(_reply)
@@ -251,4 +262,4 @@ def make_reply(body, id, reply_func, markers=None, additions=()):
         bot_tools.pause(0, 30)
         print('Continuing to parse submissions...')
     else:
-        logging.info("No reply conditions met.")
+        logging.info("No reply conditions met for " + id)

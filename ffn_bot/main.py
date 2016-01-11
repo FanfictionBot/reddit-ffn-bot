@@ -16,17 +16,17 @@ def main(args):
     main_func = settings["bot"]["main"]
     *module, func = main_func.split(".")
 
-    logging.info("Fanfiction.Net Bot")
-    logging.info("Initializing Bot.")
+    logging.debug("Fanfiction.Net Bot")
+    logging.debug("Initializing Bot.")
 
-    logging.debug("Searching main-func: " + main_func)
+    logging.info("Searching main-func: " + main_func)
     # Find module.
     module = ".".join(module)
     module = importlib.import_module(module)
     func = getattr(module, func)
 
-    logging.info("Starting bot...")
-    logging.info("=====================")
+    logging.debug("Starting bot...")
+    logging.debug("=====================")
     try:
         sys.exit(func(args))
     except Exception as e:

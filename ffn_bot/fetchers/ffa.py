@@ -130,7 +130,8 @@ class Story(site.Story):
         )
 
     def parse_html(self):
-        self.tree = tree = html.fromstring(get_default_cache().get_page(self.url))
+        self.tree = tree = html.fromstring(
+            get_default_cache().get_page(self.url))
 
         self.summary_and_meta = ' '.join(tree.xpath(FFA_SUMMARY_AND_META))
         self.summary = ''.join(

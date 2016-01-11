@@ -122,12 +122,12 @@ class RequestCache(object):
 
     def hit_cache(self, type, query):
         """Check if the value is in the cache."""
-        self.logger.debug("Hitting cache: " + "%s:%s" % (type, query))
+        self.logger.info("Hitting cache: " + "%s:%s" % (type, query))
         return self.cache.get("%s:%s" % (type, query))
 
     def push_cache(self, type, query, data):
         """Push a value into the cache."""
-        self.logger.debug("Inserting cache: " + "%s:%s" % (type, query))
+        self.logger.info("Inserting cache: " + "%s:%s" % (type, query))
         return self.cache.set("%s:%s"%(type,query), data)
 
     def get_page(self, page, throttle=0, **kwargs):

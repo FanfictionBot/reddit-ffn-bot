@@ -17,7 +17,7 @@ AFF_MATCH_REGEX = (
         r"http(?:s)?://([^.]+)\.adult-fanfiction\.org/story\.php\?no=(\d+)",
         re.IGNORECASE
     ),  # We need the id to be passed like this:
-  # <Archive>:<ID>
+    # <Archive>:<ID>
     re.compile(
         "([^:]+):(\d+)", re.IGNORECASE
     ),)
