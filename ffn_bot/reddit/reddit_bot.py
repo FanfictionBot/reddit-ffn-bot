@@ -216,7 +216,7 @@ def make_reply(body, id, reply_func, markers=None, additions=()):
             (
                 "*You requested too many fics.*\n\n"
                 "We allow a maximum of 30 stories to prevet abuse.\n\n"
-                "Please remove some requests and use **ffnbot!refresh** "
+                "Please remove some requests and use **ffnbot\\!refresh** "
                 "to retry parsing."
             ),
             reply_func
@@ -231,7 +231,7 @@ def make_reply(body, id, reply_func, markers=None, additions=()):
                 "*You requested too many groupings.*\n\n"
                 "We allow up to five groups to ensure the bot doesn't "
                 "disrupt the current conversation.\n\n"
-                "Please remove some requests and use **ffnbot!refresh** "
+                "Please remove some requests and use **ffnbot\\!refresh** "
                 "to retry parsing."
             ),
             reply_func
