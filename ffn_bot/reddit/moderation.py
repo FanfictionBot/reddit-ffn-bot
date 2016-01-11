@@ -128,7 +128,7 @@ class ModerativeCommands(object, metaclass=ModerativeCommandsMeta):
             self.reddit, get_parent(self.reddit, comment, True))
         self.logger.info("Refreshing on " + comment_with_requests.fullname)
 
-        if comment_with_requests.author.name is not None:
+        if comment_with_requests.author is not None:
             if comment_with_requests.author.name == self.reddit.user.name:
                 self.logger.info(
                     "Refresh requested on a bot comment (" + comment_with_requests.id + ").")
