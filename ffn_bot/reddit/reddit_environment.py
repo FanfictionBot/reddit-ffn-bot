@@ -76,8 +76,8 @@ class RedditBotEnvironment(BotEnvironment):
     @staticmethod
     def super_escape(string):
         for c in "([{":
-            string = string.replace(c, "<")
+            string = string.replace(str(c), "<")
         for c in ")]}":
-            string = string.replace(c, ">")
+            string = string.replace(str(c), ">")
         return string
         pass
