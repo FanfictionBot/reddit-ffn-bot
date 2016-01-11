@@ -27,7 +27,8 @@ class ModerativeCommandsMeta(type):
         return collections.OrderedDict()
 
     def __new__(cls, name, bases, what):
-        result = super(ModerativeCommandsMeta, cls).__new__(cls, name, bases, what)
+        result = super(ModerativeCommandsMeta, cls).__new__(
+            cls, name, bases, what)
 
         result._commands = getattr(result, "_commands", {}).copy()
         if None in result._commands:
@@ -85,7 +86,7 @@ class ModerativeCommands(object, metaclass=ModerativeCommandsMeta):
                     continue
 
                 self.logger.debug("Moderation: " + repr(func))
-                logger = logging.getLogger("moderation."+str(key))
+                logger = logging.getLogger("moderation." + str(key))
 
                 # Make sure we have a list.
                 if key is not None:
@@ -123,31 +124,37 @@ class ModerativeCommands(object, metaclass=ModerativeCommandsMeta):
         self.logger.info("Refresh requested by " + comment.id)
 
         # Get the full comment or submission
-        comment_with_requests = get_full(self.reddit, get_parent(self.reddit, comment, True))
+        comment_with_requests = get_full(
+            self.reddit, get_parent(self.reddit, comment, True))
         self.logger.info("Refreshing on " + comment_with_requests.fullname)
 
-        if comment_with_requests.author.name == self.reddit.user.name:
-            self.logger.info(
-                "Refresh requested on a bot comment (" + comment_with_requests.id + ").")
-            # Retrieve the requesting parent submission or comment
-            comment_with_requests = get_full(self.reddit,
-                get_parent(self.reddit, comment_with_requests, True)
-            )
+        if comment_with_requests.author.name is not None:
+            if comment_with_requests.author.name == self.reddit.user.name:
+                self.logger.info(
+                    "Refresh requested on a bot comment (" + comment_with_requests.id + ").")
+                # Retrieve the requesting parent submission or comment
+                comment_with_requests = get_full(self.reddit,
+                                                 get_parent(
+                                                     self.reddit, comment_with_requests, True)
+                                                 )
 
-            # If the requesting comment has been deleted, abort
-            if not valid_comment(comment_with_requests):
-                self.logger.warning("Parent of bot comment is invalid.")
-                return
+                # If the requesting comment has been deleted, abort
+                if not valid_comment(comment_with_requests):
+                    self.logger.warning("Parent of bot comment is invalid.")
+                    return
 
-            self.logger.info("Refresh request pushed to parent " + comment_with_requests.fullname)
+                self.logger.info(
+                    "Refresh request pushed to parent " + comment_with_requests.fullname)
 
-        self.logger.info("Running refresh on:" + comment_with_requests.fullname)
+        self.logger.info(
+            "Running refresh on:" + comment_with_requests.fullname)
         if isinstance(comment_with_requests, praw.objects.Comment):
             delete_list = comment_with_requests.replies
         elif isinstance(comment_with_requests, praw.objects.Submission):
             delete_list = comment_with_requests.comments
         else:
-            self.logger.warning("Unsupported message type: " + comment_with_requests.fullname)
+            self.logger.warning(
+                "Unsupported message type: " + comment_with_requests.fullname)
             return
 
         if delete_list:
