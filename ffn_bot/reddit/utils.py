@@ -1,4 +1,5 @@
 import praw.objects
+import logging
 
 
 def get_full(r, comment_id):
