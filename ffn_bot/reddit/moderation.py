@@ -168,7 +168,7 @@ class ModerativeCommands(object, metaclass=ModerativeCommandsMeta):
 
         # Since parent redirects to this method now, modify the force marker
         # before doing anything.
-        parent_markers = set()
+        parent_markers = {'force'}
         parent_markers |= additional
         self.handle(comment_with_requests, parent_markers)
 
