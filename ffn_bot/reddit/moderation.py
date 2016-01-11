@@ -1,5 +1,6 @@
 import collections
 import logging
+import praw
 from ffn_bot.reddit.utils import get_full, get_parent, valid_comment
 
 
