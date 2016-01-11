@@ -14,7 +14,7 @@ MESSAGES = {
 """,
 
     "FOOTER": "\n\n**If you still think the request is inappropriate\
-contact a moderator to remove the reply for you.**"
+, contact a moderator to remove the reply for you.**"
 }
 
 
