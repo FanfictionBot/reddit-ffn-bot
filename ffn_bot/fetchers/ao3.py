@@ -39,6 +39,8 @@ class AO3Metadata(Metaparser):
         res = tree.xpath(AO3_FANDOM_TAGS)
         if len(res) > 1:
             yield "Fandoms", ", ".join(res)
+        elif len(res) == 0:
+            raise site.StoryDoesNotExist
         else:
             yield "Fandom", res[0]
 
