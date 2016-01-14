@@ -22,15 +22,13 @@ DEFAULT_SUBREDDITS = ['HPFanfiction']
 SUBREDDIT_LIST = set()
 CHECKED_COMMENTS = None
 FOOTER = "\n".join([
-    r"**Bot v1.3.0 - 9/7/15** **|** \[[Usage][1]\] | \[[Changelog][2]\] | \[[Issues][3]\] | \[[GitHub][4]\]",
+    r"**FanfictionBot^(1.3.0)** **|** \[[Usage][1]\] | \[[Changelog][2]\] | \[[Issues][3]\] | \[[GitHub][4]\]",
     r'[1]: https://github.com/tusing/reddit-ffn-bot/wiki/Usage       "How to use the bot"',
     r'[2]: https://github.com/tusing/reddit-ffn-bot/wiki/Changelog   "What changed until now"',
     r'[3]: https://github.com/tusing/reddit-ffn-bot/issues/          "Bugs? Suggestions? Enter them here!"',
     r'[4]: https://github.com/tusing/reddit-ffn-bot/                 "Fork me on GitHub"'
 ])
 FOOTER += "\n\n^^^^^^^^^^^^^^^^^ffnbot!ignore"
-FOOTER += "\n\n**Update Notes:** Use *ffnbot!delete* to delete a comment! "
-FOOTER +=  "Use *ffnbot!refresh* to refresh bot replies!"
 
 # For testing purposes
 DRY_RUN = False
