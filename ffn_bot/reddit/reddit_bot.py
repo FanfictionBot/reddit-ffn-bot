@@ -27,6 +27,7 @@ __version__ = "1.4.0"
 USER_AGENT = "Python:FanfictionComment:" + __version__ + \
     " (by tusing, StuxSoftware, and MikroMan)"
 
+r = praw.Reddit(USER_AGENT)
 r._use_oauth = False  # A temporary band-aid.
 
 SUBREDDIT_LIST = set()
