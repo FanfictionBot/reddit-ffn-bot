@@ -247,7 +247,7 @@ def handle_comment(comment, extra_markers=frozenset()):
                     "(Refresh) Comment with requests is invalid.")
                 return
 
-            if comment_with_requests.author.name == "bot_parameters['user']:
+            if comment_with_requests.author.name == bot_parameters['user']:
                 logging.info(
                     "(Refresh) Refresh requested on a bot comment (" + comment_with_requests.id + ").")
                 # Retrieve the requesting parent submission or comment
