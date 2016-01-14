@@ -169,7 +169,10 @@ class Story(site.Story):
             throttle=randint(1000, 4000) / 1000)
         tree = html.fromstring(page)
 
-        self.title = (tree.xpath('//*[@id="profile_top"]/b/text()'))[0]
+        self.title = (tree.xpath('//*[@id="profile_top"]/b/text()'))
+        if not len(self.title):
+            raise site.StoryDoesNotExist
+        self.title = self.title[0]
         self.summary = (tree.xpath('//*[@id="profile_top"]/div/text()'))[0
                                                                          ]
         self.author += (tree.xpath('//*[@id="profile_top"]/a[1]/text()'))[
