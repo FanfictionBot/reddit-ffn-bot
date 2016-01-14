@@ -219,7 +219,7 @@ def handle_comment(comment, extra_markers=frozenset()):
             if not (comment.is_root):
                 parent_comment = r.get_info(thing_id=comment.parent_id)
                 if parent_comment.author is not None:
-                    if (parent_comment.author.name == "FanfictionBot"):
+                    if (parent_comment.author.name == bot_parameters['user']):
                         logging.info("Deleting comment " + parent_comment.id)
                         parent_comment.delete()
                     else:
@@ -247,7 +247,7 @@ def handle_comment(comment, extra_markers=frozenset()):
                     "(Refresh) Comment with requests is invalid.")
                 return
 
-            if comment_with_requests.author.name == "FanfictionBot":
+            if comment_with_requests.author.name == "bot_parameters['user']:
                 logging.info(
                     "(Refresh) Refresh requested on a bot comment (" + comment_with_requests.id + ").")
                 # Retrieve the requesting parent submission or comment
@@ -278,7 +278,7 @@ def handle_comment(comment, extra_markers=frozenset()):
                 delete_list = []
                 for comment in unfiltered_delete_list:
                     if comment.author is not None:
-                        if (comment.author.name == "FanfictionBot"):
+                        if (comment.author.name == bot_parameters['user']):
                             delete_list.append(comment)
                             print(
                                 "(Refresh) Found root-level bot comment " + comment.id)
@@ -292,7 +292,7 @@ def handle_comment(comment, extra_markers=frozenset()):
                 logging.info("(Refresh) Finding replies to delete.")
                 for reply in delete_list:
                     if valid_comment(reply):
-                        if (reply.author.name == "FanfictionBot"):
+                        if (reply.author.name == bot_parameters['user']):
                             logging.error(
                                 "(Refresh) Deleting bot comment " + reply.id)
                             reply.delete()
