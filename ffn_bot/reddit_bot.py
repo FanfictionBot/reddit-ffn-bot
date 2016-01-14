@@ -196,7 +196,7 @@ def handle_submission(submission, markers=frozenset()):
 def handle_comment(comment, extra_markers=frozenset()):
     logging.debug("Handling comment: " + comment.id)
     if (str(comment.id) not in CHECKED_COMMENTS
-            ) or ("force" in extra_markers):
+        ) or ("force" in extra_markers):
 
         markers = parse_context_markers(comment.body)
         markers |= extra_markers
@@ -241,6 +241,12 @@ def handle_comment(comment, extra_markers=frozenset()):
             # TODO: Make it so FanfictionBot does not have to be hardcoded
             # If ffnbot!refresh is called on an actual bot reply, then go up
             # one level to find the requesting comment
+
+            if not valid_comment(comment_with_requests):
+                logging.error(
+                    "(Refresh) Comment with requests is invalid.")
+                return
+
             if comment_with_requests.author.name == "FanfictionBot":
                 logging.info(
                     "(Refresh) Refresh requested on a bot comment (" + comment_with_requests.id + ").")
@@ -274,7 +280,8 @@ def handle_comment(comment, extra_markers=frozenset()):
                     if comment.author is not None:
                         if (comment.author.name == "FanfictionBot"):
                             delete_list.append(comment)
-                            print("(Refresh) Found root-level bot comment " + comment.id)
+                            print(
+                                "(Refresh) Found root-level bot comment " + comment.id)
             else:
                 logging.error("(Refresh) Can't refresh " + comment_with_requests.type(
                 ).__name__ + " with ID " + comment_with_requests.id)

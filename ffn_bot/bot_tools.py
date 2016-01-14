@@ -175,6 +175,7 @@ def pause(minutes, seconds):
             break
     sys.stdout.write(str.ljust("\rComplete!", 55) + '\n')
 
+
 def print_exception(etype=None, evalue=None, etb=None, level=logging.ERROR):
     """
     Prints the exception. Defaults to the last exception that occured.

@@ -121,7 +121,7 @@ class Story(object):
         result.append(reddit_markdown.exponentiate(self.format_stats()))
         # result.append("[" + str(id(self)) + "]: " + self._lnk)
         for name, link in self._lnk:
-            result.append("[%s:%s]: %s"%(str(id(self)), name, link))
+            result.append("[%s:%s]: %s" % (str(id(self)), name, link))
 
         result.append("\n\n" + reddit_markdown.linebreak + "\n\n")
 
@@ -146,7 +146,7 @@ class Story(object):
 
         download = self.get_download()
         if download is not None:
-            res.append("*Download*: [EPUB][%s:epub]"%(str(id(self))))
+            res.append("*Download*: [EPUB][%s:epub]" % (str(id(self))))
             self._lnk.append(("epub", download))
         return (" " + reddit_markdown.bold("|") + " ").join(res)
 
@@ -157,6 +157,7 @@ class Story(object):
         for c in ")]}":
             string = string.replace(c, ">")
         return string
+
     def __hash__(self):
         # We will use the URL for a hash.
         return hash(self.get_url())
