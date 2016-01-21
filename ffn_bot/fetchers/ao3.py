@@ -28,7 +28,7 @@ AO3_TITLE = '//h2/text()'
 AO3_SUMMARY_FINDER = '//*[@id="workskin"]//*[@role="complementary"]//blockquote//text()'
 AO3_FANDOM_TAGS = CSSSelector("dd.fandom ul li").path + "//text()"
 AO3_EPUB_DOWNLOAD = './/a[contains(text(),"EPUB")]/@href'
-AO3_MOBI_DOWNLOAD = './/a[contains(text(),"MOBI")]/@href'
+AO3_MOBI_DOWNLOAD = './/a[contains(text(),"MOBI")][0]/@href'
 
 class AO3Metadata(Metaparser):
 
