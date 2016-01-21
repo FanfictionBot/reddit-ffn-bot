@@ -162,7 +162,7 @@ class Story(site.Story):
     def get_download(self):
         # return ("http://archiveofourown.org/" + self.get_value_from_tree(AO3_EPUB_DOWNLOAD),
         #         "http://archiveofourown.org/" + self.get_value_from_tree(AO3_MOBI_DOWNLOAD))
-        epub_link = self.get_value_from_tree(AO3_EPUB_DOWNLOAD)
-        mobi_link = self.get_value_from_tree(AO3_MOBI_DOWNLOAD)
+        epub_link = self.tree.xpath('.//a[contains(text(),".epub")]')
+        mobi_link = self.tree.xpath('.//a[contains(text(),".mobi")]')
         print("LINKS----|||||---- ", epub_link, mobi_link)
         return(epub_link, mobi_link)
