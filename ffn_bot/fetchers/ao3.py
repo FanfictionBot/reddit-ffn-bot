@@ -149,7 +149,6 @@ class Story(site.Story):
     def parse_html(self):
         page = default_cache.get_page(self.get_real_url())
         self.tree = html.fromstring(page)
-        self.etree = etree.fromstring(page)
         self.summary = self.get_value_from_tree(AO3_SUMMARY_FINDER)
         self.title = self.get_value_from_tree(AO3_TITLE)
         self.author = self.get_value_from_tree(AO3_AUTHOR_NAME)
