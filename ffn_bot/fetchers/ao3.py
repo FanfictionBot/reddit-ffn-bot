@@ -21,14 +21,14 @@ AO3_LINK_REGEX = re.compile(
     re.IGNORECASE)
 AO3_FUNCTION = "linkao3"
 AO3_SEARCH_QUERY = "site:archiveofourown.org/works/ %s"
-
 AO3_AUTHOR_NAME = '//a[@rel="author"]/text()'
 AO3_AUTHOR_URL = '//a[@rel="author"]/@href'
 AO3_META_PARTS = '//dl[@class="stats"]//text()'
 AO3_TITLE = '//h2/text()'
 AO3_SUMMARY_FINDER = '//*[@id="workskin"]//*[@role="complementary"]//blockquote//text()'
 AO3_FANDOM_TAGS = CSSSelector("dd.fandom ul li").path + "//text()"
-
+AO3_EPUB_DOWNLOAD = './/a[contains(text(),"EPUB")]/@href'
+AO3_MOBI_DOWNLOAD = './/a[contains(text(),"MOBI")]/@href'
 
 class AO3Metadata(Metaparser):
 
@@ -157,12 +157,8 @@ class Story(site.Story):
         return "Archive of Our Own", "http://www.archiveofourown.org/"
 
     def get_download(self):
-        # return ("http://archiveofourown.org/" + self.get_value_from_tree(AO3_EPUB_DOWNLOAD),
-        #         "http://archiveofourown.org/" + self.get_value_from_tree(AO3_MOBI_DOWNLOAD))
-
-        # Referencing http://stackoverflow.com/a/14300008/4127776
-        epub_link = self.tree.xpath('.//a[contains(text(),"EPUB")]')
-        mobi_link = self.tree.xpath('.//a[contains(text(),"MOBI")]')
-        epub_link = self.get_value_from_tree('.//a[contains(text(),"EPUB")]/@href')
-        print("LINKS----|||||---- ", epub_link, mobi_link)
-        return(epub_link, mobi_link)
+        epub_download = "http://archiveofourown.org/" + self.get_value_from_tree(AO3_EPUB_DOWNLOAD)
+        mobi_download = "http://archiveofourown.org/" + self.get_value_from_tree(AO3_MOBI_DOWNLOAD)
+        logger.info("EPUB DWN: ", epub_download)
+        logger.info("MOBI DWN: ", mobi_download)
+        return(epub_download, mobi_download)
