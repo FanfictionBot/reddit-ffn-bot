@@ -164,4 +164,6 @@ class Story(site.Story):
         #         "http://archiveofourown.org/" + self.get_value_from_tree(AO3_MOBI_DOWNLOAD))
         links = self.tree.xpath('//li[@id="download"]//a/@href')
         print("LINKS------  ", links)
+        for link in self.tree.xpath =('a'):
+            print(link.text_content())
         return(links[0], links[1])
