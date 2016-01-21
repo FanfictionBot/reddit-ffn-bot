@@ -27,8 +27,8 @@ AO3_AUTHOR_URL = '//a[@rel="author"]/@href'
 AO3_META_PARTS = '//dl[@class="stats"]//text()'
 AO3_TITLE = '//h2/text()'
 AO3_SUMMARY_FINDER = '//*[@id="workskin"]//*[@role="complementary"]//blockquote//text()'
-# AO3_EPUB_DOWNLOAD = '//*[@id="main"]/div[2]/ul/li[5]/ul/li[2]/a/@href'
-# AO3_MOBI_DOWNLOAD = '//*[@id="main"]/div[2]/ul/li[5]/ul/li[1]/a/@href'
+AO3_EPUB_DOWNLOAD = '//*[@id="main"]/div[2]/ul//ul/li[2]/a/@href'
+AO3_MOBI_DOWNLOAD = '//*[@id="main"]/div[2]/ul//ul/li[1]/a/@href'
 
 AO3_FANDOM_TAGS = CSSSelector("dd.fandom ul li").path + "//text()"
 
@@ -162,8 +162,7 @@ class Story(site.Story):
     def get_download(self):
         # return ("http://archiveofourown.org/" + self.get_value_from_tree(AO3_EPUB_DOWNLOAD),
         #         "http://archiveofourown.org/" + self.get_value_from_tree(AO3_MOBI_DOWNLOAD))
-        links = self.tree.xpath('//li[@id="download"]//a/@href')
-        print("LINKS------  ", links)
-        for link in self.tree.xpath('a'):
-            print(link.text_content())
-        return(links[0], links[1])
+        epub_link = self.get_value_from_tree(AO3_EPUB_DOWNLOAD)
+        mobi_link = self.get_value_from_tree(AO3_MOBI_DOWNLOAD)
+        print("LINKS----|||||---- ", epub_link, mobi_link)
+        return(epub_link, mobi_link)
