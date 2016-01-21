@@ -62,7 +62,7 @@ def _run_forever():
                 CHECKED_COMMENTS.save()
 
 
-bot_parameters = None
+global bot_parameters
 
 def main():
     """Basic main function."""
