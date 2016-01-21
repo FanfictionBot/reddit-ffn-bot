@@ -192,11 +192,11 @@ class Story(site.Story):
         # Return (epub,mobi) download URLs in tuple.
         if "fictionpress" in self.url:
             return ("http://ficsave.com/?story_url={0}&format=epub&auto_download=yes".format(self.url),
-                "http://ficsave.com/?story_url={0}&format=mobi&auto_download=yes".format(self.url))
+                    "http://ficsave.com/?story_url={0}&format=mobi&auto_download=yes".format(self.url))
         else:
             return ("http://www.p0ody-files.com/ff_to_ebook/download.php?id=11007761&filetype=epub".format(
                 re.findall(r'\d+', self.url)[0]),
-            "http://www.p0ody-files.com/ff_to_ebook/download.php?id=11007761&filetype=mobi".format(
+                "http://www.p0ody-files.com/ff_to_ebook/download.php?id=11007761&filetype=mobi".format(
                 re.findall(r'\d+', self.url)[0]))
 
 
