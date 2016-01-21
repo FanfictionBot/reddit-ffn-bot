@@ -62,6 +62,8 @@ def _run_forever():
                 CHECKED_COMMENTS.save()
 
 
+bot_parameters = None
+
 def main():
     """Basic main function."""
     # moved call for agruments to avoid double calling
