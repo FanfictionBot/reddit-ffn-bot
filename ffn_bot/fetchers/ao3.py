@@ -157,8 +157,8 @@ class Story(site.Story):
         return "Archive of Our Own", "http://www.archiveofourown.org/"
 
     def get_download(self):
-        epub_download = "http://archiveofourown.org/" + self.get_value_from_tree(AO3_EPUB_DOWNLOAD)
-        mobi_download = "http://archiveofourown.org/" + self.get_value_from_tree(AO3_MOBI_DOWNLOAD)
+        epub_download = "http://archiveofourown.org" + self.get_value_from_tree(AO3_EPUB_DOWNLOAD)
+        mobi_download = "http://archiveofourown.org" + self.get_value_from_tree(AO3_MOBI_DOWNLOAD)
         logging.info("EPUB DWN: ", epub_download)
         logging.info("MOBI DWN: ", mobi_download)
         return(epub_download, mobi_download)
