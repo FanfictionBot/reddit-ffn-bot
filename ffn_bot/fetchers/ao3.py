@@ -16,7 +16,7 @@ from ffn_bot import site
 
 __all__ = ["ArchiveOfOurOwn"]
 
-AO3_LINK_REGEX = re.compile(
+AO3_LINK_REGEX = AO3_LINK_REGEX = re.compile(
     r"http(s)?://([^.]+\.)?archiveofourown.org/works/(?P<sid>\d+)[^ ]*",
     re.IGNORECASE)
 AO3_FUNCTION = "linkao3"
@@ -25,7 +25,7 @@ AO3_AUTHOR_NAME = '//a[@rel="author"]/text()'
 AO3_AUTHOR_URL = '//a[@rel="author"]/@href'
 AO3_META_PARTS = '//dl[@class="stats"]//text()'
 AO3_TITLE = '//h2/text()'
-AO3_SUMMARY_FINDER = '//*[@id="workskin"]//*[@role="complementary"]//blockquote//text()'
+AO3_SUMMARY_FINDER = '//*[@id="workskin"]//*[@class="summary module" and @role="complementary"]/blockquote//text()'
 AO3_FANDOM_TAGS = CSSSelector("dd.fandom ul li").path + "//text()"
 AO3_EPUB_DOWNLOAD = './/a[contains(text(),"EPUB")]/@href'
 AO3_MOBI_DOWNLOAD = './/a[contains(text(),"MOBI")]/@href'
