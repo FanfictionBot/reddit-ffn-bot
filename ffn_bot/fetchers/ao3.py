@@ -26,7 +26,8 @@ AO3_AUTHOR_URL = '//a[@rel="author"]/@href'
 AO3_META_PARTS = '//dl[@class="stats"]//text()'
 AO3_TITLE = '//h2/text()'
 AO3_SUMMARY_FINDER = '//*[@id="workskin"]//*[@role="complementary"]//blockquote//text()'
-AO3_DOWNLOAD = '//*[@id="main"]/div[2]/ul/li[5]/ul/li[2]/a/@href'
+AO3_EPUB_DOWNLOAD = '//*[@id="main"]/div[2]/ul/li[5]/ul/li[2]/a/@href'
+AO3_MOBI_DOWNLOAD = '//*[@id="main"]/div[2]/ul/li[5]/ul/li[1]/a/@href'
 
 AO3_FANDOM_TAGS = CSSSelector("dd.fandom ul li").path + "//text()"
 
@@ -160,5 +161,5 @@ class Story(site.Story):
         return "Archive of Our Own", "http://www.archiveofourown.org/"
 
     def get_download(self):
-        return "http://archiveofourown.org/" + self.get_value_from_tree(
-            AO3_DOWNLOAD)
+        return ("http://archiveofourown.org/" + self.get_value_from_tree(AO3_EPUB_DOWNLOAD),
+                "http://archiveofourown.org/" + self.get_value_from_tree(AO3_MOBI_DOWNLOAD))

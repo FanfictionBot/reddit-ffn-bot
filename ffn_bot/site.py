@@ -72,7 +72,7 @@ class Story(object):
         return None
 
     def get_download(self):
-        """Return the EPUB download link from FicSave"""
+        """Return the EPUB and MOBI download link for a fic."""
         return None
 
     def get_summary(self):
@@ -148,8 +148,12 @@ class Story(object):
 
         download = self.get_download()
         if download is not None:
+            epub = download[0]
+            mobi = download[1]
             res.append("*Download*: [EPUB][%s:epub]" % (str(id(self))))
-            self._lnk.append(("epub", download))
+            self._lnk.append(("epub", epub))
+            res.append(" or [MOBI][%s:mobi]" % (str(id(self))))
+            self._lnk.append(("mobi", mobi))
         return (" " + reddit_markdown.bold("|") + " ").join(res)
 
     @staticmethod
