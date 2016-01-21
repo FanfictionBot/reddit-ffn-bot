@@ -5,7 +5,7 @@ import itertools
 from google import search
 from requests import get
 from lxml import html
-from lxml import etree
+from lxml import html.parse
 from lxml.cssselect import CSSSelector
 
 from ffn_bot.metaparse import Metaparser, parser
@@ -163,4 +163,12 @@ class Story(site.Story):
     def get_download(self):
         # return ("http://archiveofourown.org/" + self.get_value_from_tree(AO3_EPUB_DOWNLOAD),
         #         "http://archiveofourown.org/" + self.get_value_from_tree(AO3_MOBI_DOWNLOAD))
-        return (self.etree.findtext('.epub'), self.etree.findtext('.mobi'))
+        epub_link = ""
+        mobi_link = ""
+        download_html = parse(self.url).getroot()
+        for link in download_html.cssselect('div.work a'):
+            if '.epub' in link.text_content():
+                epub_link = link.text_content()
+            if '.mobi' in link.text_content():
+                mobi_link = link.text_content()
+        return (epub_link, mobi_link)
