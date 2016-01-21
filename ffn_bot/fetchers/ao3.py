@@ -163,6 +163,6 @@ class Story(site.Story):
         # Referencing http://stackoverflow.com/a/14300008/4127776
         epub_link = self.tree.xpath('.//a[contains(text(),"EPUB")]')
         mobi_link = self.tree.xpath('.//a[contains(text(),"MOBI")]')
-        epub_link = get_value_from_tree('.//a[contains(text(),"EPUB")]')
+        epub_link = self.get_value_from_tree('.//a[contains(text(),"EPUB")]')
         print("LINKS----|||||---- ", epub_link, mobi_link)
         return(epub_link, mobi_link)
