@@ -153,7 +153,7 @@ class Story(object):
             epub = download[0]
             mobi = download[1]
             res.append(
-                "*Download*: [EPUB][%s:epub] or [MOBI][%s:mobi]".format(str(id(self)), str(id(self))))
+                "*Download*: [EPUB][{0}:epub] or [MOBI][{1}:mobi]".format(str(id(self)), str(id(self))))
             self._lnk.append(("epub", epub))
             self._lnk.append(("mobi", mobi))
         return (" " + reddit_markdown.bold("|") + " ").join(res)
