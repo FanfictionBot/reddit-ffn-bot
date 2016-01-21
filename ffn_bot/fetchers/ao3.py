@@ -28,7 +28,7 @@ AO3_TITLE = '//h2/text()'
 AO3_SUMMARY_FINDER = '//*[@id="workskin"]//*[@role="complementary"]//blockquote//text()'
 AO3_FANDOM_TAGS = CSSSelector("dd.fandom ul li").path + "//text()"
 AO3_EPUB_DOWNLOAD = './/a[contains(text(),"EPUB")]/@href'
-AO3_MOBI_DOWNLOAD = './/a[contains(text(),"MOBI")][0]/@href'
+AO3_MOBI_DOWNLOAD = './/a[contains(text(),"MOBI")]/@href'
 
 class AO3Metadata(Metaparser):
 
@@ -159,6 +159,6 @@ class Story(site.Story):
     def get_download(self):
         epub_download = "http://archiveofourown.org/" + self.get_value_from_tree(AO3_EPUB_DOWNLOAD)
         mobi_download = "http://archiveofourown.org/" + self.get_value_from_tree(AO3_MOBI_DOWNLOAD)
-        logging.info("EPUB DWN: ", epub_download)
+        logging.info("EPUB DWN: ", epub_download[0])
         logging.info("MOBI DWN: ", mobi_download)
         return(epub_download, mobi_download)
