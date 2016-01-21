@@ -148,6 +148,7 @@ class Story(site.Story):
     def parse_html(self):
         page = default_cache.get_page(self.get_real_url())
         self.tree = html.fromstring(page)
+        self.etree = etree.fromstring(page)
         self.summary = self.get_value_from_tree(AO3_SUMMARY_FINDER)
         self.title = self.get_value_from_tree(AO3_TITLE)
         self.author = self.get_value_from_tree(AO3_AUTHOR_NAME)
@@ -161,4 +162,4 @@ class Story(site.Story):
     def get_download(self):
         # return ("http://archiveofourown.org/" + self.get_value_from_tree(AO3_EPUB_DOWNLOAD),
         #         "http://archiveofourown.org/" + self.get_value_from_tree(AO3_MOBI_DOWNLOAD))
-        return (self.tree.findtext('.epub'), self.tree.findtext('.mobi'))
+        return (self.etree.findtext('.epub'), self.etree.findtext('.mobi'))
