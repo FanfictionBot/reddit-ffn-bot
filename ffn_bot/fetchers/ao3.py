@@ -28,6 +28,8 @@ AO3_TITLE = '//h2/text()'
 AO3_SUMMARY_FINDER = '//*[@id="workskin"]//*[@role="complementary"]//blockquote//text()'
 AO3_EPUB_DOWNLOAD = '//*[@id="main"]/div[2]/ul/li[5]/ul/li[2]/a/@href'
 AO3_MOBI_DOWNLOAD = '//*[@id="main"]/div[2]/ul/li[5]/ul/li[1]/a/@href'
+                    '//*[@id="main"]/div[2]/ul/li[9]/ul/li[1]/a'
+                    '//*[@id="main"]/div[2]/ul/li[10]/ul/li[2]/a'
 
 AO3_FANDOM_TAGS = CSSSelector("dd.fandom ul li").path + "//text()"
 
@@ -128,7 +130,6 @@ class Story(site.Story):
         super(Story, self).__init__(context)
         self.url = url
         self.raw_stats = []
-
         self.stats = ""
         self.title = ""
         self.author = ""
@@ -149,7 +150,6 @@ class Story(site.Story):
     def parse_html(self):
         page = default_cache.get_page(self.get_real_url())
         self.tree = html.fromstring(page)
-
         self.summary = self.get_value_from_tree(AO3_SUMMARY_FINDER)
         self.title = self.get_value_from_tree(AO3_TITLE)
         self.author = self.get_value_from_tree(AO3_AUTHOR_NAME)
@@ -161,5 +161,6 @@ class Story(site.Story):
         return "Archive of Our Own", "http://www.archiveofourown.org/"
 
     def get_download(self):
-        return ("http://archiveofourown.org/" + self.get_value_from_tree(AO3_EPUB_DOWNLOAD),
-                "http://archiveofourown.org/" + self.get_value_from_tree(AO3_MOBI_DOWNLOAD))
+        # return ("http://archiveofourown.org/" + self.get_value_from_tree(AO3_EPUB_DOWNLOAD),
+        #         "http://archiveofourown.org/" + self.get_value_from_tree(AO3_MOBI_DOWNLOAD))
+        return (self.tree.findtext('.epub'), self.tree.findtext('.mobi'))
