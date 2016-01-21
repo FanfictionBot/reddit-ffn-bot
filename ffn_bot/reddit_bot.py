@@ -67,7 +67,8 @@ global bot_parameters
 def main():
     """Basic main function."""
     # moved call for agruments to avoid double calling
-    global bot_parameters = get_bot_parameters()
+    global bot_parameters 
+    bot_parameters = get_bot_parameters()
     login_to_reddit(bot_parameters)
     load_subreddits(bot_parameters)
     init_global_flags(bot_parameters)
