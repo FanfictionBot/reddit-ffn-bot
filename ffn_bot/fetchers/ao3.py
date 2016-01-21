@@ -5,6 +5,7 @@ import itertools
 from google import search
 from requests import get
 from lxml import html
+from lxml import etree
 from lxml.cssselect import CSSSelector
 
 from ffn_bot.metaparse import Metaparser, parser
