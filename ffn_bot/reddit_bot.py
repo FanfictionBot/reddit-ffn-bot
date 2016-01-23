@@ -235,19 +235,21 @@ def handle_message(message):
     COUNT_REPLIES.setdefault(message.author.name, request_count)
 
     # Print a summary of the user's statistics.
-    logging.info(message.author.name, " has requested ", request_count, " fics with ", COUNT_REPLIES_LIMIT - COUNT_REPLIES[
-                 message.author.name], " remaining requests for the next ", TIME_TO_RESET - (time.time() - TIME_SINCE_RESET), " seconds.")
+
+    logging.info("{0} has requested {1} fics with {2} remaining requests for the next {3} seconds.".format(
+        message.author.name, request_count, COUNT_REPLIES_LIMIT - COUNT_REPLIES[message.author.name], 
+        TIME_TO_RESET - (time.time() - TIME_SINCE_RESET)))
 
     # Block the request if the user has exceeded their quota of replies.
     if COUNT_REPLIES[message.author.name] + request_count > COUNT_REPLIES_LIMIT:
-        logging.error(message.author.name, " has exceeded their available replies.")
+        logging.error("{0} has exceeded their available replies.", message.author.name)
         return
 
     # Otherwise, add the number of requests to the user's total number of requests.
     COUNT_REPLIES[message.author.name] += request_count
 
     # Print the current state of COUNT_REPLIES.
-    logging.info("The current state of DM requests: ", COUNT_REPLIES)
+    logging.info("The current state of DM requests: {0}", COUNT_REPLIES)
 
     # Make the reply and return.
     make_reply(message.body, message.id, message.reply)
