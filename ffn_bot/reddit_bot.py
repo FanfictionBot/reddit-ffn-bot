@@ -234,8 +234,7 @@ def handle_message(message):
         logging.error(message.author, " has exceeded their available replies.")
         return
 
-    COUNT_REPLIES[
-        message.author] += COUNT_REPLIES[message.author] + request_count
+    COUNT_REPLIES[message.author] += request_count
 
     logging.info("The current state of DM requests: ", COUNT_REPLIES)
     make_reply(message.body, message.id, message.reply)
