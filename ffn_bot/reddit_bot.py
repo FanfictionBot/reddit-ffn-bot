@@ -220,8 +220,7 @@ def handle_message(message):
     except AttributeError:
         pass
 
-
-    request_count += message.body.count('link') + message.body.count(';')
+    request_count = message.body.count('link') + message.body.count(';')
 
     logging.info(message.author, " has requested ", request_count, " fics with ", COUNT_REPLIES_LIMIT - COUNT_REPLIES[
                  message.author], " remaining requests for the next ", TIME_TO_RESET - (time.time() - TIME_SINCE_RESET), " seconds.")
