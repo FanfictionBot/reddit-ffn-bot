@@ -206,6 +206,7 @@ def handle_submission(submission, markers=frozenset()):
 
 
 def handle_message(message):
+<<<<<<< HEAD
     message.mark_as_read()
 
     if not valid_comment(message):
@@ -221,6 +222,10 @@ def handle_message(message):
 
     make_reply(message.body, message.id, message.reply, count_author=message.author)
     return
+=======
+    message.mark_as_read(message)
+    make_reply(message.body, message.id, message.reply)
+>>>>>>> parent of 14aa2f3... removed parameter
 
 def handle_comment(comment, extra_markers=frozenset()):
     logging.debug("Handling comment: " + comment.id)
