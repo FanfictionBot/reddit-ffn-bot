@@ -41,10 +41,10 @@ USE_STREAMS = False
 
 
 # Messaging Framework
-COUNT_REPLIES = {} # Count replies per user
-COUNT_REPLIES_LIMIT = 30 # How many requests we'll allow per TIME_TO_RESET
-TIME_TO_RESET = 86400 # Time until we reset this dictionary (in seconds)
-TIME_SINCE_RESET = time.time() # Time since the last dictionary reset
+COUNT_REPLIES = {}  # Count replies per user
+COUNT_REPLIES_LIMIT = 30  # How many requests we'll allow per TIME_TO_RESET
+TIME_TO_RESET = 86400  # Time until we reset this dictionary (in seconds)
+TIME_SINCE_RESET = time.time()  # Time since the last dictionary reset
 
 
 def run_forever():
@@ -72,10 +72,11 @@ def _run_forever():
 
 global bot_parameters
 
+
 def main():
     """Basic main function."""
     # moved call for agruments to avoid double calling
-    global bot_parameters 
+    global bot_parameters
     bot_parameters = get_bot_parameters()
     login_to_reddit(bot_parameters)
     load_subreddits(bot_parameters)
@@ -207,13 +208,40 @@ def handle_submission(submission, markers=frozenset()):
 
 def handle_message(message):
     message.mark_as_read(message)
+
+    if not valid_comment(message):
+        logging.error("Received invalid message...")
+        return
+
+    if message.submission is not None:
+        logging.info("Parsing message belonging to a submission!")
+        return
+
+    request_count += message.body.count('link') + message.body.count(';')
+
+    logging.info(message.author, " has requested ", request_count, " fics with ", COUNT_REPLIES_LIMIT - COUNT_REPLIES[
+                 message.author], " remaining requests for the next ", TIME_TO_RESET - (time.time() - TIME_SINCE_RESET), " seconds.")
+
+    if time.time() - TIME_SINCE_RESET >= TIME_TO_RESET:
+        COUNT_REPLIES = {}
+
+    COUNT_REPLIES.setdefault(message.author, request_count)
+
+    if COUNT_REPLIES[message.author] + request_count > COUNT_REPLIES_LIMIT:
+        logging.error(message.author, " has exceeded their available replies.")
+        return
+
+    COUNT_REPLIES[
+        message.author] += COUNT_REPLIES[message.author] + request_count
+
     make_reply(message.body, message.id, message.reply)
     return
+
 
 def handle_comment(comment, extra_markers=frozenset()):
     logging.debug("Handling comment: " + comment.id)
     if (str(comment.id) not in CHECKED_COMMENTS
-        ) or ("force" in extra_markers):
+            ) or ("force" in extra_markers):
 
         markers = parse_context_markers(comment.body)
         markers |= extra_markers
