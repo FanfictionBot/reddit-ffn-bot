@@ -213,9 +213,13 @@ def handle_message(message):
         logging.error("Received invalid message...")
         return
 
-    if message.submission is not None:
-        logging.info("Parsing message belonging to a submission!")
-        return
+    try:
+        if message.submission is not None:
+            logging.info("Parsing message belonging to a submission!")
+            return
+    except AttributeError:
+        pass
+
 
     request_count += message.body.count('link') + message.body.count(';')
 
