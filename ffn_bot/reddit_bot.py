@@ -207,7 +207,7 @@ def handle_submission(submission, markers=frozenset()):
 
 
 def handle_message(message):
-    message.mark_as_read(message)
+    message.mark_as_read()
 
     if not valid_comment(message):
         logging.error("Received invalid message...")
