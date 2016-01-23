@@ -207,6 +207,7 @@ def handle_submission(submission, markers=frozenset()):
 
 
 def handle_message(message):
+    global COUNT_REPLIES, TIME_SINCE_RESET, TIME_TO_RESET, COUNT_REPLIES_LIMIT
     """What we're using to handle direct messages."""
     # Mark message as read here so we don't loop over it in case of error.
     message.mark_as_read()
