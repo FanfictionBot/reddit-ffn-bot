@@ -5,7 +5,7 @@ import re
 import logging
 import itertools
 from ffn_bot import site
-from reddit_bot import COUNT_REPLIES, COUNT_REPLIES_LIMIT
+from ffn_bot.reddit_bot import COUNT_REPLIES, COUNT_REPLIES_LIMIT
 from ffn_bot.fetchers import SITES, get_sites
 
 
