@@ -234,6 +234,7 @@ def handle_message(message):
     COUNT_REPLIES[
         message.author] += COUNT_REPLIES[message.author] + request_count
 
+    logging.info("The current state of DM requests: ", COUNT_REPLIES)
     make_reply(message.body, message.id, message.reply)
     return
 
@@ -518,10 +519,10 @@ def parse_submission_text(submission, extra_markers=frozenset()):
         markers, additions)
 
 
-def make_reply(body, id, reply_func, markers=None, additions=(), count_author=None):
+def make_reply(body, id, reply_func, markers=None, additions=()):
     """Makes a reply for the given comment."""
     try:
-        reply = list(formulate_reply(body, markers, additions, count_author))
+        reply = list(formulate_reply(body, markers, additions))
     except StoryLimitExceeded:
         if not DRY_RUN:
             reply_func("You requested too many fics.\n"

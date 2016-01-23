@@ -2,10 +2,8 @@
 This file handles the comment parsing.
 """
 import re
-import logging
 import itertools
 from ffn_bot import site
-from ffn_bot.reddit_bot import COUNT_REPLIES, COUNT_REPLIES_LIMIT
 from ffn_bot.fetchers import SITES, get_sites
 
 
@@ -44,7 +42,7 @@ def get_direct_links(string, markers):
         yield from site.extract_direct_links(string, markers)
 
 
-def formulate_reply(comment_body, markers=None, additions=(), count_author=None):
+def formulate_reply(comment_body, markers=None, additions=()):
     """Creates the reply for the given comment."""
     if markers is None:
         # Parse the context markers as some may be required here
@@ -68,14 +66,6 @@ def formulate_reply(comment_body, markers=None, additions=(), count_author=None)
         if not request_list:
             continue
 
-        if count_author is not None:
-            # Ensure that user is not hitting direct message limit.
-            if COUNT_REPLIES[count_author] + len(requests) > COUNT_REPLIES_LIMIT:
-                logging.error(count_author, " has run out of fic requests.")
-                return
-            COUNT_REPLIES[count_author] += len(requests)
-            logging.info(count_author, " has ", COUNT_REPLIES_LIMIT - COUNT_REPLIES[count_author], " requests remaining.")
-
         requests.append((site, request_list))
 
     direct_links = additions
@@ -83,10 +73,10 @@ def formulate_reply(comment_body, markers=None, additions=(), count_author=None)
         direct_links = itertools.chain(
             direct_links, get_direct_links(comment_body, markers))
 
-    yield from parse_comment_requests(requests, markers, direct_links, count_author)
+    yield from parse_comment_requests(requests, markers, direct_links)
 
 
-def parse_comment_requests(requests, context, additions, count_author=None):
+def parse_comment_requests(requests, context, additions):
     """
     Executes the queries and return the
     generated story strings as a single string
