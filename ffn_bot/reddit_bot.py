@@ -440,7 +440,7 @@ def single_pass():
             handle_comment(comment)
 
         logging.info("Parsing unread messages.")
-        for message in r.get_unread(unset_has_mail=True)
+        for message in r.get_unread(unset_has_mail=True):
             handle_message(message)
 
     except Exception:
