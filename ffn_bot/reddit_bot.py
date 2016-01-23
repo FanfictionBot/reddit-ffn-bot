@@ -198,7 +198,7 @@ def handle_submission(submission, markers=frozenset()):
 
 
 def handle_message(message):
-    message.mark_as_read(message)
+    message.mark_as_read()
     make_reply(message.body, message.id, message.reply)
 
 def handle_comment(comment, extra_markers=frozenset()):
