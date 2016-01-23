@@ -198,6 +198,7 @@ def handle_submission(submission, markers=frozenset()):
 
 
 def handle_message(message):
+    r.mark_as_read(message)
     make_reply(message.body, message.id, message.reply)
 
 def handle_comment(comment, extra_markers=frozenset()):
@@ -440,7 +441,7 @@ def single_pass():
             handle_comment(comment)
 
         logging.info("Parsing unread messages.")
-        for message in r.get_unread(unset_has_mail=True, update_user=True):
+        for message in r.get_unread():
             handle_message(message)
 
     except Exception:
