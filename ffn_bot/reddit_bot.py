@@ -39,14 +39,6 @@ DRY_RUN = False
 # Please use with caution
 USE_STREAMS = False
 
-
-# Messaging Framework
-COUNT_REPLIES = {}  # Count replies per user
-COUNT_REPLIES_LIMIT = 30  # How many requests we'll allow per TIME_TO_RESET
-TIME_TO_RESET = 86400  # Time until we reset this dictionary (in seconds)
-TIME_SINCE_RESET = time.time()  # Time since the last dictionary reset
-
-
 def run_forever():
     sys.exit(_run_forever())
 
@@ -81,6 +73,13 @@ def main():
     login_to_reddit(bot_parameters)
     load_subreddits(bot_parameters)
     init_global_flags(bot_parameters)
+
+    # Messaging Framework
+    global COUNT_REPLIES = {}  # Count replies per user
+    global COUNT_REPLIES_LIMIT = 30  # How many requests we'll allow per TIME_TO_RESET
+    global TIME_TO_RESET = 86400  # Time until we reset this dictionary (in seconds)
+    global TIME_SINCE_RESET = time.time()  # Time since the last dictionary reset
+
 
     if USE_STREAMS:
         print("========================================")
