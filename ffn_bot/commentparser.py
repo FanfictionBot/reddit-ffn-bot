@@ -4,7 +4,8 @@ This file handles the comment parsing.
 import re
 import logging
 import itertools
-from ffn_bot import site, COUNT_REPLIES, COUNT_REPLIES_LIMIT
+from ffn_bot import site
+from reddit_bot COUNT_REPLIES, COUNT_REPLIES_LIMIT
 from ffn_bot.fetchers import SITES, get_sites
 
 
