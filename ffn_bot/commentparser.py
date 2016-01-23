@@ -2,8 +2,9 @@
 This file handles the comment parsing.
 """
 import re
+import logging
 import itertools
-from ffn_bot import site
+from ffn_bot import site, COUNT_REPLIES, COUNT_REPLIES_LIMIT
 from ffn_bot.fetchers import SITES, get_sites
 
 
@@ -42,7 +43,7 @@ def get_direct_links(string, markers):
         yield from site.extract_direct_links(string, markers)
 
 
-def formulate_reply(comment_body, markers=None, additions=()):
+def formulate_reply(comment_body, markers=None, additions=(), count_author=None):
     """Creates the reply for the given comment."""
     if markers is None:
         # Parse the context markers as some may be required here
@@ -66,6 +67,14 @@ def formulate_reply(comment_body, markers=None, additions=()):
         if not request_list:
             continue
 
+        if count_author is not None:
+            # Ensure that user is not hitting direct message limit.
+            if COUNT_REPLIES[count_author] + len(requests) > COUNT_REPLIES_LIMIT:
+                logging.error(count_author, " has run out of fic requests.")
+                return
+            COUNT_REPLIES[count_author] += len(requests)
+            logging.info(count_author, " has ", COUNT_REPLIES_LIMIT - COUNT_REPLIES[count_author], " requests remaining.")
+
         requests.append((site, request_list))
 
     direct_links = additions
@@ -73,10 +82,10 @@ def formulate_reply(comment_body, markers=None, additions=()):
         direct_links = itertools.chain(
             direct_links, get_direct_links(comment_body, markers))
 
-    yield from parse_comment_requests(requests, markers, direct_links)
+    yield from parse_comment_requests(requests, markers, direct_links, count_author)
 
 
-def parse_comment_requests(requests, context, additions):
+def parse_comment_requests(requests, context, additions, count_author=None):
     """
     Executes the queries and return the
     generated story strings as a single string
@@ -89,7 +98,7 @@ def parse_comment_requests(requests, context, additions):
         results = set(results)
 
     if len(tuple(filter(
-            lambda x:isinstance(x, site.Story), results
+            lambda x: isinstance(x, site.Story), results
     ))) > MAX_STORIES_PER_POST:
         raise StoryLimitExceeded("Maximum exceeded.")
 

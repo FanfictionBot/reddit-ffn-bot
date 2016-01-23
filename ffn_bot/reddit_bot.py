@@ -2,6 +2,7 @@ import sys
 import argparse
 import logging
 import praw
+import time
 from praw.objects import Submission
 
 from ffn_bot.commentlist import CommentList
@@ -37,6 +38,13 @@ DRY_RUN = False
 # This is a experimental feature of the program
 # Please use with caution
 USE_STREAMS = False
+
+
+# Messaging Framework
+COUNT_REPLIES = {} # Count replies per user
+COUNT_REPLIES_LIMIT = 30 # How many requests we'll allow per TIME_TO_RESET
+TIME_TO_RESET = 86400 # Time until we reset this dictionary (in seconds)
+TIME_SINCE_RESET = time.time() # Time since the last dictionary reset
 
 
 def run_forever():
@@ -199,7 +207,20 @@ def handle_submission(submission, markers=frozenset()):
 
 def handle_message(message):
     message.mark_as_read()
-    make_reply(message.body, message.id, message.reply)
+
+    if not valid_comment(message):
+        return
+
+    if time.time() - TIME_SINCE_RESET >= TIME_TO_RESET:
+        logging.info("Resetting COUNT_REPLIES dictionary...")
+        TIME_SINCE_RESET = time.time()
+        COUNT_REPLIES = {}
+
+    COUNT_REPLIES.setdefault(message.author, 0)
+    logging.info("User ", message.author, " has requested ", COUNT_REPLIES[message.author], " fics since the last reset.")
+
+    make_reply(message.body, message.id, message.reply, count_author=message.author)
+    return
 
 def handle_comment(comment, extra_markers=frozenset()):
     logging.debug("Handling comment: " + comment.id)
@@ -481,10 +502,10 @@ def parse_submission_text(submission, extra_markers=frozenset()):
         markers, additions)
 
 
-def make_reply(body, id, reply_func, markers=None, additions=()):
+def make_reply(body, id, reply_func, markers=None, additions=(), count_author=None):
     """Makes a reply for the given comment."""
     try:
-        reply = list(formulate_reply(body, markers, additions))
+        reply = list(formulate_reply(body, markers, additions, count_author))
     except StoryLimitExceeded:
         if not DRY_RUN:
             reply_func("You requested too many fics.\n"
