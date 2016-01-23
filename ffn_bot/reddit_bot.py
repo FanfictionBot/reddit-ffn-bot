@@ -197,6 +197,9 @@ def handle_submission(submission, markers=frozenset()):
             check_submission(submission)
 
 
+def handle_message(message):
+    make_reply(message.body, message.id, message.reply)
+
 def handle_comment(comment, extra_markers=frozenset()):
     logging.debug("Handling comment: " + comment.id)
     if (str(comment.id) not in CHECKED_COMMENTS
@@ -435,6 +438,11 @@ def single_pass():
         logging.info("Parsing new comments.")
         for comment in subreddit.get_comments(limit=100):
             handle_comment(comment)
+
+        logging.info("Parsing unread messages.")
+        for message in r.get_unread(unset_has_mail=True)
+            handle_message(message)
+
     except Exception:
         bot_tools.print_exception()
     bot_tools.pause(1, 0)
