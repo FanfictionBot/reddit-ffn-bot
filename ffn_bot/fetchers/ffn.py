@@ -194,9 +194,9 @@ class Story(site.Story):
             return ("http://ficsave.com/?story_url={0}&format=epub&auto_download=yes".format(self.url),
                     "http://ficsave.com/?story_url={0}&format=mobi&auto_download=yes".format(self.url))
         else:
-            return ("http://www.p0ody-files.com/ff_to_ebook/download.php?id={0}&filetype=epub".format(
+            return ("http://www.p0ody-files.com/ff_to_ebook/ffn-bot/index.php?id={0}&source=ff&filetype=epub".format(
                 re.findall(r'\d+', self.url)[0]),
-                "http://www.p0ody-files.com/ff_to_ebook/download.php?id={0}&filetype=mobi".format(
+                "http://www.p0ody-files.com/ff_to_ebook/ffn-bot/index.php?id={0}&source=ff&filetype=mobi".format(
                 re.findall(r'\d+', self.url)[0]))
 
 
