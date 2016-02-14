@@ -18,6 +18,7 @@ from ffn_bot.bot_tools import Fore, Back, Style
 __author__ = 'tusing, MikroMan, StuxSoftware'
 
 USER_AGENT = "Python:FanfictionComment:v1.1.2 (by tusing, StuxSoftware, and MikroMan)"
+
 r = praw.Reddit(USER_AGENT)
 DEFAULT_SUBREDDITS = ['HPFanfiction']
 SUBREDDIT_LIST = set()
