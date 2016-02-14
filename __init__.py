@@ -82,10 +82,11 @@ def get_page(url):
     @raise urllib2.URLError: An exception is raised on error.
     @raise urllib2.HTTPError: An exception is raised on error.
     """
+    print("GETTING THE PAGE AT ", url)
     request = Request(url)
-    # Change user-agent string
+    logging.info("Requesting,")
     request.add_header('User-Agent',
-                       'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/50.0.2645.3 Safari/537.36')
+                       'Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 6.0)')
     cookie_jar.add_cookie_header(request)
     response = urlopen(request)
     cookie_jar.extract_cookies(response, request)
