@@ -1,6 +1,7 @@
 lxml
 praw
 requests
+setuptools
 colorama
 cssselect
 python3-memcached
