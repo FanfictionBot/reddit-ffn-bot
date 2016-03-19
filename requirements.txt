@@ -3,5 +3,5 @@ google
 praw
 requests
 colorama
-beautifulsoup4
+bs4
 cssselect
