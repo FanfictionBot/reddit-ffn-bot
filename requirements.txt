@@ -1,7 +1,7 @@
 lxml
 praw
 requests
-setuptools
+bs4
 colorama
 cssselect
 python3-memcached
