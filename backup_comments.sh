@@ -32,9 +32,9 @@ while getopts ":i:o:s:a:e:" o; do
   esac
 done
 
-echo "Using comments file: " $comments_file
-echo "Storing backup locations in file: " $backup_log
-echo "Using sleep time: " $sleep_time
+echo "Using comments file: $comments_file"
+echo "Storing backup locations in file: $backup_log"
+echo "Using sleep time: $sleep_time"
 
 if [ ! -e "${comments_file}~" ] ; then
   echo "Creating a local backup of the comments file..."
