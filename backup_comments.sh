@@ -69,7 +69,7 @@ do
       echo "(BACKUP) $(date): Differences found! Backing up..."
       if [ "$existing_gist" != "" ]
         then
-          echo (BACKUP) $(date) - $(gist -p -u $existing_gist -d "FanfictionBot Comment Backup: $date" "$comments_file")
+          echo "(BACKUP) $(date) - $(gist -p -u $existing_gist -d "FanfictionBot Comment Backup: $date" "$comments_file")"
         else
           echo $(date) - $(gist -d "FanfictionBot Comment Backup: $date" "$comments_file")\ >> "$backup_log"
       fi
