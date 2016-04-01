@@ -23,6 +23,7 @@ while getopts ":i:o:s:a:e:" o; do
             ;;
         e)
             existing_gist=${OPTARG}
+            echo "Using existing gist: $existing_gist"\ >> $backup_log
             ;;
         *)
             usage
@@ -40,8 +41,7 @@ do
   echo "$(date): Backing up..."
   if [ "$existing_gist" != "" ]
     then
-      echo "Using existing gist ID: $existing_gist"
-      echo $(date) - $(gist -p -u $existing_gist -d "FanfictionBot Comment Backup: $date" $comments_file)\ >> $backup_log
+      echo $(date) - $(gist -p -u $existing_gist -d "FanfictionBot Comment Backup: $date" $comments_file)
     else
       echo $(date) - $(gist -d "FanfictionBot Comment Backup: $date" $comments_file)\ >> $backup_log
   fi
