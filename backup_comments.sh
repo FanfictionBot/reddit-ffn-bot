@@ -23,6 +23,7 @@ while getopts ":i:o:s:a:e:" o; do
       ;;
     e)
       existing_gist=${OPTARG}
+      echo "Using existing gist: $existing_gist"
       echo "Using existing gist: $existing_gist"\ >> "$backup_log"
       ;;
     *)
@@ -40,18 +41,27 @@ if [ ! -e "${comments_file}~" ] ; then
   touch "${comments_file}~"
 fi
 
+
+# If there are differences between the current comments_file and the last backup (comments_file~),
+# then we create a gist (or use an existing_gist ID, if specified (this requires logging into git using gist)).
+# We store the location of our new gist in backup_log (or simply echo it if we're updating an existing gist.)
+# Then, we replace comments_file~ with comments_file to reflect our changes. 
+# Finally, we sleep for sleep_time.
   
 while true
 do
-  if ! cmp "$comments_file" "${comments_file}~" >/dev/null 2>&1 # Only update if comment files and last gist are different
-    echo "$(date): Differences found! Backing up..."
-    if [ "$existing_gist" != "" ] # If we're using an existing gist,
-      then # Use the existing gist (requires github login through gist)
-        echo $(date) - $(gist -p -u $existing_gist -d "FanfictionBot Comment Backup: $date" "$comments_file")
-      else # Else, create a new gist
-        echo $(date) - $(gist -d "FanfictionBot Comment Backup: $date" "$comments_file")\ >> "$backup_log"
-    fi
-    cp "$comments_file" "${comments_file}~" # Update our comparison backup to reflect changes
+  if ! cmp "$comments_file" "${comments_file}~" >/dev/null 2>&1
+    then
+      echo "$(date): Differences found! Backing up..."
+      if [ "$existing_gist" != "" ]
+        then
+          echo $(date) - $(gist -p -u $existing_gist -d "FanfictionBot Comment Backup: $date" "$comments_file")
+        else
+          echo $(date) - $(gist -d "FanfictionBot Comment Backup: $date" "$comments_file")\ >> "$backup_log"
+      fi
+      cp "$comments_file" "${comments_file}~"
+    else
+      echo "$(date): No differences found since last backup."
   fi
   echo "$(date): Sleeping for " $sleep_time "seconds..."
   sleep $sleep_time
