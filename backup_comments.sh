@@ -24,7 +24,7 @@ while getopts ":i:o:s:a:e:" o; do
     e)
       existing_gist=${OPTARG}
       echo "Using existing gist: $existing_gist"
-      echo "Using existing gist: $existing_gist"\ >> "$backup_log"
+      echo "$(date) - Using existing gist: $existing_gist"\ >> "$backup_log"
       ;;
     *)
       usage
