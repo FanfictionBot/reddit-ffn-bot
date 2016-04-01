@@ -16,6 +16,11 @@ backup_log=BACKUP_LOCATIONS.txt
 sleep_time=3600
 existing_gist=""
 
+if [ $# -eq 0 ]
+  then
+    usage
+fi
+
 while getopts ":i:o:s:a:e:" o; do
   case "${o}" in
     i)
