@@ -7,7 +7,7 @@ backup_log=BACKUP_LOCATIONS.txt
 sleep_time=3600
 existing_gist=""
 
-while getopts ":i:o:s:" o; do
+while getopts ":i:o:s:a:e:" o; do
     case "${o}" in
         i)
             comments_file=${OPTARG}
