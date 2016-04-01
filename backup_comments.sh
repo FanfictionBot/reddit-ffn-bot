@@ -20,8 +20,10 @@ while getopts ":i:o:s:" o; do
             ;;     
         a)
             gist --login
+            ;;
         e)
             existing_gist=${OPTARG}
+            ;;
         *)
             usage
             ;;
