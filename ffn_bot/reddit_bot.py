@@ -29,7 +29,7 @@ FOOTER = "\n".join([
     r'[2]: https://github.com/tusing/reddit-ffn-bot/wiki/Changelog   "What changed until now"',
     r'[3]: https://github.com/tusing/reddit-ffn-bot/issues/          "Bugs? Suggestions? Enter them here!"',
     r'[4]: https://github.com/tusing/reddit-ffn-bot/                 "Fork me on GitHub"',
-    r'[5]: https://www.reddit.com/message/compose?to=%2Fu%2Ftusing   "The maintainer"'
+    r'[5]: https://www.reddit.com/message/compose?to=tusing          "The maintainer"'
 ])
 FOOTER += "\n\n^^^^^^^^^^^^^^^^^ffnbot!ignore"
 FOOTER += "\n\n^(*New in this version: PM request support!*)"
