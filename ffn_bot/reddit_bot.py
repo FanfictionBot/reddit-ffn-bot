@@ -503,7 +503,7 @@ def single_pass():
 
     except Exception:
         bot_tools.print_exception()
-    bot_tools.pause(1, 0)
+    bot_tools.pause(0, 15)
 
 
 def check_submission(submission):
