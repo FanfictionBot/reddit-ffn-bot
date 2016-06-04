@@ -58,7 +58,7 @@ def _run_forever():
         except:
             logging.error("MAIN: AN EXCEPTION HAS OCCURED!")
             bot_tools.print_exception()
-            bot_tools.pause(1, 0)
+            bot_tools.pause(0, 30)
         finally:
             if CHECKED_COMMENTS is not None:
                 CHECKED_COMMENTS.save()
@@ -560,7 +560,7 @@ def make_reply(body, id, reply_func, markers=None, additions=()):
             for part in reply:
                 reply_func(part + FOOTER)
 
-        bot_tools.pause(0, 30)
+        bot_tools.pause(0, 15)
         print('Continuing to parse submissions...')
     else:
         logging.info("No reply conditions met.")
