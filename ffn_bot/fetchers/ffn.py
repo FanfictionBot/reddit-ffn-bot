@@ -197,7 +197,7 @@ class Story(site.Story):
         if "fictionpress" in self.url:
             return "http://ficsave.com/?story_url={0}&format=epub&auto_download=yes".format(self.url)
         else:
-            return "http://www.p0ody-files.com/ff_to_ebook/mobile/makeEpub.php?id={0}".format(
+            return "http://ff2ebook.com/old/mobile/makeEpub.php?id={0}".format(
                 re.findall(r'\d+', self.url)[0])
 
 
