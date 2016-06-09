@@ -21,7 +21,7 @@ __author__ = 'tusing, MikroMan, StuxSoftware'
 USER_AGENT = "Python:FanfictionComment:v1.1.2 (by tusing, StuxSoftware, and MikroMan)"
 
 r = praw.Reddit(USER_AGENT)
-DEFAULT_SUBREDDITS = ['HPFanfiction']
+DEFAULT_SUBREDDITS = ['HPFanfiction','WormFanfic','NarutoFanfiction','Fanfiction','fandomnatural','marvelfans']
 SUBREDDIT_LIST = set()
 CHECKED_COMMENTS = None
 FOOTER = "\n".join([
@@ -433,23 +433,26 @@ def get_full_submissions(request_body):
         # Add the submission ID if it is explicitly defined.
         sub_ids += [sub_id for sub_id in sub_request.split(';') if len(sub_id)==6]
 
-    logging.info("(SUBMISSION REQUEST) Handling the following submission IDs: " + sub_ids)
+    logging.info("(SUBMISSION REQUEST) Handling the following submission IDs: " + " ".join(sub_ids))
     combined_text = "" # The combined text of the entire thread for every submission requested.
 
     def full_submission_text(sub_id): # Get the full text for one submission
         submission = r.get_submission(submission_id=sub_id, comment_limit=None, comment_sort='top')
         subreddit_name = r.get_info(thing_id=submission.subreddit.name).display_name
-        if subreddit_name in SUBREDDIT_LIST:
-            return [submission.selftext] + [comment.body for comment in praw.helpers.flatten_tree(submission) if valid_comment(comment)]
+        if subreddit_name.upper() in [subreddit.upper() for subreddit in SUBREDDIT_LIST]:
+            return "".join([submission.selftext] + [comment.body for comment in praw.helpers.flatten_tree(submission.comments) if valid_comment(comment)])
         else:
             logging.error("(SUBMISSION REQUEST) Received request to parse invalid submission in /r/" + subreddit_name)
+            logging.error("                     Current valid subreddits are " + " ".join(SUBREDDIT_LIST))
             return ""
 
     for sub_id in sub_ids:
-        try:
-            combined_text += full_submission_text(sub_id)
-        except:
-            pass # Too many possible exceptions here to take care of.
+        #try:
+        combined_text += full_submission_text(sub_id)
+        #except Exception as e:
+        #    logging.error("(SUBMISSION REQUEST) Exception occured!")
+        #    logging.error(e)
+        #    pass # Too many possible exceptions here to take care of.
 
     combined_text = "".join(combined_text) # Flatten list to string
     request_count = combined_text.count('link') + combined_text.count(';')
