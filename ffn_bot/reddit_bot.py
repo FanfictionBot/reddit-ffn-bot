@@ -238,7 +238,7 @@ def handle_message(message):
     if 'linksub' in body:
         submission_bodies, submission_requests = get_full_submissions(body)
         body += submission_bodies
-        requests += submission_requests
+        request_count += submission_requests
 
     # If the message author can not be found in the dict, add them.
     COUNT_REPLIES.setdefault(message.author.name, request_count)
@@ -260,7 +260,7 @@ def handle_message(message):
     logging.info("The current state of DM requests: {0}", COUNT_REPLIES)
 
     # Make the reply and return.
-    make_reply(message.body, message.id, message.reply)
+    make_reply(body, message.id, message.reply)
     return
 
 
