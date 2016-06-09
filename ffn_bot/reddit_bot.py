@@ -4,6 +4,7 @@ import logging
 import praw
 import time
 from praw.objects import Submission
+import re
 
 from ffn_bot.commentlist import CommentList
 from ffn_bot.commentparser import formulate_reply, parse_context_markers
@@ -200,7 +201,7 @@ def load_subreddits(bot_parameters):
 
 
 def handle_submission(submission, markers=frozenset()):
-    if not is_submission_checked(submission) or ("force" in markers):
+    if not is_submission_checked(submission) or ("force" in markers) or ("ignore" in markers):
         logging.info("Found new submission: " + submission.id)
         try:
             parse_submission_text(submission, markers)
@@ -229,15 +230,20 @@ def handle_message(message):
     if time.time() - TIME_SINCE_RESET >= TIME_TO_RESET:
         COUNT_REPLIES = {}
 
-    # Count the number of requests in the body of the message.
-    # TODO: Remove the need to hardcode 'link' and ';'
+    # Count the number of requests in the body of the message, of format link...(...;...;...)
     request_count = message.body.count('link') + message.body.count(';')
+    body = message.body
+
+
+    if 'linksub' in body:
+        submission_bodies, submission_requests = get_full_submissions(body)
+        body += submission_bodies
+        requests += submission_requests
 
     # If the message author can not be found in the dict, add them.
     COUNT_REPLIES.setdefault(message.author.name, request_count)
 
     # Print a summary of the user's statistics.
-
     logging.info("{0} has requested {1} fics with {2} remaining requests for the next {3} seconds.".format(
         message.author.name, request_count, COUNT_REPLIES_LIMIT - COUNT_REPLIES[message.author.name], 
         TIME_TO_RESET - (time.time() - TIME_SINCE_RESET)))
@@ -376,8 +382,13 @@ def handle_comment(comment, extra_markers=frozenset()):
                 handle_submission(comment_with_requests, frozenset(["force"]))
             return
 
+        body = comment.body
+        if 'linksub' in body:
+            submission_bodies, submission_requests = get_full_submissions(body)
+            body += submission_bodies
+        
         try:
-            make_reply(comment.body, comment.id, comment.reply, markers)
+            make_reply(body, comment.id, comment.reply, markers)
         finally:
             CHECKED_COMMENTS.add(str(comment.id))
 
@@ -401,6 +412,51 @@ def get_full(comment_id):
             "(URGENT) WAS NOT ABLE TO DETERMINE COMMENT VS SUBMISSION!")
         requested_comment = r.get_submission(requested_comment.permalink)
     return requested_comment
+
+
+def get_full_submissions(request_body):
+    """
+    Get entire submissions/threads text for futher parisng.
+    Example: linksub(reddit_thread_link; submission_id, ...)
+    Input: Comment requesting submissions to be parsed.
+    Output: (combined text of all submissions,
+             approximate number of total requests to parse)
+    """
+    sub_ids = [] # A list of all requested submission IDs.
+
+    # Capture everything inside linksub(...)
+    sub_requests = re.findall('linksub\((.*)\)', request_body)
+
+    for sub_request in sub_requests: # For every linksub(...),
+        # Add the submission ID for every Reddit thread linked, and
+        sub_ids += re.findall('\/comments/(\S{6})/', sub_request)
+        # Add the submission ID if it is explicitly defined.
+        sub_ids += [sub_id for sub_id in sub_request.split(';') if len(sub_id)==6]
+
+    logging.info("(SUBMISSION REQUEST) Handling the following submission IDs: " + sub_ids)
+    combined_text = "" # The combined text of the entire thread for every submission requested.
+
+    def full_submission_text(sub_id): # Get the full text for one submission
+        submission = r.get_submission(submission_id=sub_id, comment_limit=None, comment_sort='top')
+        subreddit_name = r.get_info(thing_id=submission.subreddit.name).display_name
+        if subreddit_name in SUBREDDIT_LIST:
+            return [submission.selftext] + [comment.body for comment in praw.helpers.flatten_tree(submission) if valid_comment(comment)]
+        else:
+            logging.error("(SUBMISSION REQUEST) Received request to parse invalid submission in /r/" + subreddit_name)
+            return ""
+
+    for sub_id in sub_ids:
+        try:
+            combined_text += full_submission_text(sub_id)
+        except:
+            pass # Too many possible exceptions here to take care of.
+
+    combined_text = "".join(combined_text) # Flatten list to string
+    request_count = combined_text.count('link') + combined_text.count(';')
+
+    return (combined_text, request_count)
+
+
 
 
 def valid_comment(comment):
@@ -533,8 +589,12 @@ def parse_submission_text(submission, extra_markers=frozenset()):
     if "submissionlink" in markers:
         additions.extend(get_direct_links(submission.url, markers))
 
+    if 'linksub' in body:
+        submission_bodies, submission_requests = get_full_submissions(body)
+        body += submission_bodies
+
     make_reply(
-        submission.selftext, submission.id, submission.add_comment,
+        body, submission.id, submission.add_comment,
         markers, additions)
 
 
