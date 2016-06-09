@@ -234,11 +234,12 @@ def handle_message(message):
     request_count = message.body.count('link') + message.body.count(';')
     body = message.body
 
-
+    markers = set()
     if 'linksub' in body:
         submission_bodies, submission_requests = get_full_submissions(body)
         body += submission_bodies
         request_count += submission_requests
+        markers.add('directlinks')
 
     # If the message author can not be found in the dict, add them.
     COUNT_REPLIES.setdefault(message.author.name, request_count)
@@ -260,7 +261,7 @@ def handle_message(message):
     logging.info("The current state of DM requests: {0}", COUNT_REPLIES)
 
     # Make the reply and return.
-    make_reply(body, message.id, message.reply)
+    make_reply(body, message.id, message.reply, markers=markers)
     return
 
 
@@ -386,6 +387,7 @@ def handle_comment(comment, extra_markers=frozenset()):
         if 'linksub' in body:
             submission_bodies, submission_requests = get_full_submissions(body)
             body += submission_bodies
+            markers.add('directlinks')
         
         try:
             make_reply(body, comment.id, comment.reply, markers)
@@ -455,6 +457,7 @@ def get_full_submissions(request_body):
         #    pass # Too many possible exceptions here to take care of.
 
     combined_text = "".join(combined_text) # Flatten list to string
+    combined_text.replace("ffnbot!", "")
     request_count = combined_text.count('link') + combined_text.count(';')
 
     return (combined_text, request_count)
@@ -595,6 +598,7 @@ def parse_submission_text(submission, extra_markers=frozenset()):
     if 'linksub' in body:
         submission_bodies, submission_requests = get_full_submissions(body)
         body += submission_bodies
+        markers.add('directlinks')
 
     make_reply(
         body, submission.id, submission.add_comment,
