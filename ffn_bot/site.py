@@ -1,5 +1,6 @@
 import re
 from collections import OrderedDict
+import logging
 
 from ffn_bot import reddit_markdown
 
@@ -99,7 +100,12 @@ class Story(object):
 
     def __str__(self):
         """Generates the response string."""
-        self.load()
+        try:
+            self.load()
+        except Exception as e:
+            logging.error("(STORY) Could not load story!")
+            logging.error(e)
+            return("")
         result = ["\n\n"]
         result.append(
             reddit_markdown.link(
@@ -168,7 +174,10 @@ class Story(object):
 
     def __hash__(self):
         # We will use the URL for a hash.
-        return hash(self.get_url())
+        try:
+            return hash(self.get_url())
+        except:
+            return 0
 
     def __eq__(self, other):
         if not isinstance(other, Story):
