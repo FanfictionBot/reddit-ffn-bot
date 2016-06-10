@@ -26,7 +26,7 @@ DEFAULT_SUBREDDITS = ['HPFanfiction','WormFanfic','NarutoFanfiction','Fanfiction
 SUBREDDIT_LIST = set()
 CHECKED_COMMENTS = None
 FOOTER = "\n".join([
-    r"**FanfictionBot**^(1.3.7) **|** \[[Usage][1]\] | \[[Changelog][2]\] | \[[Issues][3]\] | \[[GitHub][4]\] | \[[Contact][5]\]",
+    r"**FanfictionBot**^(1.4.0) **|** \[[Usage][1]\] | \[[Changelog][2]\] | \[[Issues][3]\] | \[[GitHub][4]\] | \[[Contact][5]\]",
     r'[1]: https://github.com/tusing/reddit-ffn-bot/wiki/Usage       "How to use the bot"',
     r'[2]: https://github.com/tusing/reddit-ffn-bot/wiki/Changelog   "What changed until now"',
     r'[3]: https://github.com/tusing/reddit-ffn-bot/issues/          "Bugs? Suggestions? Enter them here!"',
@@ -34,7 +34,7 @@ FOOTER = "\n".join([
     r'[5]: https://www.reddit.com/message/compose?to=tusing          "The maintainer"'
 ])
 FOOTER += "\n\n^^^^^^^^^^^^^^^^^ffnbot!ignore"
-FOOTER += "\n\n^(*New in this version: PM request support!*)"
+FOOTER += "\n\n^(*New in this version: Slim recommendations using *ffnbot\!slim*! Thread recommendations using *linksub\(thread_id)*!"
 
 # For testing purposes
 DRY_RUN = False
@@ -241,7 +241,7 @@ def handle_message(message):
     markers = set()
     body = comment.body
     sub_recs = None
-    if 'linksub' in body:
+    if 'linksub(' in body:
         sub_recs = get_sub_reccomendations(body)
         markers.add('slim')
 
@@ -389,7 +389,7 @@ def handle_comment(comment, extra_markers=frozenset()):
 
         body = comment.body
         sub_recs = None
-        if 'linksub' in body:
+        if 'linksub(' in body:
             sub_recs = get_sub_reccomendations(body)
             markers.add('slim')
         
@@ -472,31 +472,36 @@ def slimify_comment(bot_comment):
     Returns a list of stories.
     TODO: Find a less hacky way to do this.
     """
-    all_metadata = re.findall('(\^(\s|\S)*?\-{3})', bot_comment) # Get metadata
-    num_stories = len(all_metadata)
-    titles_authors = re.findall('((\n(.+)by(.+))\n+\>)', bot_comment)
-    titles_authors = [title_author[1] for title_author in titles_authors]
-    summaries = re.findall('(\>(.*))\n+\^', bot_comment)
-    summaries = [summary[0] for summary in summaries]
-    wordcounts = re.findall('(Word(\D)+((\d{1,3})+(,|\d{1,3})+)+)', str(all_metadata))
-    wordcounts = [wordcount[2] for wordcount in wordcounts]
-    downloads = [re.findall('(\*Download\*(\s|\S)+\-{3})', str(story_metadata)) for story_metadata in all_metadata]
-    downloads_fixed = [] # Not all sites have downloads. We'll take care of this:
-    for download in downloads:
-        try:
-            downloads_fixed.append(download[0][0])
-        except:
-            downloads_fixed.append("No download available)")
+    find_key = lambda slim_story: re.findall('(\[(\ |\S)+\) by)', slim_story)[0][0]
+    if 'slim!FanfictionBot' in bot_comment:
+        slimmed_stories = [story[0] for story in re.findall('((\n(.+)by(.+)(\s|\S)+?)\n+\>(\ |\S)+\n)', s)]
+        slimmed_stories = {find_key(story): story for story in slimmed_stories}
+    else:
+        all_metadata = re.findall('(\^(\s|\S)*?\-{3})', bot_comment) # Get metadata
+        num_stories = len(all_metadata)
+        titles_authors = re.findall('((\n(.+)by(.+))\n+\>)', bot_comment)
+        titles_authors = [title_author[1] for title_author in titles_authors]
+        summaries = re.findall('(\>(.*))\n+\^', bot_comment)
+        summaries = [summary[0] for summary in summaries]
+        wordcounts = re.findall('(Word(\D)+((\d{1,3})+(,|\d{1,3})+)+)', str(all_metadata))
+        wordcounts = [wordcount[2] for wordcount in wordcounts]
+        downloads = [re.findall('(\*Download\*(\s|\S)+\-{3})', str(story_metadata)) for story_metadata in all_metadata]
+        downloads_fixed = [] # Not all sites have downloads. We'll take care of this:
+        for download in downloads:
+            try:
+                downloads_fixed.append(download[0][0])
+            except:
+                downloads_fixed.append("No download available)")
 
-    slimmed_stories = []
-    for i in range(len(all_metadata)):
-        story = '\n\n' + titles_authors[i]
-        story += ' (' + wordcounts[i] + ' words' + '; ' + downloads_fixed[i]
-        story += '\n\n' + summaries[i]
-        story = story.replace('\\n', '\n')
-        story = story.replace('---', '')
-        slimmed_stories.append(story)
-    return slimmed_stories
+        slimmed_stories = {}
+        for i in range(len(all_metadata)):
+            story = '\n\n' + titles_authors[i]
+            story += ' (' + wordcounts[i] + ' words' + '; ' + downloads_fixed[i]
+            story += '\n\n' + summaries[i]
+            story = story.replace('\\n', '\n')
+            story = story.replace('---', '')
+            slimmed_stories.update({find_key(story): story})
+    return list(slimmed_stories.values())
 
 
 
@@ -634,7 +639,7 @@ def parse_submission_text(submission, extra_markers=frozenset()):
         additions.extend(get_direct_links(submission.url, markers))
 
     sub_recs = None
-    if 'linksub' in body:
+    if 'linksub(' in body:
         sub_recs = get_sub_reccomendations(body)
         markers.add('slim')
 
@@ -664,6 +669,8 @@ def make_reply(body, id, reply_func, markers=None, additions=(), sub_recs=None):
             for part in reply:
                 reply_func(part + FOOTER)
     if 'slim' in markers and (len(raw_reply) > 10 or sum([len(rec) for rec in sub_recs]) > 10):
+        # This is CRITICAL until we find a cleaner way to do this. slim!FanfictionBot is to be used
+        # when parsing threads that already have slim stories.
         slim_footer = "\n\n---\n\nslim!FanfictionBot^(1.4.0)."
         slim_stories = []
         # Submission recs (if they exist) are already slimmed.
