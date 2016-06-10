@@ -496,8 +496,8 @@ def slimify_comment(bot_comment):
         slimmed_stories = {}
         for i in range(len(all_metadata)):
             complete = ''
-            if str(all_metadata).__contains__('*Status*: Complete'):
-                complete = ', Complete'
+            if str(all_metadata[i]).__contains__('*Status*: Complete'):
+                complete = ', complete'
             story = '\n\n' + titles_authors[i]
             story += ' (' + wordcounts[i] + ' words' + complete + '; ' + downloads_fixed[i]
             story += '\n\n' + summaries[i]
