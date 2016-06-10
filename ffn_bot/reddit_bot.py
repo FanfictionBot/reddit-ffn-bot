@@ -490,13 +490,12 @@ def slimify_comment(bot_comment):
 
     slimmed_stories = []
     for i in range(len(all_metadata)):
-        str = titles_authors[i]
-        str += ' (' + wordcounts[i] + ' words' + '; ' + downloads_fixed[i]
-        str += '\n\n' + summaries[i]
-        str = str.replace('\\n', '\n')
-        str = str.replace('---', '')
-        slimmed_stories.append(str)
-
+        story = '\n\n' + titles_authors[i]
+        story += ' (' + wordcounts[i] + ' words' + '; ' + downloads_fixed[i]
+        story += '\n\n' + summaries[i]
+        story = story.replace('\\n', '\n')
+        story = story.replace('---', '')
+        slimmed_stories.append(story)
     return slimmed_stories
 
 
@@ -664,13 +663,13 @@ def make_reply(body, id, reply_func, markers=None, additions=(), sub_recs=None):
         if not DRY_RUN:
             for part in reply:
                 reply_func(part + FOOTER)
-    if 'slim' in markers and len(raw_reply) > 10:
-        slim_footer = ""
+    if 'slim' in markers and (len(raw_reply) > 10 or sum([len(rec) for rec in sub_recs]) > 10):
+        slim_footer = "\n\n---\n\nslim!FanfictionBot^(1.4.0)."
         slim_stories = []
         # Submission recs (if they exist) are already slimmed.
         if sub_recs is not None:
             slim_stories += sub_recs
-            slim_footer = "\n\n---Note that some story data is sourced from the other threads, and may be out of date."
+            slim_footer = "\n\nNote that some story data has been sourced from older threads, and may be out of date."
         slim_stories += slimify_comment(raw_reply)
 
         total_character_count = sum([len(story) for story in slim_stories])
@@ -682,12 +681,14 @@ def make_reply(body, id, reply_func, markers=None, additions=(), sub_recs=None):
             current_story = slim_stories.pop(0)
             # Comments can be up to 10,000 characters:
             if sum([len(story) for story in current_reply]) + len(current_story) > 10000:
-                reply_func("".join(current_reply), slim_footer)
+                reply_func("".join(current_reply) + slim_footer)
+                bot_tools.pause(0, 10)
                 current_reply = []
             else:
                 current_reply += current_story
+    else:
+        logging.info("No reply conditions met.")    
 
     bot_tools.pause(0, 15)
     print('Continuing to parse submissions...')
-    else:
-        logging.info("No reply conditions met.")
+ 
