@@ -474,7 +474,7 @@ def slimify_comment(bot_comment):
     """
     find_key = lambda slim_story: re.findall('(\[(\ |\S)+\) by)', slim_story)[0][0]
     if 'slim!FanfictionBot' in bot_comment:
-        slimmed_stories = [story[0] for story in re.findall('((\n(.+)by(.+)(\s|\S)+?)\n+\>(\ |\S)+\n)', s)]
+        slimmed_stories = [story[0] for story in re.findall('((\n(.+)by(.+)(\s|\S)+?)\n+\>(\ |\S)+\n)', bot_comment)]
         slimmed_stories = {find_key(story): story for story in slimmed_stories}
     else:
         all_metadata = re.findall('(\^(\s|\S)*?\-{3})', bot_comment) # Get metadata
@@ -671,12 +671,12 @@ def make_reply(body, id, reply_func, markers=None, additions=(), sub_recs=None):
     if 'slim' in markers and (len(raw_reply) > 10 or sum([len(rec) for rec in sub_recs]) > 10):
         # This is CRITICAL until we find a cleaner way to do this. slim!FanfictionBot is to be used
         # when parsing threads that already have slim stories.
-        slim_footer = "\n\n---\n\nslim!FanfictionBot^(1.4.0)."
+        slim_footer = "\n\n---\n\n*slim!FanfictionBot*^(1.4.0)."
         slim_stories = []
         # Submission recs (if they exist) are already slimmed.
         if sub_recs is not None:
             slim_stories += sub_recs
-            slim_footer = "\n\nNote that some story data has been sourced from older threads, and may be out of date."
+            slim_footer += " Note that some story data has been sourced from older threads, and may be out of date."
         slim_stories += slimify_comment(raw_reply)
 
         total_character_count = sum([len(story) for story in slim_stories])
@@ -693,6 +693,8 @@ def make_reply(body, id, reply_func, markers=None, additions=(), sub_recs=None):
                 current_reply = []
             else:
                 current_reply += current_story
+        if len(current_reply) is not 0:
+               reply_func("".join(current_reply) + slim_footer)
     else:
         logging.info("No reply conditions met.")    
 
