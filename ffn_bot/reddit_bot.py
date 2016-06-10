@@ -680,14 +680,14 @@ def make_reply(body, id, reply_func, markers=None, additions=(), sub_recs=None):
         slim_stories += slimify_comment(raw_reply)
 
         total_character_count = sum([len(story) for story in slim_stories])
-        print("Writing a slim reply to", id, "(", total_character_count, "characters in",
-              total_character_count/10000, "messages)")
+        print("Writing a slim reply to", id, "(", total_character_count, "characters in about",
+              total_character_count/(10000-len(slim_footer)), "messages)")
 
         current_reply = []
         while len(slim_stories) is not 0: # We use slim_stories as a queue.
             current_story = slim_stories.pop(0)
             # Comments can be up to 10,000 characters:
-            if sum([len(story) for story in current_reply]) + len(current_story) > 10000:
+            if sum([len(story) for story in current_reply]) + len(current_story) > 10000 - len(slim_footer):
                 reply_func("".join(current_reply) + slim_footer)
                 bot_tools.pause(0, 10)
                 current_reply = []
