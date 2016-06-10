@@ -679,6 +679,10 @@ def make_reply(body, id, reply_func, markers=None, additions=(), sub_recs=None):
             slim_footer += " Note that some story data has been sourced from older threads, and may be out of date."
         slim_stories += slimify_comment(raw_reply)
 
+        # Deal with any remaining duplicates.
+        find_key = lambda slim_story: re.findall('(\[(\ |\S)+\) by)', slim_story)[0][0]
+        slim_stories = list({find_key(story): story for story in slim_stories}.values())
+
         total_character_count = sum([len(story) for story in slim_stories])
         print("Writing a slim reply to", id, "(", total_character_count, "characters in about",
               total_character_count/(10000-len(slim_footer)), "messages)")
