@@ -500,7 +500,7 @@ def slimify_comment(bot_comment):
                 complete = ', complete'
             story = '\n\n' + titles_authors[i]
             story += ' (' + wordcounts[i] + ' words' + complete + '; ' + downloads_fixed[i]
-            story += '\n\n' + summaries[i]
+            story += '\n\n' + summaries[i] + '\n\n'
             story = story.replace('\\n', '\n')
             story = story.replace('---', '')
             slimmed_stories.update({find_key(story): story})
