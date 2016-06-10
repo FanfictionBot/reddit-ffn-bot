@@ -34,7 +34,7 @@ FOOTER = "\n".join([
     r'[5]: https://www.reddit.com/message/compose?to=tusing          "The maintainer"'
 ])
 FOOTER += "\n\n^^^^^^^^^^^^^^^^^ffnbot!ignore"
-FOOTER += "\n\n^(*New in this version: Slim recommendations using *ffnbot\!slim*! Thread recommendations using *linksub\(thread_id)*!"
+FOOTER += "\n\n^(*New in this version: Slim recommendations using* ffnbot!slim! *Thread recommendations using* linksub(thread_id)^)!"
 
 # For testing purposes
 DRY_RUN = False
@@ -495,8 +495,11 @@ def slimify_comment(bot_comment):
 
         slimmed_stories = {}
         for i in range(len(all_metadata)):
+            complete = ''
+            if str(all_metadata).__contains__('*Status*: Complete'):
+                complete = ', Complete'
             story = '\n\n' + titles_authors[i]
-            story += ' (' + wordcounts[i] + ' words' + '; ' + downloads_fixed[i]
+            story += ' (' + wordcounts[i] + ' words' + complete + '; ' + downloads_fixed[i]
             story += '\n\n' + summaries[i]
             story = story.replace('\\n', '\n')
             story = story.replace('---', '')
