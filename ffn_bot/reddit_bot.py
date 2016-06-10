@@ -19,6 +19,7 @@ from ffn_bot.bot_tools import Fore, Back, Style
 __author__ = 'tusing, MikroMan, StuxSoftware'
 
 USER_AGENT = "Python:FanfictionComment:v1.1.2 (by tusing, StuxSoftware, and MikroMan)"
+USER_NAME = ""
 
 r = praw.Reddit(USER_AGENT)
 DEFAULT_SUBREDDITS = ['HPFanfiction','WormFanfic','NarutoFanfiction','Fanfiction','fandomnatural','marvelfans']
@@ -173,9 +174,12 @@ def get_bot_parameters():
 
 def login_to_reddit(bot_parameters):
     """Performs the login for reddit."""
+    global USER_NAME
+    USER_NAME = bot_parameters['user']
     print("Logging in...")
     r.login(bot_parameters['user'], bot_parameters['password'])
     print(Fore.GREEN, "Logged in.", Style.RESET_ALL)
+
 
 
 def load_subreddits(bot_parameters):
@@ -235,11 +239,11 @@ def handle_message(message):
     body = message.body
 
     markers = set()
+    body = comment.body
+    sub_recs = None
     if 'linksub' in body:
-        submission_bodies, submission_requests = get_full_submissions(body)
-        body += submission_bodies
-        request_count += submission_requests
-        markers.add('directlinks')
+        sub_recs = get_sub_reccomendations(body)
+        markers.add('slim')
 
     # If the message author can not be found in the dict, add them.
     COUNT_REPLIES.setdefault(message.author.name, request_count)
@@ -261,7 +265,7 @@ def handle_message(message):
     logging.info("The current state of DM requests: {0}", COUNT_REPLIES)
 
     # Make the reply and return.
-    make_reply(body, message.id, message.reply, markers=markers)
+    make_reply(body, message.id, message.reply, markers=markers, sub_recs=sub_recs)
     return
 
 
@@ -384,13 +388,13 @@ def handle_comment(comment, extra_markers=frozenset()):
             return
 
         body = comment.body
+        sub_recs = None
         if 'linksub' in body:
-            submission_bodies, submission_requests = get_full_submissions(body)
-            body += submission_bodies
-            markers.add('directlinks')
+            sub_recs = get_sub_reccomendations(body)
+            markers.add('slim')
         
         try:
-            make_reply(body, comment.id, comment.reply, markers)
+            make_reply(body, comment.id, comment.reply, markers, sub_recs=sub_recs)
         finally:
             CHECKED_COMMENTS.add(str(comment.id))
 
@@ -416,13 +420,10 @@ def get_full(comment_id):
     return requested_comment
 
 
-def get_full_submissions(request_body):
+def get_sub_reccomendations(request_body):
     """
-    Get entire submissions/threads text for futher parisng.
-    Example: linksub(reddit_thread_link; submission_id, ...)
-    Input: Comment requesting submissions to be parsed.
-    Output: (combined text of all submissions,
-             approximate number of total requests to parse)
+    Recommend multiple submissions, using linksub(...)
+    Output: A slim-ified version of bot reccommendations in the requested threads.
     """
     sub_ids = [] # A list of all requested submission IDs.
 
@@ -436,31 +437,69 @@ def get_full_submissions(request_body):
         sub_ids += [sub_id for sub_id in sub_request.split(';') if len(sub_id)==6]
 
     logging.info("(SUBMISSION REQUEST) Handling the following submission IDs: " + " ".join(sub_ids))
-    combined_text = "" # The combined text of the entire thread for every submission requested.
+    replies = [] # A list of bot replies.
 
-    def full_submission_text(sub_id): # Get the full text for one submission
+    def single_sub_recommendations(sub_id): # Get the full text for one submission
+        # Get the submission's subreddit. It must be a subreddit the bot runs on.
         submission = r.get_submission(submission_id=sub_id, comment_limit=None, comment_sort='top')
         subreddit_name = r.get_info(thing_id=submission.subreddit.name).display_name
         if subreddit_name.upper() in [subreddit.upper() for subreddit in SUBREDDIT_LIST]:
-            return "".join([submission.selftext] + [comment.body for comment in praw.helpers.flatten_tree(submission.comments) if valid_comment(comment)])
+            # Return a list of all bot comments in this submission.
+            return [comment.body for comment in praw.helpers.flatten_tree(submission.comments) 
+                    if valid_comment(comment) and comment.author.name == USER_NAME]
         else:
             logging.error("(SUBMISSION REQUEST) Received request to parse invalid submission in /r/" + subreddit_name)
             logging.error("                     Current valid subreddits are " + " ".join(SUBREDDIT_LIST))
             return ""
 
+    # We build replies[] by calling single_sub_reccomendations on every requested submission.
     for sub_id in sub_ids:
-        #try:
-        combined_text += full_submission_text(sub_id)
-        #except Exception as e:
-        #    logging.error("(SUBMISSION REQUEST) Exception occured!")
-        #    logging.error(e)
-        #    pass # Too many possible exceptions here to take care of.
+        try:
+            replies += single_sub_recommendations(sub_id)
+        except Exception as e:
+            logging.error("(SUBMISSIONR RECS) Failed to get sub reccommendations for sub_id " + sub_id)
+            logging.error(e)
 
-    combined_text = "".join(combined_text) # Flatten list to string
-    combined_text.replace("ffnbot!", "")
-    request_count = combined_text.count('link') + combined_text.count(';')
+    all_recommended_stories = []
+    for bot_comment in replies:
+        all_recommended_stories += slimify_comment(bot_comment)
+    return all_recommended_stories
 
-    return (combined_text, request_count)
+
+def slimify_comment(bot_comment):
+    """
+    Slims down a bot comment into essential information: fic name, author, and description.
+    Returns a list of stories.
+    TODO: Find a less hacky way to do this.
+    """
+    all_metadata = re.findall('(\^(\s|\S)*?\-{3})', bot_comment) # Get metadata
+    num_stories = len(all_metadata)
+    titles_authors = re.findall('((\n(.+)by(.+))\n+\>)', bot_comment)
+    titles_authors = [title_author[1] for title_author in titles_authors]
+    summaries = re.findall('(\>(.*))\n+\^', bot_comment)
+    summaries = [summary[0] for summary in summaries]
+    wordcounts = re.findall('(Word(\D)+((\d{1,3})+(,|\d{1,3})+)+)', str(all_metadata))
+    wordcounts = [wordcount[2] for wordcount in wordcounts]
+    downloads = [re.findall('(\*Download\*(\s|\S)+\-{3})', str(story_metadata)) for story_metadata in all_metadata]
+    downloads_fixed = [] # Not all sites have downloads. We'll take care of this:
+    for download in downloads:
+        try:
+            downloads_fixed.append(download[0][0])
+        except:
+            downloads_fixed.append("No download available)")
+
+    slimmed_stories = []
+    for i in range(len(all_metadata)):
+        str = titles_authors[i]
+        str += ' (' + wordcounts[i] + ' words' + '; ' + downloads_fixed[i]
+        str += '\n\n' + summaries[i]
+        str = str.replace('\\n', '\n')
+        str = str.replace('---', '')
+        slimmed_stories.append(str)
+
+    return slimmed_stories
+
+
 
 
 
@@ -595,17 +634,17 @@ def parse_submission_text(submission, extra_markers=frozenset()):
     if "submissionlink" in markers:
         additions.extend(get_direct_links(submission.url, markers))
 
+    sub_recs = None
     if 'linksub' in body:
-        submission_bodies, submission_requests = get_full_submissions(body)
-        body += submission_bodies
-        markers.add('directlinks')
+        sub_recs = get_sub_reccomendations(body)
+        markers.add('slim')
 
     make_reply(
         body, submission.id, submission.add_comment,
-        markers, additions)
+        markers, additions, sub_recs=sub_recs)
 
 
-def make_reply(body, id, reply_func, markers=None, additions=()):
+def make_reply(body, id, reply_func, markers=None, additions=(), sub_recs=None):
     """Makes a reply for the given comment."""
     try:
         reply = list(formulate_reply(body, markers, additions))
@@ -618,16 +657,37 @@ def make_reply(body, id, reply_func, markers=None, additions=()):
         return
 
     raw_reply = "".join(reply)
-    if len(raw_reply) > 10:
-        print(
-            "Writing reply to", id, "(", len(raw_reply), "characters in",
-            len(reply), "messages)")
+    if 'slim' not in markers and len(raw_reply) > 10:
+        print("Writing reply to", id, "(", len(raw_reply), "characters in",
+              len(reply), "messages)")
         # Do not send the comment.
         if not DRY_RUN:
             for part in reply:
                 reply_func(part + FOOTER)
+    if 'slim' in markers and len(raw_reply) > 10:
+        slim_footer = ""
+        slim_stories = []
+        # Submission recs (if they exist) are already slimmed.
+        if sub_recs is not None:
+            slim_stories += sub_recs
+            slim_footer = "\n\n---Note that some story data is sourced from the other threads, and may be out of date."
+        slim_stories += slimify_comment(raw_reply)
 
-        bot_tools.pause(0, 15)
-        print('Continuing to parse submissions...')
+        total_character_count = sum([len(story) for story in slim_stories])
+        print("Writing a slim reply to", id, "(", total_character_count, "characters in",
+              total_character_count/10000, "messages)")
+
+        current_reply = []
+        while len(slim_stories) is not 0: # We use slim_stories as a queue.
+            current_story = slim_stories.pop(0)
+            # Comments can be up to 10,000 characters:
+            if sum([len(story) for story in current_reply]) + len(current_story) > 10000:
+                reply_func("".join(current_reply), slim_footer)
+                current_reply = []
+            else:
+                current_reply += current_story
+
+    bot_tools.pause(0, 15)
+    print('Continuing to parse submissions...')
     else:
         logging.info("No reply conditions met.")
