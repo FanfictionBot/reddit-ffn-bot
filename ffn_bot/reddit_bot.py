@@ -205,7 +205,7 @@ def load_subreddits(bot_parameters):
 
 
 def handle_submission(submission, markers=frozenset()):
-    if (not is_submission_checked(submission)) or ("force" in markers) or (not "ignore" in markers):
+    if (not is_submission_checked(submission)) and (not "ignore" in markers) or ("force" in markers):
         logging.info("Found new submission: " + submission.id)
         try:
             parse_submission_text(submission, markers)
@@ -625,11 +625,7 @@ def check_submission(submission):
 def is_submission_checked(submission):
     """Check if the submission was checked."""
     global CHECKED_COMMENTS
-    if "SUBMISSION_" + str(submission.id) in CHECKED_COMMENTS:
-        logging.info("Already checked SUBMISSION_" + str(submission.id))
-        return True
-    else:
-        return False
+    return "SUBMISSION_" + str(submission.id) in CHECKED_COMMENTS
 
 
 
