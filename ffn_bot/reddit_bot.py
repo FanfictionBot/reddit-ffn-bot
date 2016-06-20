@@ -622,7 +622,13 @@ def check_submission(submission):
 def is_submission_checked(submission):
     """Check if the submission was checked."""
     global CHECKED_COMMENTS
-    return "SUBMISSION_" + str(submission.id) in CHECKED_COMMENTS
+    if "SUBMISSION_" + str(submission.id) in CHECKED_COMMENTS:
+        logging.info("Already checked SUBMISSION_" + str(submission.id))
+        return True
+    else:
+        return False
+
+
 
 
 def parse_submission_text(submission, extra_markers=frozenset()):
