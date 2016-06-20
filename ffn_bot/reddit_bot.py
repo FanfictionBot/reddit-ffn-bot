@@ -205,7 +205,7 @@ def load_subreddits(bot_parameters):
 
 
 def handle_submission(submission, markers=frozenset()):
-    if not is_submission_checked(submission) or ("force" in markers) or ("ignore" in markers):
+    if not is_submission_checked(submission) or ("force" in markers) or not ("ignore" in markers):
         logging.info("Found new submission: " + submission.id)
         try:
             parse_submission_text(submission, markers)
@@ -239,7 +239,6 @@ def handle_message(message):
     body = message.body
 
     markers = set()
-    body = comment.body
     sub_recs = None
     if 'linksub(' in body:
         sub_recs = get_sub_reccomendations(body)
@@ -462,6 +461,9 @@ def get_sub_reccomendations(request_body):
 
     all_recommended_stories = []
     for bot_comment in replies:
+        if 'p0ody-files' in bot_comment: # Download site moved to new domain.
+            bot_comment = bot_comment.replace('p0ody-files', 'ff2ebook')
+            bot_comment = bot_comment.replace('ff_to_ebook', 'old')
         all_recommended_stories += slimify_comment(bot_comment)
     return all_recommended_stories
 
