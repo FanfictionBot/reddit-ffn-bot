@@ -67,7 +67,7 @@ class RequestCache(object):
         # Throtle only if we don't have a version cached.
         if throttle:
             time.sleep(throttle)
-        result = get(page, **kwargs).text
+        result = get(page, timeout=10, **kwargs).text
 
         self.push_cache("get", page, result)
         return result
