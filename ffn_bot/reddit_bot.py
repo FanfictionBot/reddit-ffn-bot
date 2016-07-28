@@ -431,8 +431,10 @@ def get_sub_reccomendations(request_body):
 
     for sub_request in sub_requests: # For every linksub(...),
         # Add the submission ID for every Reddit thread linked, and
-        sub_ids += re.findall('\/comments/(\S{6})/', sub_request)
+        sub_ids += re.findall('redd\.it\/(\S{6})', sub_request)
+        sub_ids += re.findall('\/comments\/(\S{6})', sub_request)
         # Add the submission ID if it is explicitly defined.
+        sub_request = sub_request.replace(" ", "") # Remove whitespace
         sub_ids += [sub_id for sub_id in sub_request.split(';') if len(sub_id)==6]
 
     logging.info("(SUBMISSION REQUEST) Handling the following submission IDs: " + " ".join(sub_ids))
@@ -454,7 +456,9 @@ def get_sub_reccomendations(request_body):
     # We build replies[] by calling single_sub_reccomendations on every requested submission.
     for sub_id in sub_ids:
         try:
-            replies += single_sub_recommendations(sub_id)
+            reply = single_sub_recommendations(sub_id)
+            replies.append("\n ".join(reply))
+            logging.info("(SUBMISSION REQUEST) Handled submission ID: " + sub_id)
         except Exception as e:
             logging.error("(SUBMISSIONR RECS) Failed to get sub reccommendations for sub_id " + sub_id)
             logging.error(e)
@@ -477,7 +481,13 @@ def slimify_comment(bot_comment):
     find_key = lambda slim_story: re.findall('(\[(\ |\S)+\) by)', slim_story)[0][0]
     if 'slim!FanfictionBot' in bot_comment:
         slimmed_stories = [story[0] for story in re.findall('((\n(.+)by(.+)(\s|\S)+?)\n+\>(\ |\S)+\n)', bot_comment)]
-        slimmed_stories = {find_key(story): story for story in slimmed_stories}
+        slimmed_stories_dict = {}
+        for story in slimmed_stories:
+            try:
+                slimmed_stories_dict[find_key(story)] = story
+            except:
+                pass
+        slimmed_stories = slimmed_stories_dict
     else:
         all_metadata = re.findall('(\^(\s|\S)*?\-{3})', bot_comment) # Get metadata
         num_stories = len(all_metadata)
@@ -505,7 +515,10 @@ def slimify_comment(bot_comment):
             story += '\n\n' + summaries[i] + '\n\n'
             story = story.replace('\\n', '\n')
             story = story.replace('---', '')
-            slimmed_stories.update({find_key(story): story})
+            try:
+                slimmed_stories.update({find_key(story): story})
+            except:
+                pass
     return list(slimmed_stories.values())
 
 
