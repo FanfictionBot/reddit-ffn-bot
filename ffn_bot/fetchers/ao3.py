@@ -89,7 +89,7 @@ class ArchiveOfOurOwn(Site):
         return self.generate_response(link, context)
 
     def _id_to_link(self, id):
-        return "http://archiveofourown.org/works/%s/" % id
+        return "https://archiveofourown.org/works/%s/" % id
 
     def find_link(self, request, context):
         # Find link by ID.
@@ -133,10 +133,10 @@ class Story(site.Story):
         self.summary = ""
 
     def get_real_url(self):
-        return "http://archiveofourown.org/works/%s?view_adult=true" % AO3_LINK_REGEX.match(self.url).groupdict()["sid"]
+        return "https://archiveofourown.org/works/%s?view_adult=true" % AO3_LINK_REGEX.match(self.url).groupdict()["sid"]
 
     def get_url(self):
-        return "http://archiveofourown.org/works/%s" % AO3_LINK_REGEX.match(self.url).groupdict()["sid"]
+        return "https://archiveofourown.org/works/%s" % AO3_LINK_REGEX.match(self.url).groupdict()["sid"]
 
     def get_value_from_tree(self, xpath, sep=""):
         return sep.join(self.tree.xpath(xpath)).strip()
@@ -147,14 +147,14 @@ class Story(site.Story):
         self.summary = self.get_value_from_tree(AO3_SUMMARY_FINDER)
         self.title = self.get_value_from_tree(AO3_TITLE)
         self.author = self.get_value_from_tree(AO3_AUTHOR_NAME)
-        self.authorlink = "http://www.archiveofourown.org" + self.get_value_from_tree(AO3_AUTHOR_URL)
+        self.authorlink = "https://www.archiveofourown.org" + self.get_value_from_tree(AO3_AUTHOR_URL)
         self.stats = AO3Metadata(
             AO3_LINK_REGEX.match(self.url).groupdict()["sid"], self.tree)
 
     def get_site(self):
-        return "Archive of Our Own", "http://www.archiveofourown.org/"
+        return "Archive of Our Own", "https://www.archiveofourown.org/"
 
     def get_download(self):
-        epub_download = "http://archiveofourown.org" + self.get_value_from_tree(AO3_EPUB_DOWNLOAD)
-        mobi_download = "http://archiveofourown.org" + self.get_value_from_tree(AO3_MOBI_DOWNLOAD)
+        epub_download = "https://archiveofourown.org" + self.get_value_from_tree(AO3_EPUB_DOWNLOAD)
+        mobi_download = "https://archiveofourown.org" + self.get_value_from_tree(AO3_MOBI_DOWNLOAD)
         return(epub_download, mobi_download)

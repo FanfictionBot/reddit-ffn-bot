@@ -159,7 +159,7 @@ class Story(site.Story):
         self.parser = parser
 
     def get_url(self):
-        return "http://www.%s/s/%s/1/" % (
+        return "https://www.%s/s/%s/1/" % (
             self.site,
             re.match(LINK_REGEX % self.site, self.url).groupdict()["sid"])
 
@@ -185,7 +185,7 @@ class Story(site.Story):
         self.stats = self.parser(None, tree)
 
     def get_site(self):
-        link = "http://www." + self.site + "/"
+        link = "https://www." + self.site + "/"
         return (DOMAIN_TO_ARCHIVE_NAME[self.site], link)
 
     def get_download(self):
