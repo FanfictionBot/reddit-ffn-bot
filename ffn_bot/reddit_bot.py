@@ -10,7 +10,6 @@ from ffn_bot.commentlist import CommentList
 from ffn_bot.commentparser import formulate_reply, parse_context_markers
 from ffn_bot.commentparser import get_direct_links
 from ffn_bot.commentparser import StoryLimitExceeded
-from ffn_bot import reddit_markdown
 from ffn_bot import bot_tools
 
 # For pretty text
@@ -18,7 +17,9 @@ from ffn_bot.bot_tools import Fore, Back, Style
 
 __author__ = 'tusing, MikroMan, StuxSoftware'
 
-USER_AGENT = "Python:FanfictionComment:v1.1.2 (by tusing, StuxSoftware, and MikroMan)"
+__version__ = "1.4.0"
+
+USER_AGENT = "Python:FanfictionComment:v%s (by tusing, StuxSoftware, and MikroMan)" % __version__
 USER_NAME = ""
 
 r = praw.Reddit(USER_AGENT)
@@ -26,7 +27,7 @@ DEFAULT_SUBREDDITS = ['HPFanfiction','WormFanfic','NarutoFanfiction','Fanfiction
 SUBREDDIT_LIST = set()
 CHECKED_COMMENTS = None
 FOOTER = "\n".join([
-    r"**FanfictionBot**^(1.4.0) **|** \[[Usage][1]\] | \[[Changelog][2]\] | \[[Issues][3]\] | \[[GitHub][4]\] | \[[Contact][5]\]",
+    r"**FanfictionBot**^(%s) **|** \[[Usage][1]\] | \[[Changelog][2]\] | \[[Issues][3]\] | \[[GitHub][4]\] | \[[Contact][5]\]" % __version__,
     r'[1]: https://github.com/tusing/reddit-ffn-bot/wiki/Usage       "How to use the bot"',
     r'[2]: https://github.com/tusing/reddit-ffn-bot/wiki/Changelog   "What changed until now"',
     r'[3]: https://github.com/tusing/reddit-ffn-bot/issues/          "Bugs? Suggestions? Enter them here!"',
