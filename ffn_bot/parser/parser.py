@@ -1,3 +1,6 @@
+import bisect
+
+
 class RequestParser(object):
     """
     A Parser extracts requests from the comment.
@@ -20,12 +23,21 @@ class RequestParser(object):
         :return: A decorator.
         """
         def _decorator(parser):
-            cls.PARSERS.append(parser)
+            bisect.insort(cls.PARSERS, (priority, parser))
             return parser
 
         if parser is not None:
+            # If a parser has been passed to this function, immediately execute the decorator.
             return _decorator(parser)
         return _decorator
+
+    @classmethod
+    def get_parsers(cls):
+        """
+        Yields all parsers.
+        :return: All parsers.
+        """
+        yield from (p for _, p in cls.PARSERS)
 
     def is_active(self, request):
         """
@@ -45,6 +57,14 @@ class RequestParser(object):
         :return: False if parsing should end here a nonzero object otherwise.
         """
         return True
+
+    def __cmp__(self, other):
+        """
+        A trick to make this code work with bisect.
+
+        It uses a hash over itself to make the results reproducable.
+        """
+        return hash(self) - hash(other)
 
 
 class parser(RequestParser):

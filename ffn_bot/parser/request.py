@@ -59,7 +59,7 @@ class Request(object):
         """
         self.markers.update(self.parse_markers())
 
-        for parser in RequestParser.PARSERS:
+        for parser in RequestParser.get_parsers():
             # Check if this parser applies to this request.
             if not parser.is_active(self):
                 continue
