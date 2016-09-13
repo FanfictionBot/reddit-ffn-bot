@@ -97,7 +97,7 @@ class ArchiveOfOurOwn(Site):
         if id is not None:
             return self._id_to_link(str(id))
 
-# Filter out direct links.
+        # Filter out direct links.
         match = AO3_LINK_REGEX.match(request)
         if match is not None:
             return request
