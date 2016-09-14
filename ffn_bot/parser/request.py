@@ -59,13 +59,20 @@ class Request(object):
         """
         return '<Unknown>'
 
+    def get_parsers(self):
+        """
+        Returns all parsers that can be used with this parser.
+        :returns: A generator that yields all supported parsers
+        """
+        yield from RequestParser.get_parsers()
+
     def parse(self):
         """
         Parses the request using the parsers defined in the global parser list.
         """
         self.markers.update(self.parse_markers())
 
-        for parser in RequestParser.get_parsers():
+        for parser in self.get_parsers():
             # Check if this parser applies to this request.
             if not parser.is_active(self):
                 continue
