@@ -24,7 +24,7 @@ def standard_requests(request):
             continue
 
         # Add each story to the request.
-        for story in site.from_request(request_list):
+        for story in site.from_requests(request_list, request.markers):
             if story is None:
                 continue
             request.stories.append(story)
@@ -33,7 +33,7 @@ def standard_requests(request):
 
 
 @RequestParser.register(100)
-@parser(lambda request: 'direct' in request.markers)
+@parser(lambda request: 'directlinks' in request.markers)
 def direct_links(request):
     """
     This parser extracts the direct links from the comments.
@@ -44,7 +44,7 @@ def direct_links(request):
     :return: True.
     """
     for site in SITES:
-        request.stories.append(site.extract_direct_links(request.content, request.markers))
+        request.stories.extend(site.extract_direct_links(request.content, request.markers))
     return True
 
 

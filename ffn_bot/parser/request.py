@@ -8,10 +8,16 @@ class Request(object):
     This class stores a comment
     """
 
+    # Allow to modify the behaviour of the comments
+    # by adding a special function into the system
+    #
+    # Currently the following markers are supported:
+    # ffnbot!ignore              Ignore the comment entirely
+    # ffnbot!distinct:false      Don't make sure that we get distinct requests
+    # ffnbot!directlinks         Also extract story requests from direct links
     CONTEXT_MARKER_REGEX = re.compile(r"ffnbot!([^ ]+)")
 
-    def __init__(self, reddit, request, markers=None):
-        self.reddit = reddit
+    def __init__(self, request, markers=None):
         self.request = request
         self.parsed = False
 
@@ -27,7 +33,7 @@ class Request(object):
         Returns the actual content of the submission.
         :return: A string containing the content of the submission.
         """
-        return ""
+        return self.request
 
     @property
     def parent(self):
@@ -79,34 +85,7 @@ class Request(object):
             for marker in entry.split(","):
                 if ":" not in marker:
                     yield (marker, None)
+                    continue
                 yield marker.split(':', 2)
 
 
-class Submission(Request):
-    """
-    Represents a praw.objects.Submission-object.
-    """
-
-    @property
-    def content(self):
-        return self.request.selftext
-
-
-class Comment(Request):
-    """
-    Represents a praw.objects.Comment-object
-    """
-
-    @property
-    def content(self):
-        return self.request.body
-
-    @property
-    def parent(self):
-        if self.request.is_root:
-            return self.root
-        return Comment(self.reddit, self.reddit.get_info(thing_id = self.request.parent_id))
-
-    @property
-    def root(self):
-        return Submission(self.reddit, self.request.submission)
