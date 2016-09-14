@@ -63,6 +63,7 @@ class RedditRequest(Request):
         """
         return self.request.id
 
+
 @RedditRequest.wrapper_for(content_types.Submission)
 class Submission(RedditRequest):
 
@@ -82,7 +83,10 @@ class Comment(RedditRequest):
     def parent(self):
         if self.request.is_root:
             return self.root
-        return Comment(self.reddit, self.reddit.get_info(thing_id = self.request.parent_id))
+        pid = self.request.parent_id
+        if pid is None:
+            return None
+        return Comment(self.reddit, self.reddit.get_info(thing_id=pid))
 
     @property
     def root(self):

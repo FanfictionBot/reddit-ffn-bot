@@ -9,6 +9,7 @@ import re
 from ffn_bot.commentlist import CommentList
 from ffn_bot.commentparser import formulate_reply, parse_context_markers
 from ffn_bot.commentparser import StoryLimitExceeded
+from ffn_bot.state import Application
 from ffn_bot import bot_tools
 
 # For pretty text
@@ -43,6 +44,9 @@ DRY_RUN = False
 # Please use with caution
 USE_STREAMS = False
 
+
+APPLICATION = Application()
+
 def run_forever():
     sys.exit(_run_forever())
 
@@ -68,9 +72,11 @@ def _run_forever():
 
 def main():
     """Basic main function."""
+    app = Application.reset()
     # moved call for agruments to avoid double calling
     global bot_parameters
-    bot_parameters = get_bot_parameters()
+    bot_parameters = app.bot_parameters = get_bot_parameters()
+
     login_to_reddit(bot_parameters)
     load_subreddits(bot_parameters)
     init_global_flags(bot_parameters)
@@ -111,6 +117,7 @@ def init_global_flags(bot_parameters):
         print("Dry run enabled. No comment will be sent.")
 
     CHECKED_COMMENTS = CommentList(bot_parameters["comments"], DRY_RUN)
+    Application().comments = CHECKED_COMMENTS
 
     level = getattr(logging, bot_parameters["verbosity"].upper())
     logging.getLogger().setLevel(level)
@@ -266,25 +273,6 @@ def handle_message(message):
     # Make the reply and return.
     make_reply(body, message.id, message.reply, markers=markers, sub_recs=sub_recs)
     return
-
-
-def _delete(comment):
-    CHECKED_COMMENTS.add(str(comment.id))
-    logging.info("Delete requested by " + comment.id)
-    if comment.is_root:
-        logging.error("Delete requested by invalid comment!")
-        return
-
-    parent_comment = r.get_info(thing_id=comment.parent_id)
-    if parent_comment.author is None:
-        logging.error("Delete requested on null comment.")
-        return
-    if parent_comment.author.name != bot_parameters['user']:
-        logging.error("Delete requested on non-bot comment!")
-        return
-
-    logging.info("Deleting comment " + parent_comment.id)
-    parent_comment.delete()
 
 
 def handle_comment(comment, extra_markers=frozenset()):

@@ -8,3 +8,4 @@ from .message import Message
 
 # Core logic
 from . import extractors
+from . import commands
