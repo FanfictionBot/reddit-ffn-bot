@@ -293,9 +293,6 @@ def handle_comment(comment, extra_markers=frozenset()):
                 item = r.get_info(thing_id=comment.parent_id)
             handle(item, {"directlinks", "submissionlink", "force"})
 
-        if "delete" in markers and (comment.id not in CHECKED_COMMENTS):
-            _delete(comment)
-
         if "refresh" in markers and (str(comment.id) not in CHECKED_COMMENTS):
             CHECKED_COMMENTS.add(str(comment.id))
             logging.info("(Refresh) Refresh requested by " + comment.id)

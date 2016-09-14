@@ -1,10 +1,11 @@
 import logging
 from .parser import parser, RequestParser
+from .reddit import Comment
 from ffn_bot.state import Application
 
 
 @RequestParser.register(50)
-@parser(lambda request: 'delete' in request.markers)
+@parser(lambda request: isinstance(request, Comment) and 'delete' in request.markers)
 def delete_command(request):
     Application().comments.add(str(request.identifier))
     logging.info("Delete requested by " + request.identifier)
