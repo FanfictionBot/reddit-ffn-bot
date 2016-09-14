@@ -8,7 +8,6 @@ import re
 
 from ffn_bot.commentlist import CommentList
 from ffn_bot.commentparser import formulate_reply, parse_context_markers
-from ffn_bot.commentparser import get_direct_links
 from ffn_bot.commentparser import StoryLimitExceeded
 from ffn_bot import bot_tools
 
@@ -522,6 +521,7 @@ def slimify_comment(bot_comment):
                 pass
     return list(slimmed_stories.values())
 
+
 def valid_comment(comment):
     """
     Checks if valid comment.
@@ -642,17 +642,9 @@ def is_submission_checked(submission):
 def parse_submission_text(submission, extra_markers=frozenset()):
     body = submission.selftext
 
-    markers = parse_context_markers(body)
-    markers |= extra_markers
-
-    # Since the bot would start downloading the stories
-    # here, we add the ignore option here
-    if "ignore" in markers:
-        return
+    markers = extra_markers
 
     additions = []
-    if "submissionlink" in markers:
-        additions.extend(get_direct_links(submission.url, markers))
 
     sub_recs = None
     if 'linksub(' in body:

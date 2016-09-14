@@ -45,6 +45,23 @@ class RedditRequest(Request):
         super(RedditRequest, self).__init__(request, markers)
         self.reddit = reddit
 
+    def reply(self, message):
+        """
+        Replies to this request
+        :param message:  The message to send
+        :return:  The replied message
+        """
+        if not callable(getattr(self.request, 'reply', None)):
+            raise RuntimeError('Cannot reply to this request.')
+        self.reply(message)
+
+    @property
+    def identifier(self):
+        """
+        Returns a unique identifier
+        :return: A unique identifier
+        """
+        return self.request.id
 
 @RedditRequest.wrapper_for(content_types.Submission)
 class Submission(RedditRequest):

@@ -15,6 +15,16 @@ class StoryLimitExceeded(Exception):
     pass
 
 
+@deprecate("parser.comment.Comment._parse_markers")
+def parse_context_markers(comment_body):
+    """
+    Changes the context of the story subsystem.
+    """
+    # The power of generators, harnessed in this oneliner
+    return set(
+        s.lower() for s in itertools.chain.from_iterable(
+            v.split(",") for v in Request.CONTEXT_MARKER_REGEX.findall(comment_body)))
+
 def formulate_reply(comment_body, markers=None, additions=()):
     """Creates the reply for the given comment."""
     if markers is None:
