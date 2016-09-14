@@ -55,11 +55,9 @@ url_search_num = "http://www.google.%(tld)s/search?hl=%(lang)s&q=%(query)s&num=%
 url_next_page_num = "http://www.google.%(tld)s/search?hl=%(lang)s&q=%(query)s&num=%(num)d&start=%(start)d&tbs=%(tbs)s&safe=%(safe)s&tbm=%(tpe)s"
 
 # Cookie jar. Stored at the user's home folder.
-home_folder = os.getenv('HOME')
-if not home_folder:
-    home_folder = os.getenv('USERHOME')
-    if not home_folder:
-        home_folder = '.'   # Use the current folder on error.
+home_folder = os.path.expanduser('~')
+if home_folder == '~':  # expanduser() returns unchanged string on error.
+    home_folder = '.'   # Use the current folder on error.
 cookie_jar = LWPCookieJar(os.path.join(home_folder, '.google-cookie'))
 try:
     cookie_jar.load()
