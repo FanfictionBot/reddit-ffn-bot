@@ -11,11 +11,27 @@ MAX_REPLY_LENGTH = 8000
 MAX_STORIES_PER_POST = 30
 
 
+def deprecated(func):
+    """This is a decorator which can be used to mark functions
+    as deprecated. It will result in a warning being emmitted
+    when the function is used."""
+    import warnings
+    import functools
+
+    @functools.wraps(func)
+    def new_func(*args, **kwargs):
+        warnings.simplefilter('always', DeprecationWarning) #turn off filter
+        warnings.warn("Call to deprecated function {}.".format(func.__name__), category=DeprecationWarning, stacklevel=2)
+        warnings.simplefilter('default', DeprecationWarning) #reset filter
+        return func(*args, **kwargs)
+
+    return new_func
+
 class StoryLimitExceeded(Exception):
     pass
 
 
-@deprecate("parser.comment.Comment._parse_markers")
+@deprecated
 def parse_context_markers(comment_body):
     """
     Changes the context of the story subsystem.
