@@ -268,18 +268,35 @@ def handle_message(message):
     return
 
 
+def _delete(comment):
+    CHECKED_COMMENTS.add(str(comment.id))
+    logging.info("Delete requested by " + comment.id)
+    if comment.is_root:
+        logging.error("Delete requested by invalid comment!")
+        return
+
+    parent_comment = r.get_info(thing_id=comment.parent_id)
+    if parent_comment.author is None:
+        logging.error("Delete requested on null comment.")
+        return
+    if parent_comment.author.name != bot_parameters['user']:
+        logging.error("Delete requested on non-bot comment!")
+        return
+
+    logging.info("Deleting comment " + parent_comment.id)
+    parent_comment.delete()
+
+
 def handle_comment(comment, extra_markers=frozenset()):
     logging.debug("Handling comment: " + comment.id)
-    if (str(comment.id) not in CHECKED_COMMENTS
-            ) or ("force" in extra_markers):
+    if (str(comment.id) not in CHECKED_COMMENTS) or ("force" in extra_markers):
 
         markers = parse_context_markers(comment.body)
         markers |= extra_markers
         if "ignore" in markers:
-            # logging.info("Comment forcefully ignored: " + comment.id)
             return
-        else:
-            logging.info("Found new comment: " + comment.id)
+
+        logging.info("Found new comment: " + comment.id)
 
         if "parent" in markers:
             if comment.is_root:
@@ -289,20 +306,7 @@ def handle_comment(comment, extra_markers=frozenset()):
             handle(item, {"directlinks", "submissionlink", "force"})
 
         if "delete" in markers and (comment.id not in CHECKED_COMMENTS):
-            CHECKED_COMMENTS.add(str(comment.id))
-            logging.info("Delete requested by " + comment.id)
-            if not (comment.is_root):
-                parent_comment = r.get_info(thing_id=comment.parent_id)
-                if parent_comment.author is not None:
-                    if (parent_comment.author.name == bot_parameters['user']):
-                        logging.info("Deleting comment " + parent_comment.id)
-                        parent_comment.delete()
-                    else:
-                        logging.error("Delete requested on non-bot comment!")
-                else:
-                    logging.error("Delete requested on null comment.")
-            else:
-                logging.error("Delete requested by invalid comment!")
+            _delete(comment)
 
         if "refresh" in markers and (str(comment.id) not in CHECKED_COMMENTS):
             CHECKED_COMMENTS.add(str(comment.id))
