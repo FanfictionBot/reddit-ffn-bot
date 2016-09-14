@@ -522,11 +522,6 @@ def slimify_comment(bot_comment):
                 pass
     return list(slimmed_stories.values())
 
-
-
-
-
-
 def valid_comment(comment):
     """
     Checks if valid comment.
