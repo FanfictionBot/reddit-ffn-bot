@@ -25,9 +25,9 @@ directory.
 
 ```
     $ sudo apt-get install git python3.4 lxml libxml2-dev python3.4-dev
-    $ sudo apt-get install python-pip
+    $ sudo apt-get install python3-pip
     $ git clone https://github.com/tusing/reddit-ffn-bot .
-    $ pip install -r requirements.txt
+    $ pip3 install -r requirements.txt
 ```
 
 ## Starting the bot
