@@ -159,7 +159,7 @@ def last_comment_time():
         return datetime.datetime.min
 
 
-def handle_submission(submission, markers=frozenset()):
+def handle_submission(submission, markers=set()):
     logging.info("Handling new submission: {0}".format(submission.permalink))
     if ("ignore" not in markers) or ("force" in markers):
         try:
@@ -280,11 +280,11 @@ def refresh_handler(comment):
     _refresh_delete_comments(delete_list)
 
     logging.info("(Refresh) Re-handling {0}".format(obj_with_requests.id))
-    handle(obj_with_requests, frozenset(["force"]))
+    handle(obj_with_requests, set(["force"]))
     return
 
 
-def handle_comment(comment, extra_markers=frozenset()):
+def handle_comment(comment, extra_markers=set()):
     logging.info("Handling new comment: {0}".format(comment.permalink))
 
     markers = parse_context_markers(comment.body)
@@ -319,7 +319,7 @@ def _single_submission_recommendations(submission_id):  # Get the full text for 
     if subreddit_name.lower() in [subreddit.lower() for subreddit in SUBREDDIT_LIST]:
         # Return a list of all bot comments in this submission.
         return [comment.body for comment in submission.comments.list()
-                if repliable(comment) and comment.author.name == BOT_USERNAME]
+                if repliable(comment) and comment.author is not None and comment.author.name == BOT_USERNAME]
     else:
         logging.error("(Submission Rec.) Received request to parse invalid submission in /r/" + subreddit_name)
         return []
@@ -459,9 +459,9 @@ def handle(obj, markers=set()):
         return False
 
     if is_submission(obj):
-        handle_submission(obj, frozenset(markers))
+        handle_submission(obj, set(markers))
     elif is_comment(obj):
-        handle_comment(obj, frozenset(markers))
+        handle_comment(obj, set(markers))
     else:
         handle_message(obj)
 
