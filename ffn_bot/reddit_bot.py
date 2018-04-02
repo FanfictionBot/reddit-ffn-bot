@@ -39,7 +39,7 @@ def load_config():
     global config, cli_args, r
     global USER_AGENT, DEFAULT_SUBREDDITS, SUBREDDIT_LIST, FOOTER, APPLICATION, \
         COUNT_REPLIES, COUNT_REPLIES_LIMIT, TIME_TO_RESET, TIME_SINCE_RESET, DRY_RUN, \
-        BOT_USERNAME, CACHED_LAST_REPLY_TIME
+        BOT_USERNAME, LAST_REPLY_TIME
     global __author__, __version__
 
     config = configparser.ConfigParser()
@@ -67,7 +67,7 @@ def load_config():
     logging.getLogger().setLevel(level)
 
     r = get_authenticated_instance()
-    CACHED_LAST_REPLY_TIME = last_comment_time()
+    LAST_REPLY_TIME = last_comment_time()
 
 
 def get_authenticated_instance():
@@ -151,10 +151,8 @@ def load_subreddits():
 
 
 def last_comment_time():
-    global CACHED_LAST_REPLY_TIME
     try:
-        CACHED_LAST_REPLY_TIME = time_created(r.redditor(BOT_USERNAME).comments.new(limit=1).next())
-        return CACHED_LAST_REPLY_TIME
+        return time_created(r.redditor(BOT_USERNAME).comments.new(limit=1).next())
     except Exception as e:
         print(e)
         logging.fatal("Could not retrieve last bot comment! Please make a comment.")
@@ -456,8 +454,7 @@ def handle(obj, markers=set()):
     logging.info("Handling object {0}".format(obj.id))
 
     if ("refresh" not in markers and "force" not in markers) and \
-            (time_created(obj) < CACHED_LAST_REPLY_TIME or
-             time_created(obj) < last_comment_time()):
+            (time_created(obj) < LAST_REPLY_TIME):
         logging.info("Skipping object " + obj.id + " - object too old!")
         return False
 
