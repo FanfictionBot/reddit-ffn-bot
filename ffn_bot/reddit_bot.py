@@ -389,7 +389,7 @@ def slimify_comment(bot_comment):
         summaries = [summary[0] for summary in summaries]
         wordcounts = re.findall('(Word(\D)+((\d{1,3})+(,|\d{1,3})+)+)', str(all_metadata))
         wordcounts = [wordcount[2] for wordcount in wordcounts]
-        downloads = [re.findall('(\*Download\*(\s|\S)+\-{3})', str(story_metadata)) for story_metadata in all_metadata]
+        downloads = [re.findall(r"(\*Download\*([^\\]*))", str(story_metadata)) for story_metadata in all_metadata]
         downloads_fixed = []  # Not all sites have downloads. We'll take care of this:
         for download in downloads:
             try:
