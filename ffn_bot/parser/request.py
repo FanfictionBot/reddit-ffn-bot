@@ -15,7 +15,7 @@ class Request(object):
     # ffnbot!ignore              Ignore the comment entirely
     # ffnbot!distinct:false      Don't make sure that we get distinct requests
     # ffnbot!directlinks         Also extract story requests from direct links
-    CONTEXT_MARKER_REGEX = re.compile(r"ffnbot!([^ ]+)")
+    CONTEXT_MARKER_REGEX = re.compile(r"ffnbot!([A-Za-z]+)")
 
     def __init__(self, request, markers=None):
         self.request = request

@@ -168,12 +168,13 @@ def handle_submission(submission, markers=set()):
             logging.error(e)
 
 
-def handle_message(message):
+def handle_message(message, markers=set()):
     global COUNT_REPLIES, TIME_SINCE_RESET, TIME_TO_RESET, COUNT_REPLIES_LIMIT
     """What we're using to handle direct messages."""
 
     logging.info("Handling new message: {0}".format(message.id))
 
+    markers |= parse_context_markers(message.body)
     # Mark message as read here so we don't loop over it in case of error.
     message.mark_read()
 
@@ -193,7 +194,6 @@ def handle_message(message):
     request_count = message.body.count('link') + message.body.count(';')
     body = message.body
 
-    markers = set()
     sub_recs = None
     if 'linksub(' in body:
         sub_recs = get_submission_recommendations(body)
@@ -463,7 +463,7 @@ def handle(obj, markers=set()):
     elif is_comment(obj):
         handle_comment(obj, set(markers))
     else:
-        handle_message(obj)
+        handle_message(obj, set(markers))
 
 
 def stream_handler(queue, iterator, handler):
@@ -521,10 +521,10 @@ def stream_strategy():
             bot_tools.print_exception(e)
 
 
-def parse_submission_text(submission, extra_markers):
+def parse_submission_text(submission, markers):
     body = submission.selftext
 
-    markers = extra_markers
+    markers |= parse_context_markers(body)
 
     additions = []
 
@@ -554,6 +554,8 @@ def make_reply(body, obj, markers=None, additions=(), sub_recs=None):
                        "\nWe allow a maximum of {0} stories".format(COUNT_REPLIES_LIMIT))
         logging.info("{0} exceeded story limit.".format(id))
         return
+
+    logging.info("Markers on reply to {0} consist of {1}".format(id, markers))
 
     raw_reply = "".join(reply)
     if 'slim' not in markers and len(raw_reply) > 0:
