@@ -112,11 +112,11 @@ class Story(object):
                 reddit_markdown.bold(
                     reddit_markdown.italics(
                         reddit_markdown.escape(self.get_title()))),
-                reddit_markdown.escape(self.get_url())) + " by " +
+                reddit_markdown.encode_url(self.get_url())) + " by " +
             reddit_markdown.link(
                 reddit_markdown.italics(
                     reddit_markdown.escape(self.get_author())),
-                reddit_markdown.escape(self.get_author_link())))
+                reddit_markdown.encode_url(self.get_author_link())))
         result.append("\n\n")
         # result.append("\n\n[***%s***](%s) by [*%s*](%s)" %
         #     self.get_title(), self.get_url(),

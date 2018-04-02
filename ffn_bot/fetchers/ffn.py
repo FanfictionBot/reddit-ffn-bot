@@ -119,7 +119,7 @@ class FanfictionBaseSite(site.Site):
         return Story(link, self.site, context, self.parser)
 
     def find_link(self, fic_name, context):
-        # Prevent users from crashing program eith bad link names.
+        # Prevent users from crashing program with bad link names.
         fic_name = fic_name.encode('ascii', errors='replace')
         fic_name = fic_name.decode('ascii', errors='replace')
 
