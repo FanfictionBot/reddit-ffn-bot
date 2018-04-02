@@ -1,5 +1,6 @@
-from .request import Request
 import praw.models as content_types
+
+from .request import Request
 
 
 class RedditRequest(Request):
@@ -33,6 +34,7 @@ class RedditRequest(Request):
         :param wrapper:   The wrapper.
         :return: A decorator or the class itself.
         """
+
         def _decorator(wrapper):
             cls.WRAPPED[type] = wrapper
             return wrapper

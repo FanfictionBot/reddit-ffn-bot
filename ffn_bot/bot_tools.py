@@ -1,9 +1,8 @@
-import sys
 import logging
 import platform
-import traceback
+import sys
 import time
-
+import traceback
 
 # colorama is not installed on
 # the system, we will use a fake ANSI-Class that will
@@ -19,6 +18,8 @@ except ImportError:
                 return super(FakeANSI, self).__getattr__(name)
             except AttributeError:
                 return ""
+
+
     Fore = FakeANSI()
     Back = FakeANSI()
     Style = FakeANSI()
@@ -41,10 +42,12 @@ def safe_int(value, default=None, converter=int):
     except ValueError:
         return default
 
+
 # Waiting for a keypress is platform dependent.
 # We will define the function determined by the platform.
 if platform.system() == "Windows":
     import msvcrt
+
 
     def wait(timeout=1, precision=1):
         """
@@ -91,6 +94,7 @@ else:
     import termios
     import fcntl
 
+
     def wait(timeout=1, precision=None):
         """
         Wait for a keypress.
@@ -111,7 +115,7 @@ else:
 
         # Yeah, we have to rape the terminal settings
         # before we think of polling the damn thing.
-        oldterm = termios.tcgetattr(fd)     # Store old state.
+        oldterm = termios.tcgetattr(fd)  # Store old state.
         newattr = termios.tcgetattr(fd)
         newattr[3] = newattr[3] & ~termios.ICANON & ~termios.ECHO
         termios.tcsetattr(fd, termios.TCSANOW, newattr)

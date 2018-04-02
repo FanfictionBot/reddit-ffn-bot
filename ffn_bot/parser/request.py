@@ -1,5 +1,6 @@
 # -*- encoding: utf-8 -*-
 import re
+
 from .parser import RequestParser
 
 
@@ -94,5 +95,3 @@ class Request(object):
                     yield (marker, None)
                     continue
                 yield marker.split(':', 2)
-
-

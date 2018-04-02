@@ -1,17 +1,19 @@
-import datetime
-import sys
 import argparse
 import configparser
+import datetime
 import logging
-import praw
-import time
-from praw.models import Submission
 import re
+import sys
+import time
 
-from ffn_bot.commentparser import formulate_reply, parse_context_markers
-from ffn_bot.commentparser import StoryLimitExceeded
-from ffn_bot.state import Application
+import praw
+from praw.models import Submission
+
 from ffn_bot import bot_tools
+from ffn_bot.commentparser import StoryLimitExceeded
+from ffn_bot.commentparser import formulate_reply, parse_context_markers
+from ffn_bot.reddit_markdown import remove_superscript
+from ffn_bot.state import Application
 
 
 def run_forever():
@@ -285,7 +287,7 @@ def refresh_handler(comment):
 
 
 def handle_comment(comment, extra_markers=set()):
-    logging.info("Handling new comment: {0}".format(comment.permalink))
+    logging.info("Handling new comment: {0}".format(getattr(comment, 'permalink', comment)))
 
     markers = parse_context_markers(comment.body)
     markers |= extra_markers
@@ -403,10 +405,11 @@ def slimify_comment(bot_comment):
             if str(all_metadata[i]).__contains__('*Status*: Complete'):
                 complete = ', complete'
             story = '\n\n' + titles_authors[i]
-            story += ' (' + wordcounts[i] + ' words' + complete + '; ' + downloads_fixed[i]
+            story += ' (' + wordcounts[i] + ' words' + complete + '; ' + downloads_fixed[i] + ')'
             story += '\n\n' + summaries[i] + '\n\n'
             story = story.replace('\\n', '\n')
             story = story.replace('---', '')
+            story = remove_superscript(story)
             try:
                 slimmed_stories.update({find_key(story): story})
             except:

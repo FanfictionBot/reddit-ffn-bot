@@ -1,11 +1,9 @@
 # Basic stuff
-from .parser import RequestParser
-from .request import Request
-
-# Reddit related stuff
-from .reddit import Comment, Submission
-from .message import Message
-
+from . import commands
 # Core logic
 from . import extractors
-from . import commands
+from .message import Message
+from .parser import RequestParser
+# Reddit related stuff
+from .reddit import Comment, Submission
+from .request import Request

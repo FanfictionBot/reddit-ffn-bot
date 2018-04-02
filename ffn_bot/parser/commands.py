@@ -1,7 +1,8 @@
 import logging
+
+from ffn_bot.state import Application
 from .parser import parser, RequestParser
 from .reddit import Comment
-from ffn_bot.state import Application
 
 
 @RequestParser.register(50)

@@ -1,11 +1,12 @@
 import re
+from random import randint
+
+from lxml import html
+
 from ffn_bot import bot_tools
 from ffn_bot import site
 from ffn_bot.cache import default_cache
 from ffn_bot.metaparse import Metaparser, parser
-
-from random import randint
-from lxml import html
 
 __all__ = ["FanfictionNetSite", "FictionPressSite"]
 
@@ -68,9 +69,9 @@ class FanfictionParser(Metaparser):
             if n_unnamed == 0:
                 yield "Language", subpart
             elif (
-                n_unnamed == 1 and sum(
-                    (g.strip() in FFN_GENRES)
-                    for g in subpart.split("/"))):
+                    n_unnamed == 1 and sum(
+                (g.strip() in FFN_GENRES)
+                for g in subpart.split("/"))):
                 yield "Genre", subpart
             else:
                 yield "Characters", subpart
@@ -128,7 +129,7 @@ class FanfictionBaseSite(site.Site):
         if sid is not None:
             return self.id_link % sid
 
-# Yield links directly without googling.
+        # Yield links directly without googling.
         match = self.link_regex.match(fic_name)
         if match is not None:
             return fic_name
@@ -174,7 +175,7 @@ class Story(site.Story):
             raise site.StoryDoesNotExist
         self.title = self.title[0]
         self.summary = (tree.xpath('//*[@id="profile_top"]/div/text()'))[0
-                                                                         ]
+        ]
         self.author += (tree.xpath('//*[@id="profile_top"]/a[1]/text()'))[
             0
         ]
@@ -196,8 +197,8 @@ class Story(site.Story):
         else:
             return ("http://www.ff2ebook.com/old/ffn-bot/index.php?id={0}&source=ff&filetype=epub".format(
                 re.findall(r'\d+', self.url)[0]),
-                "http://www.ff2ebook.com/old/ffn-bot/index.php?id={0}&source=ff&filetype=mobi".format(
-                re.findall(r'\d+', self.url)[0]))
+                    "http://www.ff2ebook.com/old/ffn-bot/index.php?id={0}&source=ff&filetype=mobi".format(
+                        re.findall(r'\d+', self.url)[0]))
 
 
 class FanfictionNetSite(FanfictionBaseSite):

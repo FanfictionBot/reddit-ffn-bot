@@ -1,4 +1,5 @@
 import re
+
 from bs4.dammit import EntitySubstitution
 
 linebreak = "---"
@@ -12,8 +13,14 @@ def italics(string):
     return '*' + string + '*'
 
 
-def exponentiate(string):
-    return '^(' + string + ')'
+def superscript(string):
+    if ')' not in string:
+        return '^(' + string + ')'
+    return '^' + re.sub(' +', ' ^', string)
+
+
+def remove_superscript(string):
+    return re.sub('\^', '', string)
 
 
 def quote(string):
@@ -23,6 +30,7 @@ def quote(string):
 def encode_url(string):
     encoder = EntitySubstitution()
     return encoder.substitute_html(string)
+
 
 def escape(string):
     return re.sub(r"([\\\[\]\-(){}+_!.#`^>*])", r"\\\1", string)

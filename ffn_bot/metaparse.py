@@ -1,17 +1,14 @@
 """
 I want a nicer implementation of some parsers.
 """
-import inspect
-import functools
 import collections
-
+import inspect
 
 basestring = (str, bytes)
 MetadataItem = collections.namedtuple("MetadataItem", "name value")
 
 
 class MetaparserMeta(type):
-
     """
     Metaclass for the Metadata-Parser class.
 
@@ -48,9 +45,9 @@ def _apply_generator(func, *args, **kwargs):
         for item in result:
             yield item
     elif (
-        (not isinstance(result, collections.Sequence))
-        or len(result) != 2
-        or (isinstance(result, basestring))
+            (not isinstance(result, collections.Sequence))
+            or len(result) != 2
+            or (isinstance(result, basestring))
     ):
         yield func.__name__, result
     else:
@@ -58,7 +55,6 @@ def _apply_generator(func, *args, **kwargs):
 
 
 class Metaparser(metaclass=MetaparserMeta):
-
     """
     What wonderful magic is happening here...
     :)

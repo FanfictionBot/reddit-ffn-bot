@@ -1,7 +1,7 @@
 from praw import models as content_type
 
-from .reddit import RedditRequest
 from .parser import parser
+from .reddit import RedditRequest
 
 
 @parser(lambda request: request.request.submission is not None)

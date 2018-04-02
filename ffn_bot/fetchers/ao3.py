@@ -1,18 +1,15 @@
-import re
-import logging
 import itertools
+import logging
+import re
 
-from google import search
-from requests import get
 from lxml import html
-from lxml.html import parse
 from lxml.cssselect import CSSSelector
 
-from ffn_bot.metaparse import Metaparser, parser
-from ffn_bot.cache import default_cache
-from ffn_bot.bot_tools import safe_int
-from ffn_bot.site import Site
 from ffn_bot import site
+from ffn_bot.bot_tools import safe_int
+from ffn_bot.cache import default_cache
+from ffn_bot.metaparse import Metaparser, parser
+from ffn_bot.site import Site
 
 __all__ = ["ArchiveOfOurOwn"]
 
@@ -29,6 +26,7 @@ AO3_SUMMARY_FINDER = '//*[@id="workskin"]//*[@class="summary module" and @role="
 AO3_FANDOM_TAGS = CSSSelector("dd.fandom ul li").path + "//text()"
 AO3_EPUB_DOWNLOAD = './/a[contains(text(),"EPUB")]/@href'
 AO3_MOBI_DOWNLOAD = './/a[contains(text(),"MOBI")]/@href'
+
 
 class AO3Metadata(Metaparser):
 
@@ -133,7 +131,8 @@ class Story(site.Story):
         self.summary = ""
 
     def get_real_url(self):
-        return "https://archiveofourown.org/works/%s?view_adult=true" % AO3_LINK_REGEX.match(self.url).groupdict()["sid"]
+        return "https://archiveofourown.org/works/%s?view_adult=true" % AO3_LINK_REGEX.match(self.url).groupdict()[
+            "sid"]
 
     def get_url(self):
         return "https://archiveofourown.org/works/%s" % AO3_LINK_REGEX.match(self.url).groupdict()["sid"]
@@ -157,4 +156,4 @@ class Story(site.Story):
     def get_download(self):
         epub_download = "https://archiveofourown.org" + self.get_value_from_tree(AO3_EPUB_DOWNLOAD)
         mobi_download = "https://archiveofourown.org" + self.get_value_from_tree(AO3_MOBI_DOWNLOAD)
-        return(epub_download, mobi_download)
+        return (epub_download, mobi_download)

@@ -1,12 +1,13 @@
-import time
 import random
-from google import search
-from requests import get
+import time
 from collections import OrderedDict
+
+from requests import get
+
+from google import search
 
 
 class LimitedSizeDict(OrderedDict):
-
     """The actual cache implementation."""
 
     def __init__(self, *args, **kwds):
@@ -25,7 +26,6 @@ class LimitedSizeDict(OrderedDict):
 
 
 class RequestCache(object):
-
     """
     Cache for search requests and page-loads.
     """
@@ -84,5 +84,6 @@ class RequestCache(object):
         result = next(search(query, num=1, stop=1), None)
         self.push_cache("search", query, result)
         return result
+
 
 default_cache = RequestCache()

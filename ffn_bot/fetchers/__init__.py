@@ -1,6 +1,5 @@
-import os.path
 import collections
-from itertools import chain
+import os.path
 from pkgutil import iter_modules
 
 from ffn_bot.site import Site
@@ -42,6 +41,5 @@ def get_sites():
 
 
 SITES = list(_load_sites())
-
 
 __all__ = ["SITES"]

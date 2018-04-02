@@ -2,10 +2,10 @@ import re
 
 from lxml import html
 
-from ffn_bot.metaparse import MetadataItem, Metaparser, parser
-from ffn_bot.cache import default_cache
-from ffn_bot.site import Site
 from ffn_bot import site
+from ffn_bot.cache import default_cache
+from ffn_bot.metaparse import Metaparser, parser
+from ffn_bot.site import Site
 
 # This regexes will be tried to generate a response
 AFF_MATCH_REGEX = (
@@ -127,8 +127,8 @@ class Story(site.Story):
         # We will generate the stats ourselves.
         self.stats = AFFMetadata((self.archive, self.id), tree)
         self.title = tree.xpath(AFF_TITLE_XPATH)[0].strip()[
-            len("Story: "):
-        ]
+                     len("Story: "):
+                     ]
         self.author = tree.xpath(AFF_AUTHOR_NAME)[0].strip()
         self.authorlink = tree.xpath(AFF_AUTHOR_URL)[0]
 

@@ -1,6 +1,6 @@
+import logging
 import re
 from collections import OrderedDict
-import logging
 
 from ffn_bot import reddit_markdown
 
@@ -71,7 +71,7 @@ class Story(object):
         return self.title
 
     def get_site(self):
-        """Return the name of the site. (None means unknown)"""
+        """Return the name and URL of the site. (None means unknown)"""
         return None
 
     def get_download(self):
@@ -105,7 +105,7 @@ class Story(object):
         except Exception as e:
             logging.error("(STORY) Could not load story!")
             logging.error(e)
-            return("")
+            return ("")
         result = ["\n\n"]
         result.append(
             reddit_markdown.link(
@@ -118,21 +118,11 @@ class Story(object):
                     reddit_markdown.escape(self.get_author())),
                 reddit_markdown.encode_url(self.get_author_link())))
         result.append("\n\n")
-        # result.append("\n\n[***%s***](%s) by [*%s*](%s)" %
-        #     self.get_title(), self.get_url(),
-        #     self.get_author(), self.get_author_link()
-        # ))
-
-        result.append("\n\n")
         result.extend(
             reddit_markdown.quote(
                 reddit_markdown.escape(self.get_summary())).split("\n"))
         result.append("")
-        result.append(reddit_markdown.exponentiate(self.format_stats()))
-        # result.append("[" + str(id(self)) + "]: " + self._lnk)
-        for name, link in self._lnk:
-            result.append("[%s:%s]: %s" % (str(id(self)), name, link))
-
+        result.append(reddit_markdown.superscript(self.format_stats()))
         result.append("\n\n" + reddit_markdown.linebreak + "\n\n")
 
         return "\n".join(result)
@@ -140,12 +130,9 @@ class Story(object):
     def format_stats(self):
         stats = OrderedDict()
         site = self.get_site()
-        self._lnk = []
         if site is not None:
             _site = iter(site)
-            site = "[" + next(_site) + "][" + str(id(self)) + ":site]"
-            self._lnk.append(("site", next(_site)))
-            stats["Site"] = site
+            stats["Site"] = "[{0}]({1})".format(next(_site), reddit_markdown.encode_url(next(_site)))
 
         for k, v in self.get_stats().items():
             stats[self.super_escape(k)] = self.super_escape(v)
@@ -159,9 +146,7 @@ class Story(object):
             epub = download[0]
             mobi = download[1]
             res.append(
-                "*Download*: [EPUB][{0}:epub] or [MOBI][{1}:mobi]".format(str(id(self)), str(id(self))))
-            self._lnk.append(("epub", epub))
-            self._lnk.append(("mobi", mobi))
+                "*Download*: [EPUB]({0}) or [MOBI]({1})".format(epub, mobi))
         return (" " + reddit_markdown.bold("|") + " ").join(res)
 
     @staticmethod

@@ -1,15 +1,15 @@
 # Harry Potter Fanfic Archive site
 
-import re
 import logging
+import re
 
 from lxml import html
 
-from ffn_bot.cache import default_cache
-from ffn_bot.bot_tools import safe_int
-from ffn_bot.site import Site
 from ffn_bot import site
+from ffn_bot.bot_tools import safe_int
+from ffn_bot.cache import default_cache
 from ffn_bot.metaparse import Metaparser, parser
+from ffn_bot.site import Site
 
 __all__ = ["HPFanfictionArchive"]
 
@@ -145,7 +145,7 @@ class Story(site.Story):
         self.title = tree.xpath(FFA_TITLE)[0]
         self.author = tree.xpath(FFA_AUTHOR_NAME)[0]
         self.authorlink = 'http://www.hpfanficarchive.com/stories/' + \
-            tree.xpath(FFA_AUTHOR_URL)[0]
+                          tree.xpath(FFA_AUTHOR_URL)[0]
 
     def get_site(self):
         return "HP Fanfic Archive", "http://www.hpfanficarchive.com"

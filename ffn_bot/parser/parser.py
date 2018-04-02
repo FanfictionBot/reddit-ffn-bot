@@ -22,6 +22,7 @@ class RequestParser(object):
         :param parser:    The parser itself.
         :return: A decorator.
         """
+
         def _decorator(parser):
             # The second argument should differ for each element in the list.
             bisect.insort(cls.PARSERS, (priority, len(cls.PARSERS), parser))
@@ -67,7 +68,7 @@ class parser(RequestParser):
     and the function itself as the actual parser code itself.
     """
 
-    def __init__(self, filter = None):
+    def __init__(self, filter=None):
         self.filter = filter
         self.decorated = None
 
@@ -84,11 +85,10 @@ class parser(RequestParser):
         return self
 
     def __repr__(self):
-        return "<parser filter:%r function:%r>"%(self.filter, self.decorated)
+        return "<parser filter:%r function:%r>" % (self.filter, self.decorated)
 
 
 @RequestParser.register(-1)
 @parser(lambda request: "ignore" in request.markers)
 def ignore_request(request):
     return False
-

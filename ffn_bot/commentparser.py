@@ -2,10 +2,9 @@
 This file handles the comment parsing.
 """
 import itertools
+
 from ffn_bot import site
-
 from ffn_bot.parser import Request
-
 
 MAX_REPLY_LENGTH = 8000
 MAX_STORIES_PER_POST = 30
@@ -20,9 +19,10 @@ def deprecated(func):
 
     @functools.wraps(func)
     def new_func(*args, **kwargs):
-        warnings.simplefilter('always', DeprecationWarning) #turn off filter
-        warnings.warn("Call to deprecated function {}.".format(func.__name__), category=DeprecationWarning, stacklevel=2)
-        warnings.simplefilter('default', DeprecationWarning) #reset filter
+        warnings.simplefilter('always', DeprecationWarning)  # turn off filter
+        warnings.warn("Call to deprecated function {}.".format(func.__name__), category=DeprecationWarning,
+                      stacklevel=2)
+        warnings.simplefilter('default', DeprecationWarning)  # reset filter
         return func(*args, **kwargs)
 
     return new_func
