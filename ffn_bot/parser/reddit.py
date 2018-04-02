@@ -1,5 +1,5 @@
 from .request import Request
-import praw.objects as content_types
+import praw.models as content_types
 
 
 class RedditRequest(Request):

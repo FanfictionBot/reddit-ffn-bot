@@ -32,7 +32,6 @@ class StoryLimitExceeded(Exception):
     pass
 
 
-@deprecated
 def parse_context_markers(comment_body):
     """
     Changes the context of the story subsystem.

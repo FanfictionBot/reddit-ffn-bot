@@ -106,3 +106,5 @@ target/
 #############################################
 # Project-Specific
 CHECKED_COMMENTS.txt
+config_private.ini
+venv/

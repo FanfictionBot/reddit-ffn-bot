@@ -52,9 +52,15 @@ def direct_links(request):
 @parser(lambda request: request.markers.get('distinct', 'true').lower() == 'true')
 def distinct_stories(request):
     """
-    Makes the stories distinct.
+    Makes the stories distinct while maintaining order.
     :param request:  The bot-request.
     :return: True
     """
-    request.stories = list(set(request.stories))
+    all_stories = set()
+    deduplicated = []
+    for story in request.stories:
+        if story not in all_stories:
+            all_stories.add(story)
+            deduplicated.append(story)
+    request.stories = deduplicated
     return True

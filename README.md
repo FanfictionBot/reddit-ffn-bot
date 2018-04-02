@@ -30,11 +30,38 @@ directory.
     $ pip install -r requirements.txt
 ```
 
+
+## Configuring the bot
+On your Reddit account, create an app (Preferences > Apps > Create Another App). Enter `https://github.com/tusing/reddit-ffn-bot/wiki/Usage` as the *about url* and `http://127.0.0.1:65010/authorize_callback` as the *redirect uri*. Hit create.
+
+The value under *personal use script* is your client ID; the value next to *secret* is your client secret. Open up `config.ini` and replace the `[REDACTED]`s with the appropriate values (including your own username and password).
+
+Replace the `subreddits` value with a comma-separated list of the subreddits you'd like to run the bot on.
+
+
 ## Starting the bot
 Use the following command to start the bot
 ```
-    $ python . -u <USERNAME> -p <PASSWORD> -s <SUBREDDIT/MULTIREDDIT>
+    $ python . -d
 ```
+
+Advanced usage:
+
+```
+usage: . [-h] [-s SUBREDDITS] [-d] [-l] [-v VERBOSITY] [-c CONFIG]
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -s SUBREDDITS, --subreddits SUBREDDITS
+                        define target subreddits; separate with commas
+  -d, --default         add config file subreddits, can be in addition to -s
+  -l, --dry             do not send comments.
+  -v VERBOSITY, --verbosity VERBOSITY
+                        The default log level. Using python level states.
+  -c CONFIG, --config CONFIG
+                        The location of your config.ini.
+```
+
 
 ## Contributing
 We happily accept contributions. Please note, that we only accept pull

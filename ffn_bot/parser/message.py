@@ -1,4 +1,4 @@
-from praw import objects as content_type
+from praw import models as content_type
 
 from .reddit import RedditRequest
 from .parser import parser
