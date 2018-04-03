@@ -132,7 +132,7 @@ class Story(object):
         site = self.get_site()
         if site is not None:
             _site = iter(site)
-            stats["Site"] = "[{0}]({1})".format(next(_site), reddit_markdown.encode_url(next(_site)))
+            stats["Site"] = next(_site)
 
         for k, v in self.get_stats().items():
             stats[self.super_escape(k)] = self.super_escape(v)
