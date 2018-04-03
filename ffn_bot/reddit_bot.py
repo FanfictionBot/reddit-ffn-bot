@@ -234,6 +234,9 @@ def parent_handler(comment):
 def _refresh_get_requests_comment(comment):
     # Get the full comment or submission
     obj_with_requests = comment.parent()
+    if not repliable(obj_with_requests) or obj_with_requests.author is None:
+        logging.info("(Refresh) Parent of {0} is not repliable!".format(comment))
+        return None
     if obj_with_requests.author.name == BOT_USERNAME:  # parent of bot comment has requests
         obj_with_requests = obj_with_requests.parent()
     logging.info("(Refresh) Refresh requested on comment {0}".format(obj_with_requests))
