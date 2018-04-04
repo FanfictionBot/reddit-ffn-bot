@@ -492,37 +492,44 @@ def post_receiver(queue):
         handler(post)
 
 
+def _make_thread(stream_type, multireddit, post_queue):
+    stream_types = {
+        "comments": r.subreddit(multireddit).stream.comments,
+        "submissions": r.subreddit(multireddit).stream.submissions,
+        "inbox": r.inbox.stream
+    }
+
+    return Thread(target=lambda: stream_handler(
+        post_queue,
+        stream_types[stream_type](pause_after=0),
+        handle))
+
+
 def stream_strategy():
     post_queue = Queue()
-    threads = []
+    threads = {}
     multireddit = "+".join(SUBREDDIT_LIST)
+    stream_types = ["comments", "submissions", "inbox"]
 
-    threads.append(Thread(target=lambda: stream_handler(
-        post_queue,
-        r.subreddit(multireddit).stream.comments(pause_after=0),
-        handle)))
-    threads.append(Thread(target=lambda: stream_handler(
-        post_queue,
-        r.subreddit(multireddit).stream.submissions(pause_after=0),
-        handle)))
-    threads.append(Thread(target=lambda: stream_handler(
-        post_queue,
-        r.inbox.stream(pause_after=0),
-        handle)))
+    def assign_thread(stream_type):
+        threads[stream_type] = _make_thread(stream_type, multireddit, post_queue)
+        threads[stream_type].daemon = True
+        threads[stream_type].start()
+        logging.info("(Stream Strategy) Began stream type: {0}".format(stream_type))
 
-    for thread in threads:
-        thread.daemon = True
-        thread.start()
+    for stream_type in stream_types:
+        assign_thread(stream_type)
 
     while True:
         try:
             post_receiver(post_queue)
         except Exception as e:
-            for thread in threads:
-                if not thread.isAlive():
-                    raise Exception("Streaming thread dead! Are you logged in correctly?")
+            logging.error("(Stream Strategy) Exception below.")
             bot_tools.print_exception(e)
-
+            for stream_type in stream_types:
+                if not threads[stream_type].isAlive():
+                    logging.error('(Stream Strategy) Restarting failed thread: {0}'.format(stream_type))
+                    assign_thread(stream_type)
 
 def parse_submission_text(submission, markers):
     body = submission.selftext
