@@ -15,6 +15,9 @@ from ffn_bot.commentparser import formulate_reply, parse_context_markers
 from ffn_bot.reddit_markdown import remove_superscript
 from ffn_bot.state import Application
 
+from queue import Queue
+from threading import Thread
+
 
 def run_forever():
     sys.exit(_run_forever())
@@ -403,7 +406,7 @@ def slimify_comment(bot_comment):
         slimmed_stories = {}
         for i in range(len(all_metadata)):
             complete = ''
-            if str(all_metadata[i]).__contains__('*Status*: Complete'):
+            if str(all_metadata[i]).__contains__('^*Status*: ^Complete'):
                 complete = ', complete'
             story = '\n\n' + titles_authors[i]
             story += ' (' + wordcounts[i] + ' words' + complete + '; ' + downloads_fixed[i] + ')'
@@ -490,9 +493,6 @@ def post_receiver(queue):
 
 
 def stream_strategy():
-    from queue import Queue
-    from threading import Thread
-
     post_queue = Queue()
     threads = []
     multireddit = "+".join(SUBREDDIT_LIST)
