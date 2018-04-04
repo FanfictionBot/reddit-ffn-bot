@@ -5,6 +5,8 @@ import logging
 import re
 import sys
 import time
+from queue import Queue
+from threading import Thread
 
 import praw
 from praw.models import Submission
@@ -14,9 +16,6 @@ from ffn_bot.commentparser import StoryLimitExceeded
 from ffn_bot.commentparser import formulate_reply, parse_context_markers
 from ffn_bot.reddit_markdown import remove_superscript
 from ffn_bot.state import Application
-
-from queue import Queue
-from threading import Thread
 
 
 def run_forever():
@@ -286,7 +285,7 @@ def refresh_handler(comment):
     _refresh_delete_comments(delete_list)
 
     logging.info("(Refresh) Re-handling {0}".format(obj_with_requests.id))
-    handle(obj_with_requests, set(["force"]))
+    handle(obj_with_requests, {"force"})
     return
 
 
@@ -343,8 +342,8 @@ def get_submission_recommendations(request_body):
 
     for sub_request in sub_requests:  # For every linksub(...),
         # Add the submission ID for every Reddit thread linked, and
-        sub_ids += re.findall('redd\.it\/(\S{6})', sub_request)
-        sub_ids += re.findall('\/comments\/(\S{6})', sub_request)
+        sub_ids += re.findall('redd\.it/(\S{6})', sub_request)
+        sub_ids += re.findall('/comments/(\S{6})', sub_request)
         # Add the submission ID if it is explicitly defined.
         sub_request = sub_request.replace(" ", "")  # Remove whitespace
         sub_ids += [sub_id for sub_id in sub_request.split(';') if len(sub_id) == 6]
@@ -377,9 +376,9 @@ def slimify_comment(bot_comment):
     Returns a list of stories.
     TODO: Find a less hacky way to do this.
     """
-    find_key = lambda slim_story: re.findall('(\[(\ |\S)+\) by)', slim_story)[0][0]
+    find_key = lambda slim_story: re.findall('(\[( |\S)+\) by)', slim_story)[0][0]
     if 'slim!FanfictionBot' in bot_comment:
-        slimmed_stories = [story[0] for story in re.findall('((\n(.+)by(.+)(\s|\S)+?)\n+\>(\ |\S)+\n)', bot_comment)]
+        slimmed_stories = [story[0] for story in re.findall('((\n(.+)by(.+)(\s|\S)+?)\n+>( |\S)+\n)', bot_comment)]
         slimmed_stories_dict = {}
         for story in slimmed_stories:
             try:
@@ -388,10 +387,10 @@ def slimify_comment(bot_comment):
                 pass
         slimmed_stories = slimmed_stories_dict
     else:
-        all_metadata = re.findall('(\^(\s|\S)*?\-{3})', bot_comment)  # Get metadata
-        titles_authors = re.findall('((\n(.+)by(.+))\n+\>)', bot_comment)
+        all_metadata = re.findall('(\^(\s|\S)*?-{3})', bot_comment)  # Get metadata
+        titles_authors = re.findall('((\n(.+)by(.+))\n+>)', bot_comment)
         titles_authors = [title_author[1] for title_author in titles_authors]
-        summaries = re.findall('(\>(.*))\n+\^', bot_comment)
+        summaries = re.findall('(>(.*))\n+\^', bot_comment)
         summaries = [summary[0] for summary in summaries]
         wordcounts = re.findall('(Word(\D)+((\d{1,3})+(,|\d{1,3})+)+)', str(all_metadata))
         wordcounts = [wordcount[2] for wordcount in wordcounts]
@@ -531,6 +530,7 @@ def stream_strategy():
                     logging.error('(Stream Strategy) Restarting failed thread: {0}'.format(stream_type))
                     assign_thread(stream_type)
 
+
 def parse_submission_text(submission, markers):
     body = submission.selftext
 
@@ -587,7 +587,7 @@ def make_reply(body, obj, markers=None, additions=(), sub_recs=None):
         slim_stories += slimify_comment(raw_reply)
 
         # Deal with any remaining duplicates.
-        find_key = lambda slim_story: re.findall('(\[(\ |\S)+\) by)', slim_story)[0][0]
+        find_key = lambda slim_story: re.findall('(\[( |\S)+\) by)', slim_story)[0][0]
         slim_stories = list({find_key(story): story for story in slim_stories}.values())
 
         total_character_count = sum([len(story) for story in slim_stories])
