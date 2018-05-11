@@ -41,7 +41,7 @@ def load_config():
     global config, cli_args, r
     global USER_AGENT, DEFAULT_SUBREDDITS, SUBREDDIT_LIST, FOOTER, APPLICATION, \
         COUNT_REPLIES, COUNT_REPLIES_LIMIT, TIME_TO_RESET, TIME_SINCE_RESET, DRY_RUN, \
-        BOT_USERNAME, LAST_REPLY_TIME
+        BOT_USERNAME, MIN_VALID_TIME
     global __author__, __version__
 
     config = configparser.ConfigParser()
@@ -67,9 +67,8 @@ def load_config():
 
     level = getattr(logging, cli_args["verbosity"].upper())
     logging.getLogger().setLevel(level)
-
     r = get_authenticated_instance()
-    LAST_REPLY_TIME = last_comment_time()
+    MIN_VALID_TIME = last_comment_time()
 
 
 def get_authenticated_instance():
@@ -290,7 +289,8 @@ def refresh_handler(comment):
 
 
 def handle_comment(comment, extra_markers=set()):
-    logging.info("Handling new comment: {0}".format(getattr(comment, 'permalink', comment)))
+    # comment.permalink
+    logging.info("Handling new comment: {0}".format(comment.permalink))
 
     markers = parse_context_markers(comment.body)
     markers |= extra_markers
@@ -449,20 +449,15 @@ def repliable(obj):
     if is_comment(obj) or is_message(obj) or is_submission(obj):
         return True
 
-    logging.error("Found invalid object ".format(obj))
+    logging.error("Found invalid object {0}".format(obj))
     return False
 
 
 def handle(obj, markers=set()):
     if not repliable(obj):
-        return
-    logging.info("Handling object {0}".format(obj.id))
-
-    if ("refresh" not in markers and "force" not in markers) and \
-            (time_created(obj) < LAST_REPLY_TIME):
-        logging.info("Skipping object " + obj.id + " - object too old!")
         return False
 
+    logging.info("Handling object {0}".format(obj.id))
     if is_submission(obj):
         handle_submission(obj, set(markers))
     elif is_comment(obj):
@@ -471,14 +466,31 @@ def handle(obj, markers=set()):
         handle_message(obj, set(markers))
 
 
+def valid_time(obj):
+    global MIN_VALID_TIME
+    if not repliable(obj):
+        return False
+
+    print('\n')
+    obj_time = time_created(obj)
+    if obj_time > MIN_VALID_TIME:  # Check against cached time; update if necessary
+        MIN_VALID_TIME = last_comment_time()
+
+    if obj_time < MIN_VALID_TIME:
+        logging.warning("Object {0} creation time < min time ({1} < {2})".format(obj, obj_time, MIN_VALID_TIME))
+        return False
+    logging.info("Object {0} creation time >= min time ({1} >= {2})".format(obj, obj_time, MIN_VALID_TIME))
+    return True
+
+
 def stream_handler(queue, iterator, handler):
     def _raise(exc):
         raise exc
 
     try:
         for post in iterator:
-            if post is not None:
-                logging.info("Queueing Post: " + str(post) + '\n')
+            if post is not None and valid_time(post):
+                logging.info("Queueing Post: " + str(post))
                 queue.put_nowait((handler, post))
     except BaseException as e:
         # Send the actual exception to the main thread
