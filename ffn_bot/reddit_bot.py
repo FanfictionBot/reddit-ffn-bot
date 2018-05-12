@@ -224,14 +224,6 @@ def handle_message(message, markers=set()):
     return
 
 
-def parent_handler(comment):
-    if comment.is_root:
-        item = comment.submission
-    else:
-        item = r.comment(id=comment.parent_id)
-    handle(item, {"directlinks", "submissionlink", "force"})
-
-
 def _refresh_get_requests_comment(comment):
     # Get the full comment or submission
     obj_with_requests = comment.parent()
@@ -284,7 +276,7 @@ def refresh_handler(comment):
     _refresh_delete_comments(delete_list)
 
     logging.info("(Refresh) Re-handling {0}".format(obj_with_requests.id))
-    handle(obj_with_requests, {"force"})
+    handle(obj_with_requests, {"directlinks", "submissionlink", "force"})
     return
 
 
@@ -299,10 +291,7 @@ def handle_comment(comment, extra_markers=set()):
         logging.info("Ignoring {0}".format(comment.id))
         return
 
-    if "parent" in markers:
-        parent_handler(comment)
-
-    if "refresh" in markers:
+    if "parent" in markers or "refresh" in markers:
         refresh_handler(comment)
 
     body = comment.body
