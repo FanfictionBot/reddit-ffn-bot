@@ -73,7 +73,7 @@ You can find our pull request page here: [Pull Requests][github:pull-requests]
 [ffn]: https://www.fanfiction.net/
 [fp]:  https://www.fictionpress.com/
 [ffa]: http://hpfanficarchive.com/
-[ao3]: http://archiveofown.org/
+[ao3]: http://archiveofourown.org/
 [aff]: http://www.adultfanfiction.net/
 
 [github:bleeding]:      https://github.com/tusing/reddit-ffn-bot/tree/bleeding
