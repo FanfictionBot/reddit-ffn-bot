@@ -4,7 +4,7 @@ from collections import OrderedDict
 
 from requests import get
 
-from google import search
+from googlesearch import search
 
 
 class LimitedSizeDict(OrderedDict):
