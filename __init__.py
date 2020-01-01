@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 # Python bindings to the Google search engine
-# Copyright (c) 2009-2015, Mario Vilas
+# Copyright (c) 2009-2019, Mario Vilas
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -28,9 +28,8 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-__all__ = ['search']
-
 import os
+import random
 import sys
 import time
 
@@ -44,17 +43,49 @@ else:
     from urllib2 import Request, urlopen
     from urlparse import urlparse, parse_qs
 
-# Lazy import of BeautifulSoup.
-BeautifulSoup = None
+try:
+    from bs4 import BeautifulSoup
+    is_bs4 = True
+except ImportError:
+    from BeautifulSoup import BeautifulSoup
+    is_bs4 = False
+
+__all__ = [
+
+    # Main search function.
+    'search',
+
+    # Specialized search functions.
+    'search_images', 'search_news',
+    'search_videos', 'search_shop',
+    'search_books', 'search_apps',
+
+    # Shortcut for "get lucky" search.
+    'lucky',
+
+    # Miscellaneous utility functions.
+    'get_random_user_agent', 'get_tbs',
+]
 
 # URL templates to make Google searches.
-url_home = "http://www.google.%(tld)s/"
-url_search = "http://www.google.%(tld)s/search?hl=%(lang)s&q=%(query)s&btnG=Google+Search&tbs=%(tbs)s&safe=%(safe)s&tbm=%(tpe)s"
-url_next_page = "http://www.google.%(tld)s/search?hl=%(lang)s&q=%(query)s&start=%(start)d&tbs=%(tbs)s&safe=%(safe)s&tbm=%(tpe)s"
-url_search_num = "http://www.google.%(tld)s/search?hl=%(lang)s&q=%(query)s&num=%(num)d&btnG=Google+Search&tbs=%(tbs)s&safe=%(safe)s&tbm=%(tpe)s"
-url_next_page_num = "http://www.google.%(tld)s/search?hl=%(lang)s&q=%(query)s&num=%(num)d&start=%(start)d&tbs=%(tbs)s&safe=%(safe)s&tbm=%(tpe)s"
+url_home = "https://www.google.%(tld)s/"
+url_search = "https://www.google.%(tld)s/search?hl=%(lang)s&q=%(query)s&" \
+             "btnG=Google+Search&tbs=%(tbs)s&safe=%(safe)s&tbm=%(tpe)s&" \
+             "cr=%(country)s"
+url_next_page = "https://www.google.%(tld)s/search?hl=%(lang)s&q=%(query)s&" \
+                "start=%(start)d&tbs=%(tbs)s&safe=%(safe)s&tbm=%(tpe)s&" \
+                "cr=%(country)s"
+url_search_num = "https://www.google.%(tld)s/search?hl=%(lang)s&q=%(query)s&" \
+                 "num=%(num)d&btnG=Google+Search&tbs=%(tbs)s&safe=%(safe)s&" \
+                 "tbm=%(tpe)s&cr=%(country)s"
+url_next_page_num = "https://www.google.%(tld)s/search?hl=%(lang)s&" \
+                    "q=%(query)s&num=%(num)d&start=%(start)d&tbs=%(tbs)s&" \
+                    "safe=%(safe)s&tbm=%(tpe)s&cr=%(country)s"
+url_parameters = (
+    'hl', 'q', 'num', 'btnG', 'start', 'tbs', 'safe', 'tbm', 'cr')
 
 # Cookie jar. Stored at the user's home folder.
+# If the cookie jar is inaccessible, the errors are ignored.
 home_folder = os.getenv('HOME')
 if not home_folder:
     home_folder = os.getenv('USERHOME')
@@ -66,33 +97,92 @@ try:
 except Exception:
     pass
 
+# Default user agent, unless instructed by the user to change it.
+USER_AGENT = 'Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 6.0)'
+
+# Load the list of valid user agents from the install folder.
+# The search order is:
+#   * user_agents.txt.gz
+#   * user_agents.txt
+#   * default user agent
+try:
+    install_folder = os.path.abspath(os.path.split(__file__)[0])
+    try:
+        user_agents_file = os.path.join(install_folder, 'user_agents.txt.gz')
+        import gzip
+        fp = gzip.open(user_agents_file, 'rb')
+        try:
+            user_agents_list = [_.strip() for _ in fp.readlines()]
+        finally:
+            fp.close()
+            del fp
+    except Exception:
+        user_agents_file = os.path.join(install_folder, 'user_agents.txt')
+        with open(user_agents_file) as fp:
+            user_agents_list = [_.strip() for _ in fp.readlines()]
+except Exception:
+    user_agents_list = [USER_AGENT]
+
+
+# Get a random user agent.
+def get_random_user_agent():
+    """
+    Get a random user agent string.
+
+    :rtype: str
+    :return: Random user agent string.
+    """
+    return random.choice(user_agents_list)
+
+
+# Helper function to format the tbs parameter.
+def get_tbs(from_date, to_date):
+    """
+    Helper function to format the tbs parameter.
+
+    :param datetime.date from_date: Python date object.
+    :param datetime.date to_date: Python date object.
+
+    :rtype: str
+    :return: Dates encoded in tbs format.
+    """
+    from_date = from_date.strftime('%m/%d/%Y')
+    to_date = to_date.strftime('%m/%d/%Y')
+    return 'cdr:1,cd_min:%(from_date)s,cd_max:%(to_date)s' % vars()
+
 
 # Request the given URL and return the response page, using the cookie jar.
-def get_page(url):
+# If the cookie jar is inaccessible, the errors are ignored.
+def get_page(url, user_agent=None):
     """
     Request the given URL and return the response page, using the cookie jar.
 
-    @type  url: str
-    @param url: URL to retrieve.
+    :param str url: URL to retrieve.
+    :param str user_agent: User agent for the HTTP requests.
+        Use None for the default.
 
-    @rtype:  str
-    @return: Web page retrieved for the given URL.
+    :rtype: str
+    :return: Web page retrieved for the given URL.
 
-    @raise IOError: An exception is raised on error.
-    @raise urllib2.URLError: An exception is raised on error.
-    @raise urllib2.HTTPError: An exception is raised on error.
+    :raises IOError: An exception is raised on error.
+    :raises urllib2.URLError: An exception is raised on error.
+    :raises urllib2.HTTPError: An exception is raised on error.
     """
+    if user_agent is None:
+        user_agent = USER_AGENT
     print("GETTING THE PAGE AT ", url)
     request = Request(url)
     logging.info("Requesting,")
-    request.add_header('User-Agent',
-                       'Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 6.0)')
+    request.add_header('User-Agent', user_agent)
     cookie_jar.add_cookie_header(request)
     response = urlopen(request)
     cookie_jar.extract_cookies(response, request)
     html = response.read()
     response.close()
-    cookie_jar.save()
+    try:
+        cookie_jar.save()
+    except Exception:
+        pass
     return html
 
 
@@ -101,140 +191,85 @@ def get_page(url):
 def filter_result(link):
     try:
 
-        # Valid results are absolute URLs not pointing to a Google domain
-        # like images.google.com or googleusercontent.com
+        # Decode hidden URLs.
+        if link.startswith('/url?'):
+            o = urlparse(link, 'http')
+            link = parse_qs(o.query)['q'][0]
+
+        # Valid results are absolute URLs not pointing to a Google domain,
+        # like images.google.com or googleusercontent.com for example.
+        # TODO this could be improved!
         o = urlparse(link, 'http')
         if o.netloc and 'google' not in o.netloc:
             return link
 
-        # Decode hidden URLs.
-        if link.startswith('/url?'):
-            link = parse_qs(o.query)['q'][0]
-
-            # Valid results are absolute URLs not pointing to a Google domain
-            # like images.google.com or googleusercontent.com
-            o = urlparse(link, 'http')
-            if o.netloc and 'google' not in o.netloc:
-                return link
-
-    # Otherwise, or on error, return None.
+    # On error, return None.
     except Exception:
         pass
-    return None
-
-
-# Shortcut to search images
-# Beware, this does not return the image link.
-def search_images(query, tld='com', lang='en', tbs='0', safe='off', num=10, start=0,
-                  stop=None, pause=2.0, only_standard=False, extra_params={}):
-    return search(query, tld, lang, tbs, safe, num, start, stop, pause, only_standard, extra_params, tpe='isch')
-
-
-# Shortcut to search news
-def search_news(query, tld='com', lang='en', tbs='0', safe='off', num=10, start=0,
-                stop=None, pause=2.0, only_standard=False, extra_params={}):
-    return search(query, tld, lang, tbs, safe, num, start, stop, pause, only_standard, extra_params, tpe='nws')
-
-
-# Shortcut to search videos
-def search_videos(query, tld='com', lang='en', tbs='0', safe='off', num=10, start=0,
-                  stop=None, pause=2.0, only_standard=False, extra_params={}):
-    return search(query, tld, lang, tbs, safe, num, start, stop, pause, only_standard, extra_params, tpe='vid')
-
-
-# Shortcut to search shop
-def search_shop(query, tld='com', lang='en', tbs='0', safe='off', num=10, start=0,
-                stop=None, pause=2.0, only_standard=False, extra_params={}):
-    return search(query, tld, lang, tbs, safe, num, start, stop, pause, only_standard, extra_params, tpe='shop')
-
-
-# Shortcut to search books
-def search_books(query, tld='com', lang='en', tbs='0', safe='off', num=10, start=0,
-                 stop=None, pause=2.0, only_standard=False, extra_params={}):
-    return search(query, tld, lang, tbs, safe, num, start, stop, pause, only_standard, extra_params, tpe='bks')
-
-
-# Shortcut to search apps
-def search_apps(query, tld='com', lang='en', tbs='0', safe='off', num=10, start=0,
-                stop=None, pause=2.0, only_standard=False, extra_params={}):
-    return search(query, tld, lang, tbs, safe, num, start, stop, pause, only_standard, extra_params, tpe='app')
 
 
 # Returns a generator that yields URLs.
 def search(query, tld='com', lang='en', tbs='0', safe='off', num=10, start=0,
-           stop=None, pause=2.0, only_standard=False, extra_params={}, tpe=''):
+           stop=None, domains=None, pause=2.0, tpe='', country='',
+           extra_params=None, user_agent=None):
     """
     Search the given query string using Google.
 
-    @type  query: str
-    @param query: Query string. Must NOT be url-encoded.
-
-    @type  tld: str
-    @param tld: Top level domain.
-
-    @type  lang: str
-    @param lang: Languaje.
-
-    @type  tbs: str
-    @param tbs: Time limits (i.e "qdr:h" => last hour, "qdr:d" => last 24 hours, "qdr:m" => last month).
-
-    @type  safe: str
-    @param safe: Safe search.
-
-    @type  num: int
-    @param num: Number of results per page.
-
-    @type  start: int
-    @param start: First result to retrieve.
-
-    @type  stop: int
-    @param stop: Last result to retrieve.
-        Use C{None} to keep searching forever.
-
-    @type  pause: float
-    @param pause: Lapse to wait between HTTP requests.
+    :param str query: Query string. Must NOT be url-encoded.
+    :param str tld: Top level domain.
+    :param str lang: Language.
+    :param str tbs: Time limits (i.e "qdr:h" => last hour,
+        "qdr:d" => last 24 hours, "qdr:m" => last month).
+    :param str safe: Safe search.
+    :param int num: Number of results per page.
+    :param int start: First result to retrieve.
+    :param int stop: Last result to retrieve.
+        Use None to keep searching forever.
+    :param list domains: A list of web domains to constrain
+        the search.
+    :param float pause: Lapse to wait between HTTP requests.
         A lapse too long will make the search slow, but a lapse too short may
         cause Google to block your IP. Your mileage may vary!
-
-    @type  only_standard: bool
-    @param only_standard: If C{True}, only returns the standard results from
-        each page. If C{False}, it returns every possible link from each page,
-        except for those that point back to Google itself. Defaults to C{False}
-        for backwards compatibility with older versions of this module.
-
-    @type  extra_params: dict
-    @param extra_params: A dictionary of extra HTTP GET parameters, which must be URL encoded.
-        For example if you don't want google to filter similar results you can set the extra_params to
+    :param str tpe: Search type (images, videos, news, shopping, books, apps)
+        Use the following values {videos: 'vid', images: 'isch',
+        news: 'nws', shopping: 'shop', books: 'bks', applications: 'app'}
+    :param str country: Country or region to focus the search on. Similar to
+        changing the TLD, but does not yield exactly the same results.
+        Only Google knows why...
+    :param dict extra_params: A dictionary of extra HTTP GET
+        parameters, which must be URL encoded. For example if you don't want
+        Google to filter similar results you can set the extra_params to
         {'filter': '0'} which will append '&filter=0' to every query.
+    :param str user_agent: User agent for the HTTP requests.
+        Use None for the default.
 
-    @type  tpe: str
-    @param tpe: Search type (images, videos, news, shopping, books, apps)
-            Use the following values {videos: 'vid', images: 'isch', news: 'nws',
-                                      shopping: 'shop', books: 'bks', applications: 'app'}
-
-    @rtype:  generator
-    @return: Generator (iterator) that yields found URLs. If the C{stop}
-        parameter is C{None} the iterator will loop forever.
+    :rtype: generator of str
+    :return: Generator (iterator) that yields found URLs.
+        If the stop parameter is None the iterator will loop forever.
     """
-
-    # Lazy import of BeautifulSoup.
-    # Try to use BeautifulSoup 4 if available, fall back to 3 otherwise.
-    global BeautifulSoup
-    if BeautifulSoup is None:
-        try:
-            from bs4 import BeautifulSoup
-        except ImportError:
-            from BeautifulSoup import BeautifulSoup
-
     # Set of hashes for the results found.
     # This is used to avoid repeated results.
     hashes = set()
 
+    # Count the number of links yielded.
+    count = 0
+
+    # Prepare domain list if it exists.
+    if domains:
+        query = query + ' ' + ' OR '.join(
+                                'site:' + domain for domain in domains)
+
     # Prepare the search string.
     query = quote_plus(query)
 
-    # Check extra_params for overlapping
-    for builtin_param in ('hl', 'q', 'btnG', 'tbs', 'safe', 'tbm'):
+    # If no extra_params is given, create an empty dictionary.
+    # We should avoid using an empty dictionary as a default value
+    # in a function parameter in Python.
+    if not extra_params:
+        extra_params = {}
+
+    # Check extra_params for overlapping.
+    for builtin_param in url_parameters:
         if builtin_param in extra_params.keys():
             raise ValueError(
                 'GET parameter "%s" is overlapping with \
@@ -243,7 +278,7 @@ def search(query, tld='com', lang='en', tbs='0', safe='off', num=10, start=0,
             )
 
     # Grab the cookie from the home page.
-    get_page(url_home % vars())
+    get_page(url_home % vars(), user_agent)
 
     # Prepare the URL of the first request.
     if start:
@@ -258,32 +293,44 @@ def search(query, tld='com', lang='en', tbs='0', safe='off', num=10, start=0,
             url = url_search_num % vars()
 
     # Loop until we reach the maximum result, if any (otherwise, loop forever).
-    while not stop or start < stop:
+    while not stop or count < stop:
 
-        try:  # Is it python<3?
-            iter_extra_params = extra_params.iteritems()
-        except AttributeError:  # Or python>3?
-            iter_extra_params = extra_params.items()
-        # Append extra GET_parameters to URL
-        for k, v in iter_extra_params:
-            url += url + ('&%s=%s' % (k, v))
+        # Remeber last count to detect the end of results.
+        last_count = count
+
+        # Append extra GET parameters to the URL.
+        # This is done on every iteration because we're
+        # rebuilding the entire URL at the end of this loop.
+        for k, v in extra_params.items():
+            k = quote_plus(k)
+            v = quote_plus(v)
+            url = url + ('&%s=%s' % (k, v))
 
         # Sleep between requests.
+        # Keeps Google from banning you for making too many requests.
         time.sleep(pause)
 
         # Request the Google Search results page.
-        html = get_page(url)
+        html = get_page(url, user_agent)
 
-        # Parse the response and process every anchored URL.
-        soup = BeautifulSoup(html, "lxml")
-        anchors = soup.find(id='search').findAll('a')
+        # Parse the response and get every anchored URL.
+        if is_bs4:
+            soup = BeautifulSoup(html, 'html.parser')
+        else:
+            soup = BeautifulSoup(html)
+        try:
+            anchors = soup.find(id='search').findAll('a')
+            # Sometimes (depending on the User-agent) there is
+            # no id "search" in html response...
+        except AttributeError:
+            # Remove links of the top bar.
+            gbar = soup.find(id='gbar')
+            if gbar:
+                gbar.clear()
+            anchors = soup.findAll('a')
+
+        # Process every anchored URL.
         for a in anchors:
-
-            # Leave only the "standard" results if requested.
-            # Otherwise grab all possible links.
-            if only_standard and (
-                    not a.parent or a.parent.name.lower() != "h3"):
-                continue
 
             # Get the URL from the anchor tag.
             try:
@@ -305,8 +352,15 @@ def search(query, tld='com', lang='en', tbs='0', safe='off', num=10, start=0,
             # Yield the result.
             yield link
 
+            # Increase the results counter.
+            # If we reached the limit, stop.
+            count += 1
+            if stop and count >= stop:
+                return
+
         # End if there are no more results.
-        if not soup.find(id='nav'):
+        # XXX TODO review this logic, not sure if this is still true!
+        if last_count == count:
             break
 
         # Prepare the URL for the next request.
@@ -315,3 +369,86 @@ def search(query, tld='com', lang='en', tbs='0', safe='off', num=10, start=0,
             url = url_next_page % vars()
         else:
             url = url_next_page_num % vars()
+
+
+# Shortcut to search images.
+# Beware, this does not return the image link.
+def search_images(*args, **kwargs):
+    """
+    Shortcut to search images.
+
+    Same arguments and return value as the main search function.
+
+    :note: Beware, this does not return the image link.
+    """
+    kwargs['tpe'] = 'isch'
+    return search(*args, **kwargs)
+
+
+# Shortcut to search news.
+def search_news(*args, **kwargs):
+    """
+    Shortcut to search news.
+
+    Same arguments and return value as the main search function.
+    """
+    kwargs['tpe'] = 'nws'
+    return search(*args, **kwargs)
+
+
+# Shortcut to search videos.
+def search_videos(*args, **kwargs):
+    """
+    Shortcut to search videos.
+
+    Same arguments and return value as the main search function.
+    """
+    kwargs['tpe'] = 'vid'
+    return search(*args, **kwargs)
+
+
+# Shortcut to search shop.
+def search_shop(*args, **kwargs):
+    """
+    Shortcut to search shop.
+
+    Same arguments and return value as the main search function.
+    """
+    kwargs['tpe'] = 'shop'
+    return search(*args, **kwargs)
+
+
+# Shortcut to search books.
+def search_books(*args, **kwargs):
+    """
+    Shortcut to search books.
+
+    Same arguments and return value as the main search function.
+    """
+    kwargs['tpe'] = 'bks'
+    return search(*args, **kwargs)
+
+
+# Shortcut to search apps.
+def search_apps(*args, **kwargs):
+    """
+    Shortcut to search apps.
+
+    Same arguments and return value as the main search function.
+    """
+    kwargs['tpe'] = 'app'
+    return search(*args, **kwargs)
+
+
+# Shortcut to single-item search.
+# Evaluates the iterator to return the single URL as a string.
+def lucky(*args, **kwargs):
+    """
+    Shortcut to single-item search.
+
+    Same arguments as the main search function, but the return value changes.
+
+    :rtype: str
+    :return: URL found by Google.
+    """
+    return next(search(*args, **kwargs))
