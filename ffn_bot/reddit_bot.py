@@ -153,7 +153,7 @@ def load_subreddits():
 
 def last_comment_time():
     try:
-        return time_created(r.redditor(BOT_USERNAME).comments.new(limit=1).next())
+        return time_created(next(r.redditor(BOT_USERNAME).comments.new(limit=1)))
     except Exception as e:
         print(e)
         logging.fatal("Could not retrieve last bot comment! Please make a comment.")
