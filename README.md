@@ -75,6 +75,7 @@ You can find our pull request page here: [Pull Requests][github:pull-requests]
 [ffa]: http://hpfanficarchive.com/
 [ao3]: http://archiveofown.org/
 [aff]: http://www.adultfanfiction.net/
+[siye]: http://www.siye.co.uk/
 
 [github:bleeding]:      https://github.com/tusing/reddit-ffn-bot/tree/bleeding
 [github:issues]:        https://github.com/tusing/reddit-ffn-bot/issues
