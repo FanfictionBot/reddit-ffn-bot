@@ -9,7 +9,7 @@ author and metadata of the story.
 * Direct Parsing of Links
 * Modification of bot behaviour for the users.
 * Support for [fanfiction.net][ffn], [fictionpress.com][fp],
-  [hpfanficarchive.com][ffa], [archiveofourown.org][ao3] and
+  [hpfanficarchive.com][ffa], [archiveofourown.org][ao3], [siye.co.uk][siye] and
   [adultfanfiction.com][aff]
 
 ## Deployment and Installation
