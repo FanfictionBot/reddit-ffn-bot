@@ -2,8 +2,7 @@ import random
 import time
 from collections import OrderedDict
 
-from requests import get
-
+import cloudscraper
 from googlesearch import search
 
 
@@ -36,6 +35,13 @@ class RequestCache(object):
     def __init__(self, max_size=10000, expire_time=30 * 60 * 1000):
         self.cache = LimitedSizeDict(size_limit=max_size)
         self.expire_time = expire_time
+        self.scraper = cloudscraper.create_scraper(
+            browser={
+                'browser': 'firefox',
+                'platform': 'windows',
+                'mobile': False
+            }
+        )
 
     def hit_cache(self, type, query):
         """Check if the value is in the cache."""
@@ -67,7 +73,7 @@ class RequestCache(object):
         # Throtle only if we don't have a version cached.
         if throttle:
             time.sleep(throttle)
-        result = get(page, timeout=10, **kwargs).text
+        result = self.scraper.get(page, timeout=10).text
 
         self.push_cache("get", page, result)
         return result

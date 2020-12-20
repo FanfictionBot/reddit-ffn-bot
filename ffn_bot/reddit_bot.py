@@ -597,7 +597,7 @@ def make_reply(body, obj, markers=None, additions=(), sub_recs=None):
         ))
 
         current_reply = []
-        while len(slim_stories) is not 0:  # We use slim_stories as a queue.
+        while len(slim_stories) != 0:  # We use slim_stories as a queue.
             current_story = slim_stories.pop(0)
             # Comments can be up to 10,000 characters:
             if sum([len(story) for story in current_reply]) + len(current_story) > 10000 - len(slim_footer):
@@ -605,7 +605,7 @@ def make_reply(body, obj, markers=None, additions=(), sub_recs=None):
                 current_reply = []
             else:
                 current_reply += current_story
-        if len(current_reply) is not 0:
+        if len(current_reply) != 0:
             send_reply("".join(current_reply) + slim_footer)
     else:
         logging.info("No reply conditions met.")

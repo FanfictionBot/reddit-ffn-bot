@@ -1,7 +1,8 @@
+bs4
+cloudscraper
+colorama
+cssselect
+google
 lxml
 praw
 requests
-colorama
-bs4
-cssselect
-google
