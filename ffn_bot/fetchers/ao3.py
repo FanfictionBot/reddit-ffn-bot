@@ -18,8 +18,8 @@ AO3_LINK_REGEX = AO3_LINK_REGEX = re.compile(
     re.IGNORECASE)
 AO3_FUNCTION = "linkao3"
 AO3_SEARCH_QUERY = "site:archiveofourown.org/works/ %s"
-AO3_AUTHOR_NAME = '//h3[@class="byline heading"]/a[@rel="author"]/text()
-AO3_AUTHOR_URL = '//h3[@class="byline heading"]/a[@rel="author"]/@href
+AO3_AUTHOR_NAME = '//h3[@class="byline heading"]/a[@rel="author"]/text()'
+AO3_AUTHOR_URL = '//h3[@class="byline heading"]/a[@rel="author"]/@href'
 AO3_META_PARTS = '//dl[@class="stats"]//text()'
 AO3_TITLE = '//h2/text()'
 AO3_SUMMARY_FINDER = '//*[@id="workskin"]//*[@class="summary module" and @role="complementary"]/blockquote//text()'
