@@ -427,7 +427,7 @@ def is_message(obj):
 
 
 def time_created(obj):
-    return datetime.datetime.fromtimestamp(obj.created)
+    return datetime.datetime.fromtimestamp(obj.created_utc)
 
 
 def repliable(obj):
