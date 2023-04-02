@@ -45,7 +45,7 @@ def _apply_generator(func, *args, **kwargs):
         for item in result:
             yield item
     elif (
-            (not isinstance(result, collections.Sequence))
+            (not isinstance(result, collections.abc.Sequence))
             or len(result) != 2
             or (isinstance(result, basestring))
     ):
