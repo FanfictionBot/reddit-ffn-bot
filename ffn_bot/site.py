@@ -1,5 +1,6 @@
 import logging
 import re
+import traceback
 from collections import OrderedDict
 
 from ffn_bot import reddit_markdown
@@ -105,6 +106,7 @@ class Story(object):
         except Exception as e:
             logging.error("(STORY) Could not load story!")
             logging.error(e)
+            traceback.print_exc()
             return ("")
         result = ["\n\n"]
         result.append(
