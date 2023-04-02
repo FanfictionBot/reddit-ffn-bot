@@ -169,21 +169,27 @@ class Story(site.Story):
             self.get_url(),
             throttle=randint(1000, 4000) / 1000)
         tree = html.fromstring(page)
+        print("got page")
 
         self.title = (tree.xpath('//*[@id="profile_top"]/b/text()'))
+        print('title', self.title)
         if not len(self.title):
             raise site.StoryDoesNotExist
         self.title = self.title[0]
         self.summary = (tree.xpath('//*[@id="profile_top"]/div/text()'))[0
         ]
+        print('summary', self.summary)
         self.author += (tree.xpath('//*[@id="profile_top"]/a[1]/text()'))[
             0
         ]
+        print('author', self.author)
         self.authorlink = 'https://www.' + self.site + tree.xpath(
             '//*[@id="profile_top"]/a[1]/@href')[0]
+        print('alink', self.authorlink)
         self.image = tree.xpath('//*[@id="profile_top"]/span[1]/img')
         self.tree = tree
         self.stats = self.parser(None, tree)
+
 
     def get_site(self):
         link = "https://www." + self.site + "/"

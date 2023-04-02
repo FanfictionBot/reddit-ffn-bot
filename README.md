@@ -30,6 +30,18 @@ directory.
     $ pip install -r requirements.txt
 ```
 
+### Cloudflare Bypass needed for Fanfiction.net
+
+You must install and run the [FlareSolverr](https://github.com/FlareSolverr/FlareSolverr) container:
+
+```
+docker run -d \
+  --name=flaresolverr \
+  -p 8191:8191 \
+  -e LOG_LEVEL=info \
+  --restart unless-stopped \
+  ghcr.io/flaresolverr/flaresolverr:latest
+```
 
 ## Configuring the bot
 On your Reddit account, create an app (Preferences > Apps > Create Another App). Enter `https://github.com/tusing/reddit-ffn-bot/wiki/Usage` as the *about url* and `http://127.0.0.1:65010/authorize_callback` as the *redirect uri*. Hit create.
